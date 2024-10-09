@@ -1,30 +1,53 @@
 <script lang="ts">
-import { enhance } from "$app/forms";
-import { toast } from "$lib/store/toast";
-import type { ActionData } from "./$types";
+import { applyAction, enhance } from "$app/forms";
+import { invalidateAll } from "$app/navigation";
+import { getToastState } from "$lib/toast-state.svelte";
+import type { ActionData, SubmitFunction } from "./$types";
 
-export let form: ActionData;
+let { form }: { form: ActionData } = $props();
 
-$: (() => {
-  // input is not actually used but present as a statement
-  form;
-  // console.log(
-  //   `This function is running, current input is ${JSON.stringify(form)}`,
-  // );
-  if (!form) {
-    return;
+const toastState = getToastState();
+let titleInput = $state<HTMLInputElement>();
+
+const submitTagCreate: SubmitFunction = (
+  { formData, formElement, cancel },
+) => {
+  const { title } = Object.fromEntries(formData);
+  if (title.toString().length < 1) {
+    toastState.error("Error", "");
+    cancel();
   }
 
-  if (form.error?.title?.message) {
-    toast.error(form.error.title.message);
-  }
-  if (form.data?.title) {
-    const message = `Tag created with tag title: ${form.data.title}`;
-    toast.success(message);
-  }
-})();
+  return async ({ result }) => {
+    let message = "";
+    switch (result.type) {
+      case "redirect":
+        break;
+      case "error":
+        // TODO: toast error
+        toastState.error("Error", result.error);
+        break;
+      case "success":
+        formElement.reset();
+        message = `Tag created with name ${
+          result.data?.data.title ?? title.toString()
+        }`;
+        toastState.success("", message);
+        break;
+      case "failure":
+        // TODO: toast error
+        message = result.data?.error.title?.message ?? "";
+        toastState.error("", message);
+        break;
+    }
+    // await update();
+    await applyAction(result);
+    await invalidateAll();
+    titleInput?.focus();
+  };
+};
 
-function resetError(key: string) {
+function resetError(key: "title") {
   if (form?.error?.hasOwnProperty(key)) {
     form.error[key] = undefined;
   }
@@ -34,7 +57,7 @@ function resetError(key: string) {
 <form
   method="POST"
   action="?/create"
-  use:enhance
+  use:enhance={submitTagCreate}
   id="form"
   class="mx-auto max-w-screen-xl grid grid-cols-1 gap-4"
 >
@@ -47,11 +70,12 @@ function resetError(key: string) {
       <input
         id="title"
         class="input input-bordered {form?.error?.title ? 'input-error': ''} w-full"
-        required
         autocomplete="off"
         name="title"
         type="text"
         placeholder="Title"
+        required
+        bind:this={titleInput}
         oninput={() => resetError("title")}
       />
       {#if form?.error}
@@ -68,6 +92,5 @@ function resetError(key: string) {
     </button>
   </div>
 </form>
-
 <style>
 </style>

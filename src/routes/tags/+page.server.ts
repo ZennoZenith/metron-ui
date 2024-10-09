@@ -1,6 +1,20 @@
-import { API_BASE_ROUTE, type InternalApiError, type Tag } from "$lib";
+import { API_BASE_ROUTE } from "$lib";
+import type { InternalApiError, Tag } from "$lib/types";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
+
+interface Err extends Record<string, any> {
+  error: {
+    title?: {
+      message: string;
+    };
+  };
+  data?: Tag;
+}
+
+interface Ok extends Partial<Err> {
+  data: Tag;
+}
 
 export const actions = {
   create: async ({ request }) => {
@@ -8,12 +22,12 @@ export const actions = {
     const title = formData.get("title")?.toString().trim();
 
     if (!title) {
-      return fail(422, {
+      return fail<Err>(422, {
         error: {
           title: {
             message: "Tag name undefined or empty",
           },
-        } satisfies InternalApiError,
+        },
       });
     }
 
@@ -28,7 +42,7 @@ export const actions = {
     let body = await res.json() as Tag;
 
     if (res.status !== 200) {
-      return fail(422, {
+      return fail<Err>(422, {
         error: {
           title: {
             message: `Tag "${title}" already exists`,
@@ -37,6 +51,6 @@ export const actions = {
       });
     }
 
-    return { data: body };
+    return { data: body } as Ok;
   },
 } satisfies Actions;

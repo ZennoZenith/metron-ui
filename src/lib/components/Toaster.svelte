@@ -1,12 +1,15 @@
 <script lang="ts">
-import { type Toast } from "$lib";
-import { toast } from "$lib/store/toast";
+import Toast from "$lib/components/Toast.svelte";
+import { getToastState } from "$lib/toast-state.svelte";
 
-let toasting: Toast[];
-toast.subcribe();
+const toastState = getToastState();
 </script>
 
-<div id="toast-container" class="toast toast-end"></div>
+<div id="toast-container" class="toast toast-end">
+  {#each toastState.toasts as toast}
+    <Toast {toast} />
+  {/each}
+</div>
 
 <style>
 </style>
