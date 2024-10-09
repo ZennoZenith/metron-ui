@@ -7,16 +7,16 @@ const toastState = getToastState();
 function showToast(toastType: ToastType): any {
   switch (toastType) {
     case "INFO":
-      toastState.info("Info title", "Info Message");
+      toastState.info("Info Message", "Info title");
       break;
     case "SUCCESS":
-      toastState.success("Success title", "Success Message");
+      toastState.success("Success Message", "Success title");
       break;
     case "WARNING":
-      toastState.warning("Warning title", "Warning Message");
+      toastState.warning("Warning Message", "Warning title");
       break;
     case "ERROR":
-      toastState.error("Error title", "Error Message");
+      toastState.error("Error Message", "Error title");
       break;
   }
 }

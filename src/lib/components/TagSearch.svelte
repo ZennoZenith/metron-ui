@@ -47,7 +47,6 @@ function preventSubmit(event: KeyboardEvent) {
       placeholder="Search tags"
       id="tag-search"
       type="search"
-      name="tagTitle"
       autocomplete="off"
       bind:value={tagSearchQuery}
       on:input={searchTags}

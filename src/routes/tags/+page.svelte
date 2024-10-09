@@ -9,12 +9,12 @@ let { form }: { form: ActionData } = $props();
 const toastState = getToastState();
 let titleInput = $state<HTMLInputElement>();
 
-const submitTagCreate: SubmitFunction = (
+const submitTag: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
   const { title } = Object.fromEntries(formData);
   if (title.toString().length < 1) {
-    toastState.error("Error", "");
+    toastState.error("Tag name undefined or empty");
     cancel();
   }
 
@@ -24,20 +24,18 @@ const submitTagCreate: SubmitFunction = (
       case "redirect":
         break;
       case "error":
-        // TODO: toast error
-        toastState.error("Error", result.error);
+        toastState.error(result.error);
         break;
       case "success":
         formElement.reset();
         message = `Tag created with name ${
           result.data?.data.title ?? title.toString()
         }`;
-        toastState.success("", message);
+        toastState.success(message);
         break;
       case "failure":
-        // TODO: toast error
         message = result.data?.error.title?.message ?? "";
-        toastState.error("", message);
+        toastState.error(message);
         break;
     }
     // await update();
@@ -57,7 +55,7 @@ function resetError(key: "title") {
 <form
   method="POST"
   action="?/create"
-  use:enhance={submitTagCreate}
+  use:enhance={submitTag}
   id="form"
   class="mx-auto max-w-screen-xl grid grid-cols-1 gap-4"
 >

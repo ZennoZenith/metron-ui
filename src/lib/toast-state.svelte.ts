@@ -17,7 +17,7 @@ export class ToastState {
     });
   }
 
-  add(toastType: ToastType, title: string, message: string, durationMs = DEFAULT_TOAST_DURATION_TIME) {
+  add(toastType: ToastType, message: string, title: string = "", durationMs = DEFAULT_TOAST_DURATION_TIME) {
     const value: Toast = {
       id: uuidv4(),
       toastType,
@@ -44,20 +44,20 @@ export class ToastState {
     this._toasts = this._toasts.filter((v) => v.id !== id);
   }
 
-  info(title: string, message: string, durationMs = DEFAULT_TOAST_DURATION_TIME) {
-    this.add("INFO", title, message, durationMs);
+  info(message: string, title: string = "", durationMs = DEFAULT_TOAST_DURATION_TIME) {
+    this.add("INFO", message, title, durationMs);
   }
 
-  success(title: string, message: string, durationMs = DEFAULT_TOAST_DURATION_TIME) {
-    this.add("SUCCESS", title, message, durationMs);
+  success(message: string, title: string = "", durationMs = DEFAULT_TOAST_DURATION_TIME) {
+    this.add("SUCCESS", message, title, durationMs);
   }
 
-  warning(title: string, message: string, durationMs = DEFAULT_TOAST_DURATION_TIME) {
-    this.add("WARNING", title, message, durationMs);
+  warning(message: string, title: string = "", durationMs = DEFAULT_TOAST_DURATION_TIME) {
+    this.add("WARNING", message, title, durationMs);
   }
 
-  error(title: string, message: string, durationMs = DEFAULT_TOAST_DURATION_TIME) {
-    this.add("ERROR", title, message, durationMs);
+  error(message: string, title: string = "", durationMs = DEFAULT_TOAST_DURATION_TIME) {
+    this.add("ERROR", message, title, durationMs);
   }
 
   get toasts() {

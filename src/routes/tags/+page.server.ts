@@ -1,5 +1,5 @@
 import { API_BASE_ROUTE } from "$lib";
-import type { InternalApiError, Tag } from "$lib/types";
+import type { Tag } from "$lib/types";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
@@ -47,7 +47,7 @@ export const actions = {
           title: {
             message: `Tag "${title}" already exists`,
           },
-        } satisfies InternalApiError,
+        },
       });
     }
 

@@ -1,19 +1,26 @@
 <script lang="ts">
-import type { Tag } from "$lib";
+import { applyAction, enhance } from "$app/forms";
+import { invalidateAll } from "$app/navigation";
 import TagSearch from "$lib/components/TagSearch.svelte";
+import { getToastState } from "$lib/toast-state.svelte";
+import type { Tag } from "$lib/types";
+import type { ActionData, SubmitFunction } from "./$types";
 
-let selectedTags: Tag[] = [];
-let tagSearchQuery: string = "";
-let imageInputElement: HTMLInputElement;
-let imagePreviewParentElement: HTMLDivElement;
-let imagePreviewElement: HTMLImageElement;
-let hasImage = false;
+const toastState = getToastState();
+let { form }: { form: ActionData } = $props();
+let selectedTags: Tag[] = $state([]);
+let formElement = $state<HTMLFormElement>();
+let titleInput = $state<HTMLInputElement>();
+let tagSearchQuery: string = $state("");
+let imageInputElement = $state<HTMLInputElement>();
+let imagePreviewElement = $state<HTMLImageElement>();
+let hasImage = $state(false);
 
 function selectItem(item: Tag) {
   if (selectedTags.findIndex(value => value.id === item.id) !== -1) {
     return;
   }
-  selectedTags = [...selectedTags, item];
+  selectedTags.push(item);
 }
 
 function removeItem(tagId: string) {
@@ -37,24 +44,79 @@ function previewImage(event: Event) {
   const imageFilesLength = imageFiles.length;
   if (imageFilesLength > 0) {
     const imageSrc = URL.createObjectURL(imageFiles[0]);
-    imagePreviewElement.src = imageSrc;
+    if (imagePreviewElement) {
+      imagePreviewElement.src = imageSrc;
+    }
     hasImage = true;
   } else {
-    imagePreviewElement.removeAttribute("src");
-    imageInputElement.value = "";
+    if (imagePreviewElement) {
+      imagePreviewElement.removeAttribute("src");
+    }
+    if (imageInputElement) {
+      imageInputElement.value = "";
+    }
     hasImage = false;
   }
 }
 
 function removeImage() {
-  imagePreviewElement.removeAttribute("src");
-  imageInputElement.value = "";
+  if (imagePreviewElement) {
+    imagePreviewElement.removeAttribute("src");
+  }
+  if (imageInputElement) {
+    imageInputElement.value = "";
+  }
   hasImage = false;
+}
+
+const submitImage: SubmitFunction = (
+  { formData, cancel },
+) => {
+  const { title } = Object.fromEntries(formData);
+  if (title.toString().length < 1) {
+    toastState.error("Title is empty");
+    cancel();
+  }
+
+  return async ({ result }) => {
+    let message = "";
+    switch (result.type) {
+      case "redirect":
+        break;
+      case "error":
+        console.error(result);
+        toastState.error(JSON.stringify(result.error), "Internal server error");
+        break;
+      case "success":
+        formElement?.reset();
+        removeImage();
+        toastState.success("Image saved");
+        break;
+      case "failure":
+        message = result.data?.error.title?.message ?? "";
+        toastState.error(message);
+        break;
+    }
+    await applyAction(result);
+    await invalidateAll();
+    titleInput?.focus();
+  };
+};
+
+function resetError(key: "title") {
+  if (form?.error?.hasOwnProperty(key)) {
+    form.error[key] = undefined;
+  }
 }
 </script>
 
 <form
   id="form"
+  method="POST"
+  action="?/create"
+  use:enhance={submitImage}
+  bind:this={formElement}
+  enctype="multipart/form-data"
   class="mx-auto max-w-screen-xl grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
   <div class="px-2 py-4 flex flex-col gap-6">
@@ -88,6 +150,14 @@ function removeImage() {
     {#if selectedTags.length > 0}
       <div id="selected-tag-list" class="flex flex-wrap gap-2 items-center">
         {#each selectedTags as tag}
+          <input
+            type="checkbox"
+            name="tags"
+            value={tag.id}
+            hidden
+            aria-hidden="true"
+            checked
+          />
           <button
             class="h-8 px-4 rounded-full flex items-center gap-2 bg-accent text-neutral tag"
             type="button"
@@ -162,7 +232,6 @@ function removeImage() {
       class:display-none={hasImage}
       class:skeleton={!hasImage}
       class="w-full grow min-h-12 image-preview-container"
-      bind:this={imagePreviewParentElement}
     >
     </div>
     <img
