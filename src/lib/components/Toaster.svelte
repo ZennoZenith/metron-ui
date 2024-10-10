@@ -6,7 +6,7 @@ const toastState = getToastState();
 </script>
 
 <div id="toast-container" class="toast toast-end">
-  {#each toastState.toasts as toast}
+  {#each toastState.toasts as toast (toast.id)}
     <Toast {toast} />
   {/each}
 </div>

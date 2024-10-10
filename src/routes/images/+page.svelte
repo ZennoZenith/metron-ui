@@ -149,7 +149,7 @@ function resetError(key: "title") {
 
     {#if selectedTags.length > 0}
       <div id="selected-tag-list" class="flex flex-wrap gap-2 items-center">
-        {#each selectedTags as tag}
+        {#each selectedTags as tag (tag.id)}
           <input
             type="checkbox"
             name="tags"

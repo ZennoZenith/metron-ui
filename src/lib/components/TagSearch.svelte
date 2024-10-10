@@ -61,7 +61,7 @@ function preventSubmit(event: KeyboardEvent) {
       id="tag-search-list"
       class="border-solid border-2 grid grid-cols-1 absolute w-full bg-neutral"
     >
-      {#each tagsSearchList as tag}
+      {#each tagsSearchList as tag (tag.id)}
         <div
           class="cursor-pointer p-2"
           tabindex="0"
