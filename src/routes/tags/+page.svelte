@@ -63,7 +63,7 @@ function resetError(key: "title") {
     <label class="form-control">
       <div class="label">
         <span class="label-text">Title</span>
-        <span class="label-text-alt">Custom syntax</span>
+        <span class="label-text-alt">Required</span>
       </div>
       <input
         id="title"

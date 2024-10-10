@@ -22,7 +22,7 @@ function showToast(toastType: ToastType): any {
 }
 </script>
 
-<div class="flex flex-wrap gap-4">
+<div class="flex flex-wrap gap-4 p-4">
   <button
     class="btn btn-primary rounded-lg"
     type="button"

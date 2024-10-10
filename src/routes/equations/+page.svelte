@@ -12,8 +12,6 @@ let selectedTags: Tag[] = $state([]);
 let formElement = $state<HTMLFormElement>();
 let titleInput = $state<HTMLInputElement>();
 let tagSearchQuery: string = $state("");
-let imageInputElement = $state<HTMLInputElement>();
-let imagePreviewElement = $state<HTMLImageElement>();
 let hasImage = $state(false);
 
 function selectTag(tag: Tag) {
@@ -33,43 +31,7 @@ function removeTag(tagId: string) {
   selectedTags = selectedTags.filter((ele) => ele.id !== tagId);
 }
 
-function previewImage(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const imageFiles = target.files;
-  if (null === imageFiles) {
-    console.error("Image file is null");
-    return;
-  }
-
-  const imageFilesLength = imageFiles.length;
-  if (imageFilesLength > 0) {
-    const imageSrc = URL.createObjectURL(imageFiles[0]);
-    if (imagePreviewElement) {
-      imagePreviewElement.src = imageSrc;
-    }
-    hasImage = true;
-  } else {
-    if (imagePreviewElement) {
-      imagePreviewElement.removeAttribute("src");
-    }
-    if (imageInputElement) {
-      imageInputElement.value = "";
-    }
-    hasImage = false;
-  }
-}
-
-function removeImage() {
-  if (imagePreviewElement) {
-    imagePreviewElement.removeAttribute("src");
-  }
-  if (imageInputElement) {
-    imageInputElement.value = "";
-  }
-  hasImage = false;
-}
-
-const submitImage: SubmitFunction = (
+const submitEquation: SubmitFunction = (
   { formData, cancel },
 ) => {
   const { title } = Object.fromEntries(formData);
@@ -89,8 +51,7 @@ const submitImage: SubmitFunction = (
         break;
       case "success":
         formElement?.reset();
-        removeImage();
-        toastState.success("Image saved");
+        toastState.success("Equation saved");
         break;
       case "failure":
         message = result.data?.error.title?.message ?? "";
@@ -114,9 +75,8 @@ function resetError(key: "title") {
   id="form"
   method="POST"
   action="?/create"
-  use:enhance={submitImage}
+  use:enhance={submitEquation}
   bind:this={formElement}
-  enctype="multipart/form-data"
   class="mx-auto max-w-screen-xl grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
   <div class="px-2 py-4 flex flex-col gap-6">
@@ -131,6 +91,7 @@ function resetError(key: "title") {
         placeholder=""
         name="title"
         required
+        aria-required="true"
       ></textarea>
     </label>
 
@@ -181,61 +142,20 @@ function resetError(key: "title") {
   </div>
 
   <div class="px-2 py-4 flex flex-col gap-6">
-    <label class="form-control">
+    <label class="form-control h-full">
       <div class="label">
-        <span class="label-text">Pick a file</span>
+        <span class="label-text">Content</span>
         <span class="label-text-alt">Required</span>
       </div>
-      <div class="flex gap-2">
-        <input
-          class="file-input file-input-bordered grow"
-          type="file"
-          id="image"
-          name="file"
-          accept="image/*"
-          onchange={previewImage}
-          bind:this={imageInputElement}
-          required
-        />
-        <!-- 
-         -->
-        <button
-          class=""
-          id="remove-file"
-          type="button"
-          aria-label="search tag button"
-          onclick={removeImage}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-4 w-4 stroke-current"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            >
-            </path>
-          </svg>
-        </button>
-      </div>
+      <textarea
+        id="content"
+        class="textarea textarea-bordered w-full min-h-12 h-full"
+        placeholder=""
+        name="content"
+        required
+        aria-required="true"
+      ></textarea>
     </label>
-
-    <div
-      class:display-none={hasImage}
-      class:skeleton={!hasImage}
-      class="w-full grow min-h-12 image-preview-container"
-    >
-    </div>
-    <img
-      class:display-none={!hasImage}
-      id="preview-selected-image"
-      alt="preview"
-      bind:this={imagePreviewElement}
-    />
   </div>
 
   <button class="btn btn-primary rounded-lg" type="submit">
