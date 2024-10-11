@@ -1,11 +1,15 @@
 <script lang="ts">
-import type { Tag } from "$lib";
+import type { Tag } from "$lib/types";
 
-export let tagSearchQuery: string;
-export let selectItem: (tag: Tag) => void;
+type Props = {
+  tagSearchQuery: string;
+  selectItem: (tag: Tag) => void;
+};
 
-let tagsSearchList: Tag[] = [];
-let showDropdown = false;
+let { tagSearchQuery = $bindable(), selectItem }: Props = $props();
+
+let tagsSearchList: Tag[] = $state([]);
+let showDropdown = $state(false);
 
 // Function to handle when user selects an item
 function handleFocus() {
@@ -49,10 +53,10 @@ function preventSubmit(event: KeyboardEvent) {
       type="search"
       autocomplete="off"
       bind:value={tagSearchQuery}
-      on:input={searchTags}
-      on:focus={handleFocus}
-      on:blur={handleBlur}
-      on:keydown={preventSubmit}
+      oninput={searchTags}
+      onfocus={handleFocus}
+      onblur={handleBlur}
+      onkeydown={preventSubmit}
     />
     <button class="btn" type="button">Search Tag</button>
   </div>
@@ -68,11 +72,11 @@ function preventSubmit(event: KeyboardEvent) {
           data-tag-id={tag.id}
           data-tag-title={tag.title}
           role="button"
-          on:click={() => {
+          onclick={() => {
             selectItem(tag);
             closeDropdown();
           }}
-          on:keypress={() => {
+          onkeypress={() => {
             selectItem(tag);
             closeDropdown();
           }}
