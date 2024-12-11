@@ -117,7 +117,7 @@ function resetError(key: "title") {
   use:enhance={submitImage}
   bind:this={formElement}
   enctype="multipart/form-data"
-  class="mx-auto max-w-screen-xl grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
+  class="mx-auto max-w-(--breakpoint-xl) grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
   <div class="px-2 py-4 flex flex-col gap-6">
     <label class="form-control">

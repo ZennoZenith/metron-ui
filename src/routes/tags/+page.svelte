@@ -57,7 +57,7 @@ function resetError(key: "title") {
   action="?/create"
   use:enhance={submitTag}
   id="form"
-  class="mx-auto max-w-screen-xl grid grid-cols-1 gap-4"
+  class="mx-auto max-w-(--breakpoint-xl) grid grid-cols-1 gap-4"
 >
   <div class="px-2 py-4 flex flex-col gap-6">
     <label class="form-control">

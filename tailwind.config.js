@@ -1,13 +1,10 @@
-import daisyui from "daisyui";
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./src/**/*.{html,js,svelte,ts}"],
   theme: {
     extend: {},
   },
-  plugins: [
-    daisyui,
-  ],
+  plugins: [],
   daisyui: {
     darkTheme: "dark", // name of one of the included themes for dark mode
     base: true, // applies background color and foreground color for root element by default
