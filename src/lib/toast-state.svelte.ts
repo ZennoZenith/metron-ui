@@ -6,7 +6,7 @@ const DEFAULT_TOAST_DURATION_TIME = 5000; // in milliseconds
 export class ToastState {
   private _toasts = $state<Toast[]>([]);
   private _toasted: Toast[] = [];
-  private _toastToTimeout = new Map<string, number>();
+  private _toastToTimeout = new Map<string, Timer>();
 
   constructor() {
     onDestroy(() => {
@@ -24,12 +24,15 @@ export class ToastState {
       title,
       message,
     };
-    console.log(value);
+    console.info(value);
     this._toasts.push(value);
 
     this._toastToTimeout.set(
       value.id,
       setTimeout(() => {
+        if (durationMs === 0) {
+          return;
+        }
         this.remove(value.id);
       }, durationMs),
     );
