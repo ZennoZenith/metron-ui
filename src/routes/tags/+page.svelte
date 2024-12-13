@@ -57,17 +57,17 @@ function resetError(key: "title") {
   action="?/create"
   use:enhance={submitTag}
   id="form"
-  class="mx-auto max-w-(--breakpoint-xl) grid grid-cols-1 gap-4"
+  class=""
 >
   <div class="px-2 py-4 flex flex-col gap-6">
-    <label class="form-control">
-      <div class="label">
-        <span class="label-text">Title</span>
-        <span class="label-text-alt">Required</span>
+    <label class="">
+      <div class="">
+        <span class="">Title</span>
+        <span class="">Required</span>
       </div>
       <input
         id="title"
-        class="input input-bordered {form?.error?.title ? 'input-error': ''} w-full"
+        class=""
         autocomplete="off"
         name="title"
         type="text"
@@ -77,15 +77,15 @@ function resetError(key: "title") {
         oninput={() => resetError("title")}
       />
       {#if form?.error}
-        <div class="label">
-          <span class="label-text text-error">
+        <div class="">
+          <span class="">
             {form?.error?.title?.message}
           </span>
         </div>
       {/if}
     </label>
 
-    <button class="btn btn-primary rounded-lg" type="submit">
+    <button class="" type="submit">
       Create tag
     </button>
   </div>

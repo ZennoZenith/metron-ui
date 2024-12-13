@@ -1,6 +1,5 @@
-<h1 class="text-3xl font-bold underline">
-  Hello world!
-</h1>
+<script lang="ts">
+import ColorTest from "$lib/components/colors-test.svelte";
+</script>
 
-<style lang="postcss">
-</style>
+<ColorTest />

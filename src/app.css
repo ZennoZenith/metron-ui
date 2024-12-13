@@ -1,6 +1,6 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@config '../tailwind.config.js';
+/* @config '../tailwind.config.js'; */
 
 /*
   The default border color has changed to `currentColor` in Tailwind CSS v4,
@@ -18,4 +18,46 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentColor);
   }
+}
+
+@theme {
+  --font-display: "Satoshi", "sans-serif";
+
+  --color-magnum-50: hsl(40, 100%, 96%);
+  --color-magnum-100: hsl(42, 95%, 92%);
+  --color-magnum-200: hsl(39, 93%, 83%);
+  --color-magnum-300: hsl(38, 91%, 72%);
+  --color-magnum-400: hsl(34, 91%, 65%);
+  --color-magnum-500: hsl(32, 90%, 53%);
+  --color-magnum-600: hsl(28, 85%, 48%);
+  --color-magnum-700: hsl(24, 83%, 40%);
+  --color-magnum-800: hsl(22, 74%, 34%);
+  --color-magnum-900: hsl(22, 70%, 28%);
+  --color-magnum-950: hsl(20, 76%, 15%);
+
+  --color-primary: hsl(282, 100%, 50%);
+  --color-primary-content: hsl(276, 100%, 92.7%);
+  --color-secondary: hsl(103, 100%, 24.1%);
+  --color-secondary-content: hsl(108, 27%, 85.5%);
+  --color-accent: hsl(340, 100%, 63.9%);
+  --color-accent-content: hsl(348, 83.3%, 4.7%);
+  --color-neutral: hsl(222, 48.1%, 5.3%);
+  --color-neutral-content: hsl(225, 3.6%, 78.4%);
+  /* --color-base-100: hsl(219, 29.1%, 15.5%);
+  --color-base-200: hsl(219, 30.3%, 12.9%);
+  --color-base-300: hsl(219, 32.1%, 10.4%); */
+  --color-base-100: hsl(219, 33%, 12%);
+  --color-base-200: hsl(219, 35%, 11%);
+  --color-base-300: hsl(219, 37%, 10%);
+  --color-base-content: hsl(220, 6.2%, 81.2%);
+  --color-info: hsl(204, 100%, 45.3%);
+  --color-info-content: hsl(218, 100%, 3.7%);
+  --color-success: hsl(72, 100%, 47.3%);
+  --color-success-content: hsl(81, 100%, 3.9%);
+  --color-warning: hsl(23, 100%, 50%);
+  --color-warning-content: hsl(8, 100%, 4.3%);
+  --color-error: hsl(0, 100%, 42.7%);
+  --color-error-content: hsl(9, 100%, 90.8%);
+
+  --color-base: var(--color-base-100);
 }
