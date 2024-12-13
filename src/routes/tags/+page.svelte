@@ -1,6 +1,7 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
+import { Button } from "$lib/components/melt";
 import { getToastState } from "$lib/toast-state.svelte";
 import type { ActionData, SubmitFunction } from "./$types";
 
@@ -52,6 +53,7 @@ function resetError(key: "title") {
 }
 </script>
 
+<Button> </Button>
 <form
   method="POST"
   action="?/create"
