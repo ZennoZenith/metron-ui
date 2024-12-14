@@ -1,9 +1,9 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
-import { Button } from "$lib/components/melt";
 import { getToastState } from "$lib/toast-state.svelte";
 import type { ActionData, SubmitFunction } from "./$types";
+import CreateTagDialog from "./CreateTagDialog.svelte";
 
 let { form }: { form: ActionData } = $props();
 
@@ -53,7 +53,10 @@ function resetError(key: "title") {
 }
 </script>
 
-<Button> </Button>
+<div class="grid grid-cols-1 p-4">
+  <CreateTagDialog />
+</div>
+
 <form
   method="POST"
   action="?/create"
