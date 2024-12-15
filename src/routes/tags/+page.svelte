@@ -1,62 +1,15 @@
 <script lang="ts">
-import { applyAction, enhance } from "$app/forms";
-import { invalidateAll } from "$app/navigation";
-import { getToastState } from "$lib/toast-state.svelte";
 import type { ActionData, SubmitFunction } from "./$types";
 import CreateTagDialog from "./CreateTagDialog.svelte";
 
-let { form }: { form: ActionData } = $props();
-
-const toastState = getToastState();
-let titleInput = $state<HTMLInputElement>();
-
-const submitTag: SubmitFunction = (
-  { formData, formElement, cancel },
-) => {
-  const { title } = Object.fromEntries(formData);
-  if (title.toString().length < 1) {
-    toastState.error("Tag name undefined or empty");
-    cancel();
-  }
-
-  return async ({ result }) => {
-    let message = "";
-    switch (result.type) {
-      case "redirect":
-        break;
-      case "error":
-        toastState.error(result.error);
-        break;
-      case "success":
-        formElement.reset();
-        message = `Tag created with name ${
-          result.data?.data.title ?? title.toString()
-        }`;
-        toastState.success(message);
-        break;
-      case "failure":
-        message = result.data?.error.title?.message ?? "";
-        toastState.error(message);
-        break;
-    }
-    // await update();
-    await applyAction(result);
-    await invalidateAll();
-    titleInput?.focus();
-  };
-};
-
-function resetError(key: "title") {
-  if (form?.error?.hasOwnProperty(key)) {
-    form.error[key] = undefined;
-  }
-}
+// let { form }: { form: ActionData } = $props();
 </script>
 
 <div class="grid grid-cols-1 p-4">
   <CreateTagDialog />
 </div>
 
+<!-- 
 <form
   method="POST"
   action="?/create"
@@ -95,5 +48,5 @@ function resetError(key: "title") {
     </button>
   </div>
 </form>
-<style>
-</style>
+
+ -->

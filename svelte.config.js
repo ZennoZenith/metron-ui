@@ -15,6 +15,8 @@ export default {
     alias: {
       $routes: "src/routes",
       "$routes/*": "src/routes/*",
+      $utils: "src/lib/utils",
+      "$utils/*": "src/lib/utils/*",
       $api: "src/routes/api",
       "$api/*": "src/routes/api/*",
       $constants: "src/constants",

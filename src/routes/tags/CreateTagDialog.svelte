@@ -1,9 +1,19 @@
 <script lang="ts">
 import { createDialog, melt } from "@melt-ui/svelte";
 /** Internal helpers */
+import { applyAction, enhance } from "$app/forms";
+import { invalidateAll } from "$app/navigation";
 import { X } from "$icons";
 import { flyAndScale } from "$lib/melt/utils/index";
+import {
+  type Tag,
+  validateSchema,
+  type ValidationError,
+} from "$lib/models/tags";
+import { getToastState } from "$lib/toast-state.svelte";
+import type { Superposition } from "$utils";
 import { fade } from "svelte/transition";
+import type { SubmitFunction } from "./$types";
 
 const {
   elements: {
@@ -11,19 +21,67 @@ const {
     overlay,
     content,
     title,
-    description,
     close,
     portalled,
   },
   states: { open },
 } = createDialog({
   forceVisible: true,
+  role: "alertdialog",
 });
+
+const toastState = getToastState();
+
+let response = $state<Superposition<ValidationError, Tag>>();
+
+const submitTag: SubmitFunction = (
+  { formData, formElement, cancel },
+) => {
+  const formEntries = Object.fromEntries(formData.entries());
+  let parsed = validateSchema(formEntries);
+
+  if (!parsed.success) {
+    response = parsed;
+    toastState.error("Invalid form data");
+    cancel();
+    return;
+  }
+
+  return async ({ result }) => {
+    switch (result.type) {
+      case "redirect":
+        break;
+      case "error":
+        toastState.error(result.error);
+        break;
+      case "success":
+        formElement.reset();
+        response = result.data;
+        toastState.success(
+          `Tag created with name ${
+            result.data?.data.title ?? title.toString()
+          }`,
+        );
+        open.set(false);
+        break;
+      case "failure":
+        response = result.data;
+        toastState.error(result.data?.error.messages[0] ?? "");
+        break;
+    }
+    // await update();
+    await applyAction(result);
+    await invalidateAll();
+  };
+};
+
+$inspect(response);
 </script>
 
 <button
   use:melt={$trigger}
   class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
+  type="button"
 >
   Create tag
 </button>
@@ -37,7 +95,7 @@ const {
     >
     </div>
     <div
-      class="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-base-300 text-base-content p-6 shadow-lg"
+      class="fixed left-1/2 top-1/2 z-50 max-h-[85vh] w-[90vw] max-w-[450px] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-base-content text-base-300 p-6 shadow-lg"
       transition:flyAndScale={{
         duration: 150,
         y: 8,
@@ -49,37 +107,73 @@ const {
         Create Tag
       </h2>
 
-      <fieldset class="mb-4 flex items-center gap-5">
-        <label class="w-[90px] text-right" for="name"> Title </label>
-        <input
-          class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-          id="name"
-          name="title"
-          placeholder="Tag title"
-          value=""
-        />
-      </fieldset>
-      <div class="mt-6 flex justify-end gap-4">
-        <button
-          use:melt={$close}
-          class="inline-flex h-8 items-center justify-center rounded-sm px-4 font-medium leading-none bg-neutral text-neutral-content"
-        >
-          Cancel
-        </button>
-        <button
-          use:melt={$close}
-          class="inline-flex h-8 items-center justify-center rounded-sm bg-primary px-4 font-medium leading-none text-primary-content"
-        >
-          Save changes
-        </button>
-      </div>
-      <button
-        use:melt={$close}
-        aria-label="close"
-        class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-default-content hover:bg-accent focus:shadow-accent"
+      <form
+        method="POST"
+        action="?/create"
+        use:enhance={submitTag}
+        id="form"
+        class="w-full grid grid-cols-1 p-4"
       >
-        <X class="size-4" />
-      </button>
+        <fieldset class="mb-4 flex items-center gap-5">
+          <label class="w-[90px] text-right" for="name"> Title </label>
+          <input
+            class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
+            id="name"
+            name="title"
+            placeholder="Tag title"
+            value=""
+          />
+          {#if response?.success === false && response.error.type === "VALIDATION"}
+            <div class="text-error">
+              {response.error.data.title[0]}
+            </div>
+          {/if}
+        </fieldset>
+        {#if response?.success === false}
+          <div class="text-error">
+            {response.error.messages[0]}
+          </div>
+        {/if}
+        <div></div>
+        <div class="mt-6 flex justify-end gap-4">
+          <button
+            use:melt={$close}
+            class="inline-flex h-8 items-center justify-center rounded-sm px-4 font-medium leading-none bg-neutral text-neutral-content"
+            type="button"
+          >
+            Cancel
+          </button>
+          <button
+            class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
+            type="submit"
+          >
+            Save changes
+          </button>
+        </div>
+        <button
+          use:melt={$close}
+          type="button"
+          aria-label="close"
+          class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-default-content hover:bg-accent focus:shadow-accent"
+        >
+          <X class="size-4" />
+        </button>
+      </form>
     </div>
   </div>
 {/if}
+<style>
+fieldset {
+  display: grid;
+  gap: 0 1em;
+  align-items: center;
+  grid-template-columns: max-content auto;
+  grid-template-rows: 2.5em 1em;
+
+  div {
+    grid-column-start: 2;
+    font-size: smaller;
+    overflow: hidden;
+  }
+}
+</style>

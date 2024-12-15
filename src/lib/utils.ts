@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type FormDataValidationError = Record<string, [string, ...string[]] | undefined>;
+export type FormDataValidationError = Record<string, [string, ...string[]] | undefined>;
 export type FormError<E extends FormDataValidationError> = {
   type: "VALIDATION";
   messages: [string, ...string[]];
@@ -37,11 +37,19 @@ export async function catchError<T, E extends { message: string } = Error>(
   }
 }
 
-export async function fetchJson<T>(
+export type ApiError = {
+  "httpCode": number;
+  "errorCode": number;
+  "title": string;
+  "error": string;
+  "href": string;
+};
+
+export async function fetchJson<T extends {}>(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Superposition<{}, T>> {
-  const errorRes = await catchError(fetch(input, init));
+  const errorRes = await catchError<Response>(fetch(input, init));
   if (errorRes[0]) {
     return {
       success: false,
@@ -50,17 +58,25 @@ export async function fetchJson<T>(
     };
   }
 
-  const errorJson = await catchError<T>(errorRes[1].json());
+  const errorJson = await catchError<T | ApiError>(errorRes[1].json());
 
-  if (errorJson[0]) {
+  if (errorJson[0] === undefined && errorRes[1].status > 399 && "error" in errorJson[1]) {
     return {
       success: false,
-      httpCode: 500,
-      error: { type: "GENERIC", messages: [errorJson[0].message] },
+      httpCode: errorJson[1].httpCode,
+      error: { type: "GENERIC", messages: [errorJson[1].error] },
     };
   }
 
-  return { success: true, data: errorJson[1] };
+  if (errorJson[0] === undefined) {
+    return { success: true, data: errorJson[1] as T };
+  }
+
+  return {
+    success: false,
+    httpCode: errorRes[1].status,
+    error: { type: "GENERIC", messages: [errorRes[1].statusText] },
+  };
 }
 
 export class Debounce {
