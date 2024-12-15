@@ -57,7 +57,6 @@ export async function fetchJson<T extends {}>(
       error: { type: "GENERIC", messages: [errorRes[0].message] },
     };
   }
-
   const errorJson = await catchError<T | ApiError>(errorRes[1].json());
 
   if (errorJson[0] === undefined && errorRes[1].status > 399 && "error" in errorJson[1]) {

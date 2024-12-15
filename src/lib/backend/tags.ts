@@ -13,3 +13,11 @@ export async function createTag(tag: ParsedTagCreate) {
 
   return errorOrJson;
 }
+
+export async function searchTagByQueryTitle(query: string) {
+  const url = new URL(`${API_BASE_ROUTE}/tags`);
+  url.searchParams.append("tagName", query);
+  let errorOrJson = await fetchJson<Tag[]>(url);
+
+  return errorOrJson;
+}

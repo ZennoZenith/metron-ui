@@ -12,7 +12,7 @@ import {
   trim,
 } from "valibot";
 
-const schema = pipe(
+const createSchema = pipe(
   object(
     {
       title: pipe(
@@ -25,19 +25,57 @@ const schema = pipe(
     },
   ),
 );
+export type ParsedTagCreate = InferOutput<typeof createSchema>;
 
-export type ParsedTagCreate = InferOutput<typeof schema>;
+const searchSchema = pipe(
+  object(
+    {
+      search: pipe(
+        string("search should be string"),
+        trim(),
+      ),
+    },
+  ),
+);
+
+export type ParsedTagSearch = InferOutput<typeof searchSchema>;
+
 export interface ValidationError extends FormDataValidationError {
   title?: [string, ...string[]];
 }
 
-export function validateSchema(data: unknown): Superposition<ValidationError, ParsedTagCreate> {
-  const d = safeParse(schema, data);
+export interface ValidationSearchError extends FormDataValidationError {
+  search?: [string, ...string[]];
+}
+
+export function validateCreateSchema(data: unknown): Superposition<ValidationError, ParsedTagCreate> {
+  const d = safeParse(createSchema, data);
   if (d.success) {
     return { success: true, data: d.output as ParsedTagCreate };
   }
 
-  const issues = flatten<typeof schema>(d.issues);
+  const issues = flatten<typeof createSchema>(d.issues);
+
+  return {
+    success: false,
+    httpCode: 400,
+    error: {
+      type: "VALIDATION",
+      messages: ["Validation error"],
+      data: {
+        ...issues.nested,
+      },
+    },
+  };
+}
+
+export function validateSearchSchema(data: unknown): Superposition<ValidationSearchError, ParsedTagSearch> {
+  const d = safeParse(searchSchema, data);
+  if (d.success) {
+    return { success: true, data: d.output as ParsedTagSearch };
+  }
+
+  const issues = flatten<typeof searchSchema>(d.issues);
 
   return {
     success: false,

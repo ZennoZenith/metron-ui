@@ -1,5 +1,5 @@
 import { createTag } from "$lib/backend/tags";
-import { type Tag, validateSchema } from "$lib/models/tags";
+import { type Tag, validateCreateSchema } from "$lib/models/tags";
 import { type Superposition } from "$utils";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
@@ -8,7 +8,7 @@ export const actions = {
   create: async ({ request }) => {
     const formData = await request.formData();
     const formEntries = Object.fromEntries(formData.entries());
-    const reqData = validateSchema(formEntries);
+    const reqData = validateCreateSchema(formEntries);
     if (!reqData.success) {
       return fail(400, reqData satisfies Superposition);
     }
