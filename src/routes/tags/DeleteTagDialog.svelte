@@ -3,7 +3,7 @@ import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import { X } from "$icons";
 import { flyAndScale } from "$lib/melt/utils/index";
-import { type Tag, validateCreateSchema } from "$lib/models/tags";
+import { type Tag } from "$lib/models/tags";
 import { getToastState } from "$lib/toast-state.svelte";
 import { UuidSchema } from "$types";
 import { createDialog, melt } from "@melt-ui/svelte";
@@ -132,7 +132,7 @@ const deleteTag: SubmitFunction = (
           use:melt={$close}
           type="button"
           aria-label="close"
-          class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-default-content hover:bg-accent focus:shadow-accent"
+          class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-magnum-800 hover:bg-magnum-100 focus:shadow-magnum-400"
         >
           <X class="size-4" />
         </button>

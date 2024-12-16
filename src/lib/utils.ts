@@ -5,6 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
+
 export type FormDataValidationError = Record<string, [string, ...string[]] | undefined>;
 export type FormError<E extends FormDataValidationError> = {
   type: "VALIDATION";

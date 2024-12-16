@@ -151,7 +151,7 @@ const submitTag: SubmitFunction = (
           use:melt={$close}
           type="button"
           aria-label="close"
-          class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-default-content hover:bg-accent focus:shadow-accent"
+          class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-magnum-800 hover:bg-magnum-100 focus:shadow-magnum-400"
         >
           <X class="size-4" />
         </button>

@@ -7,6 +7,14 @@ export type Toast = {
   toastType: ToastType;
   title: string;
   message: string;
+  durationMs: number;
+  createdAtMs: number;
+  psudoStartAtMs: number;
+  pause: {
+    paused: boolean;
+    pausedAtMs: number;
+    pauseAtRatio: number;
+  };
 };
 
 export type InternalApiError = {
