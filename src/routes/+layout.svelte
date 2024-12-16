@@ -2,10 +2,10 @@
 import "../app.css";
 import Toaster from "$lib/components/Toaster.svelte";
 import ToastTest from "$lib/components/ToastTest.svelte";
-import { setToastState } from "$lib/toast-state.svelte";
+import { setToaster } from "$lib/toaster.svelte";
 
 let { children } = $props();
-setToastState();
+setToaster();
 </script>
 
 {@render children()}

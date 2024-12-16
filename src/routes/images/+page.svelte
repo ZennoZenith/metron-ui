@@ -2,11 +2,11 @@
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import TagSearch from "$lib/components/TagSearch.svelte";
-import { getToastState } from "$lib/toast-state.svelte";
+import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$lib/types";
 import type { ActionData, SubmitFunction } from "./$types";
 
-const toastState = getToastState();
+const toaster = getToaster();
 let { form }: { form: ActionData } = $props();
 let selectedTags: Tag[] = $state([]);
 let formElement = $state<HTMLFormElement>();
@@ -74,7 +74,7 @@ const submitImage: SubmitFunction = (
 ) => {
   const { title } = Object.fromEntries(formData);
   if (title.toString().length < 1) {
-    toastState.error("Title is empty");
+    toaster.error("Title is empty");
     cancel();
   }
 
@@ -85,16 +85,16 @@ const submitImage: SubmitFunction = (
         break;
       case "error":
         console.error(result);
-        toastState.error(JSON.stringify(result.error), "Internal server error");
+        toaster.error(JSON.stringify(result.error), "Internal server error");
         break;
       case "success":
         formElement?.reset();
         removeImage();
-        toastState.success("Image saved");
+        toaster.success("Image saved");
         break;
       case "failure":
         message = result.data?.error.title?.message ?? "";
-        toastState.error(message);
+        toaster.error(message);
         break;
     }
     await applyAction(result);

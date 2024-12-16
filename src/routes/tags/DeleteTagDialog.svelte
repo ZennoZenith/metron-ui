@@ -4,7 +4,7 @@ import { invalidateAll } from "$app/navigation";
 import { X } from "$icons";
 import { flyAndScale } from "$lib/melt/utils/index";
 import { type Tag } from "$lib/models/tags";
-import { getToastState } from "$lib/toast-state.svelte";
+import { getToaster } from "$lib/toaster.svelte";
 import { UuidSchema } from "$types";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
@@ -15,7 +15,7 @@ type Props = { tag?: Tag };
 
 const { tag }: Props = $props();
 
-const toastState = getToastState();
+const toaster = getToaster();
 const {
   elements: {
     overlay,
@@ -43,7 +43,7 @@ const deleteTag: SubmitFunction = (
   let parsed = safeParse(UuidSchema, id);
 
   if (!parsed.success) {
-    toastState.error(parsed.issues[0].message);
+    toaster.error(parsed.issues[0].message);
     cancel();
     return;
   }
@@ -51,17 +51,17 @@ const deleteTag: SubmitFunction = (
   return async ({ result }) => {
     switch (result.type) {
       case "error":
-        toastState.error(result.error);
+        toaster.error(result.error);
         break;
       case "success":
         formElement.reset();
-        toastState.success(
+        toaster.success(
           "Tag deleted successfully",
         );
         open.set(false);
         break;
       case "failure":
-        toastState.error(result.data?.error.messages[0] ?? "");
+        toaster.error(result.data?.error.messages[0] ?? "");
         break;
     }
     // await update();

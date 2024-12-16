@@ -4,7 +4,7 @@ import ErrorSvg from "$lib/svgs/error.svelte";
 import InfoSvg from "$lib/svgs/info.svelte";
 import SuccessSvg from "$lib/svgs/success.svelte";
 import WarningSvg from "$lib/svgs/warning.svelte";
-import { getToastState } from "$lib/toast-state.svelte";
+import { getToaster } from "$lib/toaster.svelte";
 import type { Toast } from "$lib/types";
 import { onMount } from "svelte";
 import { fade, fly } from "svelte/transition";
@@ -14,7 +14,7 @@ type Props = {
 
 const MAX_PERCENTAGE_VALUE = 100;
 const { toast }: Props = $props();
-const toastState = getToastState();
+const toaster = getToaster();
 let toastTypeClass: string = $state("");
 let toastTypeTextClass: string = $state("");
 let percentage = $state(0);
@@ -64,7 +64,7 @@ function setIfEmptyTitle(toast: Toast) {
 onMount(() => {
   let frame: number;
   const updatePercentage = () => {
-    percentage = toastState.getPercentage(toast.id);
+    percentage = toaster.getPercentage(toast.id);
     frame = requestAnimationFrame(updatePercentage);
   };
   frame = requestAnimationFrame(updatePercentage);
@@ -77,8 +77,8 @@ onMount(() => {
   role="alert"
   in:fly={{ duration: 150, x: "100%" }}
   out:fly={{ duration: 150, x: "100%" }}
-  onmouseenter={() => toastState.pause(toast.id)}
-  onmouseleave={() => toastState.resume(toast.id)}
+  onmouseenter={() => toaster.pause(toast.id)}
+  onmouseleave={() => toaster.resume(toast.id)}
 >
   <div class="absolute left-5 top-2 h-1 w-[10%] overflow-hidden rounded-full">
     <div
@@ -123,7 +123,7 @@ onMount(() => {
     <button
       class="absolute right-4 top-4 grid size-6 place-items-center rounded-full text-magnum-500 hover:bg-magnum-900/50"
       aria-label="close toast"
-      onclick={() => toastState.remove(toast.id)}
+      onclick={() => toaster.remove(toast.id)}
     >
       <X class="size-4" />
     </button>

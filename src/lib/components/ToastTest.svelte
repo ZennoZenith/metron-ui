@@ -1,22 +1,22 @@
 <script lang="ts">
-import { getToastState } from "$lib/toast-state.svelte";
+import { getToaster } from "$lib/toaster.svelte";
 import type { ToastType } from "$lib/types";
 
-const toastState = getToastState();
+const toaster = getToaster();
 
 function showToast(toastType: ToastType): any {
   switch (toastType) {
     case "INFO":
-      toastState.info("Info Message", "Info title");
+      toaster.info("Info Message", "Info title");
       break;
     case "SUCCESS":
-      toastState.success("Success Message", "Success title");
+      toaster.success("Success Message", "Success title");
       break;
     case "WARNING":
-      toastState.warning("Warning Message", "Warning title");
+      toaster.warning("Warning Message", "Warning title");
       break;
     case "ERROR":
-      toastState.error("Error Message", "Error title");
+      toaster.error("Error Message", "Error title");
       break;
   }
 }

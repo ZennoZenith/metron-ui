@@ -5,7 +5,7 @@ import { getContext, onDestroy, setContext } from "svelte";
 
 const DEFAULT_TOAST_DURATION_TIME = 5000; // in milliseconds
 type Hover = "pause" | "pause-all" | null;
-export class ToastState {
+export class Toaster {
   private _toasts = $state<Toast[]>([]);
   private _toasted: Toast[] = [];
   private _toastToTimeout = new Map<string, Timer>();
@@ -169,9 +169,9 @@ export class ToastState {
 
 const TOAST_KEY = Symbol("TOAST");
 
-export function setToastState() {
-  return setContext(TOAST_KEY, new ToastState());
+export function setToaster(options?: ConstructorParameters<typeof Toaster>[0]) {
+  return setContext(TOAST_KEY, new Toaster(options));
 }
-export function getToastState() {
-  return getContext<ReturnType<typeof setToastState>>(TOAST_KEY);
+export function getToaster() {
+  return getContext<ReturnType<typeof setToaster>>(TOAST_KEY);
 }

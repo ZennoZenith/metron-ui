@@ -8,7 +8,7 @@ import {
   validateCreateSchema,
   type ValidationError,
 } from "$lib/models/tags";
-import { getToastState } from "$lib/toast-state.svelte";
+import { getToaster } from "$lib/toaster.svelte";
 import type { Superposition } from "$utils";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
@@ -18,7 +18,7 @@ type Props = { tag?: Tag };
 
 const { tag }: Props = $props();
 
-const toastState = getToastState();
+const toaster = getToaster();
 const {
   elements: {
     overlay,
@@ -47,7 +47,7 @@ const updateTag: SubmitFunction = (
 
   if (!parsed.success) {
     response = parsed;
-    toastState.error("Invalid form data");
+    toaster.error("Invalid form data");
     cancel();
     return;
   }
@@ -55,19 +55,19 @@ const updateTag: SubmitFunction = (
   return async ({ result }) => {
     switch (result.type) {
       case "error":
-        toastState.error(result.error);
+        toaster.error(result.error);
         break;
       case "success":
         formElement.reset();
         response = result.data;
-        toastState.success(
+        toaster.success(
           "Tag updated",
         );
         open.set(false);
         break;
       case "failure":
         response = result.data;
-        toastState.error(result.data?.error.messages[0] ?? "");
+        toaster.error(result.data?.error.messages[0] ?? "");
         break;
     }
     // await update();
