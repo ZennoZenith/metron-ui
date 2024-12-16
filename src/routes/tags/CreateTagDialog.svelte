@@ -133,7 +133,6 @@ const submitTag: SubmitFunction = (
             {response.error.messages[0]}
           </div>
         {/if}
-        <div></div>
         <div class="mt-6 flex justify-end gap-4">
           <button
             use:melt={$close}

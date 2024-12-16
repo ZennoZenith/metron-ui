@@ -15,9 +15,13 @@ import type { Superposition } from "$utils";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "./$types";
 
+type Props = { tag?: Tag };
+
+const { tag }: Props = $props();
+
+const toastState = getToastState();
 const {
   elements: {
-    trigger,
     overlay,
     content,
     title,
@@ -30,11 +34,13 @@ const {
   role: "alertdialog",
 });
 
-const toastState = getToastState();
+export function openDialog() {
+  open.set(true);
+}
 
 let response = $state<Superposition<ValidationError, Tag>>();
 
-const submitTag: SubmitFunction = (
+const updateTag: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
   const formEntries = Object.fromEntries(formData.entries());
@@ -49,8 +55,6 @@ const submitTag: SubmitFunction = (
 
   return async ({ result }) => {
     switch (result.type) {
-      case "redirect":
-        break;
       case "error":
         toastState.error(result.error);
         break;
@@ -58,9 +62,7 @@ const submitTag: SubmitFunction = (
         formElement.reset();
         response = result.data;
         toastState.success(
-          `Tag created with name ${
-            result.data?.data.title ?? title.toString()
-          }`,
+          "Tag updated",
         );
         open.set(false);
         break;
@@ -75,14 +77,6 @@ const submitTag: SubmitFunction = (
   };
 };
 </script>
-
-<button
-  use:melt={$trigger}
-  class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-  type="button"
->
-  Create tag
-</button>
 
 {#if $open}
   <div class="" use:melt={$portalled}>
@@ -102,24 +96,43 @@ const submitTag: SubmitFunction = (
       use:melt={$content}
     >
       <h2 use:melt={$title} class="m-0 text-lg font-medium">
-        Create Tag
+        Update Tag
       </h2>
 
       <form
         method="POST"
-        action="?/create"
-        use:enhance={submitTag}
+        action="?/update"
+        use:enhance={updateTag}
         id="form"
         class="w-full grid grid-cols-1 p-4"
       >
         <fieldset class="mb-4 flex items-center gap-5">
+          <label class="w-[90px] text-right" for="orignal-title">
+            Orignal Title
+          </label>
+          <input
+            id="orignal-title"
+            class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
+            placeholder={tag ? tag.title : ""}
+            value={tag ? tag.title : ""}
+            disabled
+            aria-disabled="true"
+          />
+        </fieldset>
+        <fieldset class="mb-4 flex items-center gap-5">
           <label class="w-[90px] text-right" for="name"> Title </label>
+          <input
+            name="id"
+            hidden
+            aria-hidden="true"
+            value={tag ? tag.id : ""}
+          />
           <input
             class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
             id="name"
             name="title"
-            placeholder="Tag title"
-            value=""
+            placeholder="New tag title"
+            value={tag ? tag.title : ""}
           />
           {#if response?.success === false && response.error.type === "VALIDATION"
     && response.error.data.title}
@@ -133,7 +146,6 @@ const submitTag: SubmitFunction = (
             {response.error.messages[0]}
           </div>
         {/if}
-        <div></div>
         <div class="mt-6 flex justify-end gap-4">
           <button
             use:melt={$close}

@@ -1,5 +1,6 @@
 import { API_BASE_ROUTE } from "$constants";
-import type { ParsedTagCreate, Tag } from "$lib/models/tags";
+import type { ParsedTagCreate, ParsedTagUpdate, Tag } from "$lib/models/tags";
+import type { Uuid } from "$types";
 import { fetchJson } from "$utils";
 
 export async function createTag(tag: ParsedTagCreate) {
@@ -9,6 +10,18 @@ export async function createTag(tag: ParsedTagCreate) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(tag),
+  });
+
+  return errorOrJson;
+}
+
+export async function updateTag(tag: ParsedTagUpdate) {
+  let errorOrJson = await fetchJson<Tag>(`${API_BASE_ROUTE}/tags/id/${tag.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ title: tag.title }),
   });
 
   return errorOrJson;

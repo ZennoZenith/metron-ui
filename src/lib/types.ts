@@ -18,3 +18,5 @@ export type Tag = {
   id: string;
   title: string;
 };
+
+export type Uuid = string;
