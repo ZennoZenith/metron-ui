@@ -64,8 +64,9 @@ export class ToastState {
 
   getPercentage(id: string) {
     const toast = this._toasts.find((v) => v.id === id);
-    if (!toast) return 100;
+    if (!toast) return 0;
 
+    if (toast.durationMs === 0) return 0;
     if (toast.pause.paused) return clamp(toast.pause.pauseAtRatio, 0, 1) * 100;
 
     const toastedTime = Date.now() - toast.psudoStartAtMs;
@@ -106,6 +107,7 @@ export class ToastState {
   private _pauseToast(toast?: Toast) {
     if (!toast) return;
     if (toast.pause.paused === true) return;
+    if (toast.durationMs === 0) return;
 
     const timeout = this._toastToTimeout.get(toast.id);
     if (timeout) {
@@ -122,6 +124,7 @@ export class ToastState {
   private _resumeToast(toast?: Toast) {
     if (!toast) return;
     if (toast.pause.paused === false) return;
+    if (toast.durationMs === 0) return;
 
     const now = Date.now();
     toast.psudoStartAtMs = toast.psudoStartAtMs + now - toast.pause.pausedAtMs;

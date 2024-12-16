@@ -7,7 +7,7 @@ import WarningSvg from "$lib/svgs/warning.svelte";
 import { getToastState } from "$lib/toast-state.svelte";
 import type { Toast } from "$lib/types";
 import { onMount } from "svelte";
-import { fly } from "svelte/transition";
+import { fade, fly } from "svelte/transition";
 type Props = {
   toast: Toast;
 };
@@ -80,9 +80,7 @@ onMount(() => {
   onmouseenter={() => toastState.pause(toast.id)}
   onmouseleave={() => toastState.resume(toast.id)}
 >
-  <div
-    class="absolute left-5 top-2 h-1 w-[10%] overflow-hidden rounded-full bg-black/40"
-  >
+  <div class="absolute left-5 top-2 h-1 w-[10%] overflow-hidden rounded-full">
     <div
       class="h-full w-full bg-magnum-500"
       style={`transform: translateX(-${
@@ -91,6 +89,14 @@ onMount(() => {
     >
     </div>
   </div>
+  {#if toast.pause.paused === true}
+    <div
+      class="absolute left-17 top-0.5 text-xs font-semibold text-magnum-500"
+      transition:fade={{ duration: 100 }}
+    >
+      Paused
+    </div>
+  {/if}
   <div
     class="relative flex w-[24rem] max-w-[calc(100vw-2rem)] items-center justify-between gap-4 p-5 pt-6"
   >
