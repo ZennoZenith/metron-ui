@@ -1,28 +1,29 @@
 <script lang="ts">
-import { createDialog, melt } from "@melt-ui/svelte";
-/** Internal helpers */
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import { X } from "$icons";
 import { flyAndScale } from "$lib/melt/utils/index";
-import {
-  type Tag,
-  validateCreateSchema,
-  type ValidationError,
-} from "$lib/models/tags";
+import { type Tag, validateCreateSchema } from "$lib/models/tags";
 import { getToastState } from "$lib/toast-state.svelte";
-import type { Superposition } from "$utils";
+import { UuidSchema } from "$types";
+import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
+import { safeParse } from "valibot";
 import type { SubmitFunction } from "./$types";
 
+type Props = { tag?: Tag };
+
+const { tag }: Props = $props();
+
+const toastState = getToastState();
 const {
   elements: {
-    trigger,
     overlay,
     content,
     title,
     close,
     portalled,
+    description,
   },
   states: { open },
 } = createDialog({
@@ -30,42 +31,36 @@ const {
   role: "alertdialog",
 });
 
-const toastState = getToastState();
+export function openDialog() {
+  open.set(true);
+}
 
-let response = $state<Superposition<ValidationError, Tag>>();
-
-const submitTag: SubmitFunction = (
+const deleteTag: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
-  const formEntries = Object.fromEntries(formData.entries());
-  let parsed = validateCreateSchema(formEntries);
+  const { id } = Object.fromEntries(formData.entries());
+
+  let parsed = safeParse(UuidSchema, id);
 
   if (!parsed.success) {
-    response = parsed;
-    toastState.error("Invalid form data");
+    toastState.error(parsed.issues[0].message);
     cancel();
     return;
   }
 
   return async ({ result }) => {
     switch (result.type) {
-      case "redirect":
-        break;
       case "error":
         toastState.error(result.error);
         break;
       case "success":
         formElement.reset();
-        response = result.data;
         toastState.success(
-          `Tag created with name ${
-            result.data?.data.title ?? title.toString()
-          }`,
+          "Tag deleted successfully",
         );
         open.set(false);
         break;
       case "failure":
-        response = result.data;
         toastState.error(result.data?.error.messages[0] ?? "");
         break;
     }
@@ -75,14 +70,6 @@ const submitTag: SubmitFunction = (
   };
 };
 </script>
-
-<button
-  use:melt={$trigger}
-  class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-  type="button"
->
-  Create tag
-</button>
 
 {#if $open}
   <div class="" use:melt={$portalled}>
@@ -102,38 +89,30 @@ const submitTag: SubmitFunction = (
       use:melt={$content}
     >
       <h2 use:melt={$title} class="m-0 text-lg font-medium">
-        Create Tag
+        Delete Tag
       </h2>
+
+      <p use:melt={$description} class="mb-5 mt-2 leading-normal text-zinc-600">
+        This action cannot be undone. This will permanently delete the tag:
+        <span class="text-error">
+          {tag?.title}
+        </span>
+      </p>
 
       <form
         method="POST"
-        action="?/create"
-        use:enhance={submitTag}
+        action="?/delete"
+        use:enhance={deleteTag}
         id="form"
         class="w-full grid grid-cols-1 p-4"
       >
-        <fieldset class="mb-4 flex items-center gap-5">
-          <label class="w-[90px] text-right" for="name"> Title </label>
-          <input
-            class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-            id="name"
-            name="title"
-            placeholder="Tag title"
-            value=""
-          />
-          {#if response?.success === false && response.error.type === "VALIDATION"
-    && response.error.data.title}
-            <div class="text-error">
-              {response.error.data.title[0]}
-            </div>
-          {/if}
-        </fieldset>
-        {#if response?.success === false}
-          <div class="text-error">
-            {response.error.messages[0]}
-          </div>
-        {/if}
-        <div></div>
+        <input
+          name="id"
+          class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
+          value={tag ? tag.id : ""}
+          type="hidden"
+          aria-disabled="true"
+        />
         <div class="mt-6 flex justify-end gap-4">
           <button
             use:melt={$close}
@@ -143,10 +122,10 @@ const submitTag: SubmitFunction = (
             Cancel
           </button>
           <button
-            class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
+            class="inline-flex h-8 items-center justify-center rounded-sm bg-error px-4 font-medium leading-none text-error-content"
             type="submit"
           >
-            Save changes
+            Delete
           </button>
         </div>
         <button
@@ -161,19 +140,3 @@ const submitTag: SubmitFunction = (
     </div>
   </div>
 {/if}
-
-<style>
-fieldset {
-  display: grid;
-  gap: 0 1em;
-  align-items: center;
-  grid-template-columns: max-content auto;
-  grid-template-rows: 2.5em 1em;
-
-  div {
-    grid-column-start: 2;
-    font-size: smaller;
-    overflow: hidden;
-  }
-}
-</style>

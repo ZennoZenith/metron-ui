@@ -2,6 +2,7 @@
 import { Edit, Trash } from "$icons";
 import type { Tag } from "$lib/models/tags";
 import CreateTagDialog from "./CreateTagDialog.svelte";
+import DeleteTagDialog from "./DeleteTagDialog.svelte";
 import TagSearch from "./TagSearch.svelte";
 import UpdateTagDialog from "./UpdateTagDialog.svelte";
 
@@ -13,6 +14,7 @@ const onSearch = (l: Tag[]) => {
 };
 
 let updateDialog = $state<UpdateTagDialog>();
+let deleteDialog = $state<DeleteTagDialog>();
 </script>
 
 <div class="grid grid-cols-1 p-2 gap-4">
@@ -21,6 +23,7 @@ let updateDialog = $state<UpdateTagDialog>();
   {#if list && list.length > 0}
     <div class="grid grid-cols-1 gap-2">
       <UpdateTagDialog bind:this={updateDialog} tag={selectedTag} />
+      <DeleteTagDialog bind:this={deleteDialog} tag={selectedTag} />
 
       {#each list as tag (tag.id)}
         <div class="flex border border-secondary gap-1 rounded p-2">
@@ -29,13 +32,19 @@ let updateDialog = $state<UpdateTagDialog>();
             <button
               type="button"
               onclick={() => {
-                updateDialog?.openDialog();
                 selectedTag = tag;
+                updateDialog?.openDialog();
               }}
             >
               <Edit class="h-5 text-info" />
             </button>
-            <button type="button">
+            <button
+              type="button"
+              onclick={() => {
+                selectedTag = tag;
+                deleteDialog?.openDialog();
+              }}
+            >
               <Trash class="h-5 text-error" />
             </button>
           </div>

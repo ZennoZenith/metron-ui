@@ -27,6 +27,14 @@ export async function updateTag(tag: ParsedTagUpdate) {
   return errorOrJson;
 }
 
+export async function deleteTag(id: Uuid) {
+  let errorOrJson = await fetchJson<Tag>(`${API_BASE_ROUTE}/tags/id/${id}`, {
+    method: "DELETE",
+  });
+
+  return errorOrJson;
+}
+
 export async function searchTagByQueryTitle(query: string) {
   const url = new URL(`${API_BASE_ROUTE}/tags`);
   url.searchParams.append("tagName", query);

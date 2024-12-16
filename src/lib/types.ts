@@ -1,3 +1,5 @@
+import { type InferOutput, pipe, string, uuid } from "valibot";
+
 export type ToastType = "INFO" | "SUCCESS" | "WARNING" | "ERROR";
 
 export type Toast = {
@@ -19,4 +21,5 @@ export type Tag = {
   title: string;
 };
 
-export type Uuid = string;
+export const UuidSchema = pipe(string(), uuid("The UUID is badly formatted."));
+export type Uuid = InferOutput<typeof UuidSchema>;

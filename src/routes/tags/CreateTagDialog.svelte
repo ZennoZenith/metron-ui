@@ -1,6 +1,4 @@
 <script lang="ts">
-import { createDialog, melt } from "@melt-ui/svelte";
-/** Internal helpers */
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import { X } from "$icons";
@@ -12,6 +10,7 @@ import {
 } from "$lib/models/tags";
 import { getToastState } from "$lib/toast-state.svelte";
 import type { Superposition } from "$utils";
+import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "./$types";
 
