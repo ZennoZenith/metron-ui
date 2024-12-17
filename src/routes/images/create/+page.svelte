@@ -2,18 +2,21 @@
 // import { applyAction, enhance } from "$app/forms";
 // import { invalidateAll } from "$app/navigation";
 import TagSearch from "$components/TagSearch.svelte";
-import type { Tag } from "$lib/models/tags";
+import { X } from "$icons";
+import { fade } from "svelte/transition";
 // import { getToaster } from "$lib/toaster.svelte";
 // import type { ActionData, SubmitFunction } from "./$types";
 
 // const toaster = getToaster();
 // let { form }: { form: ActionData } = $props();
-let selectedTags: Tag[] = [];
 let imageInputElement = $state<HTMLInputElement>();
 let imagePreviewElement = $state<HTMLImageElement>();
 let hasImage = $state(false);
 
 function previewImage(event: Event) {
+  if (!imagePreviewElement) return;
+  if (!imageInputElement) return;
+
   const target = event.target as HTMLInputElement;
   const imageFiles = target.files;
   if (null === imageFiles) {
@@ -21,31 +24,26 @@ function previewImage(event: Event) {
     return;
   }
 
-  const imageFilesLength = imageFiles.length;
-  if (imageFilesLength > 0) {
+  if (imageFiles.length > 0) {
     const imageSrc = URL.createObjectURL(imageFiles[0]);
-    if (imagePreviewElement) {
-      imagePreviewElement.src = imageSrc;
-    }
+    imagePreviewElement.src = imageSrc;
+    imagePreviewElement.removeAttribute("hidden");
     hasImage = true;
   } else {
-    if (imagePreviewElement) {
-      imagePreviewElement.removeAttribute("src");
-    }
-    if (imageInputElement) {
-      imageInputElement.value = "";
-    }
+    imagePreviewElement.removeAttribute("src");
+    imagePreviewElement.hidden = true;
+    imageInputElement.value = "";
     hasImage = false;
   }
 }
 
 function removeImage() {
-  if (imagePreviewElement) {
-    imagePreviewElement.removeAttribute("src");
-  }
-  if (imageInputElement) {
-    imageInputElement.value = "";
-  }
+  if (!imagePreviewElement) return;
+  if (!imageInputElement) return;
+
+  imagePreviewElement.removeAttribute("src");
+  imagePreviewElement.hidden = true;
+  imageInputElement.value = "";
   hasImage = false;
 }
 
@@ -119,13 +117,13 @@ function removeImage() {
       </div>
       <textarea
         id="description"
-        class="w-full text-xl min-h-12 h-52 rounded-sm border border-solid border-base-content"
+        class="w-full text-xl min-h-12 h-52 p-2 rounded-sm border border-solid border-base-content"
         placeholder=""
         name="description"
       ></textarea>
     </label>
 
-    <TagSearch selectedTagList={selectedTags} />
+    <TagSearch />
   </div>
 
   <div class="px-2 py-4 flex flex-col gap-6">
@@ -133,49 +131,40 @@ function removeImage() {
       <div class="">
         Pick a file <span class="text-error" aria-label="required"> * </span>
       </div>
-      <div class="flex gap-2">
+      <div
+        class="flex gap-2 rounded-sm border border-solid border-base-content items-center"
+      >
         <input
-          class="file-input file-input-bordered grow"
+          bind:this={imageInputElement}
+          class="grow"
           type="file"
           id="image"
           name="file"
-          accept="image/*"
+          accept=".png,.jpeg,.svg"
           onchange={previewImage}
-          bind:this={imageInputElement}
           required
         />
-        <button
-          class=""
-          id="remove-file"
-          type="button"
-          aria-label="search tag button"
-          onclick={removeImage}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            class="inline-block h-4 w-4 stroke-current"
+        {#if hasImage}
+          <button
+            class="mr-1"
+            id="remove-file"
+            type="button"
+            aria-label="search tag button"
+            onclick={removeImage}
+            transition:fade={{ duration: 100 }}
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            >
-            </path>
-          </svg>
-        </button>
+            <X />
+          </button>
+        {/if}
       </div>
     </label>
 
-    {#if hasImage}
-      <img
-        id="preview-selected-image"
-        alt="preview"
-        bind:this={imagePreviewElement}
-      />
-    {/if}
+    <img
+      bind:this={imagePreviewElement}
+      id="preview-selected-image"
+      alt="preview"
+      hidden
+    />
   </div>
 
   <button
@@ -185,3 +174,28 @@ function removeImage() {
     Submit
   </button>
 </form>
+
+<style>
+input[type="file"]::file-selector-button {
+  border-radius: 0.25rem;
+  padding: 0 1rem;
+  height: 2rem;
+  cursor: pointer;
+  background-color: var(--color-secondary);
+  color: var(--color-secondary-content);
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 100ms;
+}
+
+/* file upload button hover state */
+input[type="file"]::file-selector-button:hover {
+  background-color: color(from var(--color-secondary) srgb r g b / 0.9);
+}
+
+/* file upload button active state */
+input[type="file"]::file-selector-button:active {
+  background-color: color(from var(--color-secondary) srgb r g b / 0.8);
+}
+</style>

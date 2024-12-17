@@ -21,10 +21,10 @@ export default {
       "$api/*": "src/routes/api/*",
       $constants: "src/constants",
       $types: "src/lib/types",
-      $components: "src/lib/components",
-      "$components/*": "src/lib/components/*",
       $icons: "src/lib/components/icons",
       "$icons/*": "src/lib/components/icons/*",
+      $components: "src/lib/components",
+      "$components/*": "src/lib/components/*",
     },
   },
   compilerOptions: {

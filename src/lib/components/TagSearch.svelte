@@ -119,5 +119,9 @@ function onTagSelect(selectedItem: DropDownListItem) {
   </div>
 </div>
 
+{#each selectedTags.values as tag (tag.id)}
+  <input type="hidden" name="tags" value={tag.id}>
+{/each}
+
 <style>
 </style>

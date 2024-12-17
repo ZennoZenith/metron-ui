@@ -50,7 +50,7 @@ function selectDropdownItem(
     {/if}
     {#each list as item (item.key)}
       <button
-        class="{item?.disabled === true ? 'bg-zinc-700' : 'bg-base-300 hover:bg-base-100'} text-surface-content px-3 overflow-hidden flex items-center h-10 whitespace-nowrap"
+        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} px-3 overflow-hidden flex items-center h-10 whitespace-nowrap"
         type="button"
         data-key={item.key}
         data-data-text={item.dataText}
