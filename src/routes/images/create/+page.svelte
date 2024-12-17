@@ -104,7 +104,7 @@ function removeImage() {
       </div>
       <textarea
         id="title"
-        class="w-full text-xl h-12 min-h-12 p-2 rounded-sm border border-solid border-base-content"
+        class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
         placeholder=""
         name="title"
         required
@@ -117,7 +117,7 @@ function removeImage() {
       </div>
       <textarea
         id="description"
-        class="w-full text-xl min-h-12 h-52 p-2 rounded-sm border border-solid border-base-content"
+        class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
         placeholder=""
         name="description"
       ></textarea>
@@ -129,10 +129,10 @@ function removeImage() {
   <div class="px-2 py-4 flex flex-col gap-6">
     <label class="">
       <div class="">
-        Pick a file <span class="text-error" aria-label="required"> * </span>
+        Pick an image <span class="text-error" aria-label="required"> * </span>
       </div>
       <div
-        class="flex gap-2 rounded-sm border border-solid border-base-content items-center"
+        class="flex gap-2 rounded border border-solid border-base-content items-center"
       >
         <input
           bind:this={imageInputElement}

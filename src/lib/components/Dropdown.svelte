@@ -4,6 +4,7 @@ import type { Searchable } from "$lib";
 import type { DropDownListItem } from "$lib/types";
 
 type Props = {
+  // anchorName: `--${string}`;
   searchable: Searchable;
   onSelect?: (
     selectedItem: DropDownListItem,
@@ -14,6 +15,7 @@ type Props = {
 };
 
 let {
+  // anchorName,
   searchable,
   onSelect = () => {},
   list = $bindable(),
@@ -40,7 +42,11 @@ function selectDropdownItem(
 </script>
 
 {#if searchable.showDropdown}
-  <div class="absolute w-full left top-12 flex flex-col z-10">
+  <!-- 
+    class="anchored flex flex-col z-10"
+    style={`position-anchor: ${anchorName};`}
+   -->
+  <div class="w-full flex flex-col z-10">
     {#if list.length === 0}
       <div
         class="bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap"
@@ -69,3 +75,12 @@ function selectDropdownItem(
     {/each}
   </div>
 {/if}
+
+<style>
+/* .anchored {
+  position: fixed;
+  left: anchor(left);
+  top: calc(anchor(bottom) + 0.25rem);
+  width: anchor-size(width);
+} */
+</style>

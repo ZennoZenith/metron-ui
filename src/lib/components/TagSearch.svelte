@@ -1,5 +1,6 @@
 <script lang="ts">
 import Dropdown from "$components/Dropdown.svelte";
+import { X } from "$icons";
 import { Debounce, Searchable } from "$lib";
 import type { Tag } from "$lib/models/tags";
 import { setMySet } from "$lib/set.svelte";
@@ -14,6 +15,7 @@ const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
 
 let tagSearchQuery = $state("");
 const knownTags = new Map<Tag["id"], Tag>();
+let inputRef = $state<HTMLInputElement>();
 
 let list = $state<DropDownListItem[]>([
   {
@@ -83,17 +85,41 @@ function onTagSelect(selectedItem: DropDownListItem) {
   } else {
     selectedTags.deleteByKey(tag.id);
   }
+  inputRef?.focus();
+}
+
+function removeTag(tagId: Tag["id"]) {
+  console.log(tagId);
+  if (!knownTags.get(tagId)) return;
+  selectedTags.deleteByKey(tagId);
+
+  const item = list.find(v => v.key === tagId);
+  if (!item) return;
+  item.selected = false;
+  inputRef?.focus();
 }
 </script>
 
 <div
   id="tag-search-container"
-  class="relative"
+  class="min-h-fit"
   onfocusout={tagSearchable.onFocusLoss}
 >
-  <div class="flex">
+  <div
+    class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
+  >
+    {#each selectedTags.values as tag}
+      <button
+        type="button"
+        class="bg-info text-info-content font-semibold pl-3 pr-1 rounded-full flex items-center gap-1"
+        onclick={() => removeTag(tag.id)}
+      >
+        {tag.title} <X class="text-error h-5" />
+      </button>
+    {/each}
     <input
-      class="h-12 p-2 rounded-sm border border-solid border-base-content grow rounded-r-none border-r-0"
+      bind:this={inputRef}
+      class="min-w-16 rounded grow outline-none"
       placeholder="Search tags"
       id="tag-search"
       type="search"
@@ -102,20 +128,17 @@ function onTagSelect(selectedItem: DropDownListItem) {
       oninput={searchTags}
       onfocus={tagSearchable.onFocus}
     />
+  </div>
+  <div class="relative w-full h-0">
+    <!-- 
+      anchorName="--dropdown-anchor-1"
+     -->
     <Dropdown
       searchable={tagSearchable}
       multiple
       onSelect={onTagSelect}
       bind:list
     />
-
-    <button
-      class="bg-secondary text-secondary-content px-4 border border-solid border-base-content border-l-0"
-      type="button"
-      onclick={searchTags}
-    >
-      Search Tag
-    </button>
   </div>
 </div>
 
@@ -124,4 +147,7 @@ function onTagSelect(selectedItem: DropDownListItem) {
 {/each}
 
 <style>
+/* .anchor {
+  anchor-name: --dropdown-anchor-1;
+} */
 </style>
