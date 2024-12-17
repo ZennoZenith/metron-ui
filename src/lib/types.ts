@@ -24,9 +24,12 @@ export type InternalApiError = {
   };
 };
 
-export type Tag = {
-  id: string;
-  title: string;
+export type DropDownListItem = {
+  key: string;
+  text: string;
+  dataText: string;
+  disabled?: boolean;
+  selected: boolean;
 };
 
 export const UuidSchema = pipe(string(), uuid("The UUID is badly formatted."));

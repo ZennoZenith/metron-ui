@@ -1,95 +1,122 @@
 <script lang="ts">
-import type { Tag } from "$lib/types";
+import Dropdown from "$components/Dropdown.svelte";
+import { Debounce, Searchable } from "$lib";
+import type { Tag } from "$lib/models/tags";
+import { setMySet } from "$lib/set.svelte";
+import type { DropDownListItem } from "$types";
+import { fetchJson, type Superposition } from "$utils";
 
-type Props = {
-  tagSearchQuery: string;
-  selectItem: (tag: Tag) => void;
-};
+const tagSearchable = new Searchable(100);
+const debounce = new Debounce();
 
-let { tagSearchQuery = $bindable(), selectItem }: Props = $props();
+const SET_KEY = Symbol("SET");
+const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
 
-let tagsSearchList: Tag[] = $state([]);
-let showDropdown = $state(false);
+let tagSearchQuery = $state("");
+const knownTags = new Map<Tag["id"], Tag>();
 
-// Function to handle when user selects an item
-function handleFocus() {
-  showDropdown = true;
-}
+let list = $state<DropDownListItem[]>([
+  {
+    dataText: "Hello",
+    key: "key1",
+    text: "Some text 1",
+    disabled: true,
+    selected: false,
+  },
+  {
+    dataText: "Hello",
+    key: "key2",
+    text: "Some text 2",
+    selected: true,
+  },
+]);
 
-function handleBlur() {
-  // Delay dropdown close to allow click on item
-  setTimeout(() => (showDropdown = false), 200);
-}
+async function autocomplete(query: string) {
+  const errorJson = await fetchJson<Superposition<{}, Tag[]>>(
+    "/api/tags",
+    {
+      method: "POST",
+      body: JSON.stringify({ search: query }),
+      headers: {
+        "content-type": "application/json",
+      },
+    },
+  );
 
-function closeDropdown() {
-  showDropdown = false;
+  if (!errorJson.success) {
+    console.error(errorJson.error);
+    return;
+  }
+
+  if (!errorJson.data.success) {
+    console.error(errorJson.data.error);
+    return;
+  }
+
+  let tags = errorJson.data.data;
+  list = tags.map(v => {
+    return {
+      dataText: v.title,
+      text: v.title,
+      key: v.id,
+      selected: selectedTags.hasKey(v.id),
+    } as DropDownListItem;
+  });
+
+  tags.forEach(v => knownTags.set(v.id, v));
 }
 
 async function searchTags() {
-  let data = await fetch("/tags", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ tagName: tagSearchQuery }),
-  }).then(d => d.json()) as Tag[];
+  if (tagSearchQuery.trim().length === 0) {
+    return;
+  }
 
-  tagsSearchList = data;
+  debounce.debounceAsync(autocomplete)(tagSearchQuery);
 }
 
-function preventSubmit(event: KeyboardEvent) {
-  if (event.key === "Enter") {
-    event.preventDefault();
+function onTagSelect(selectedItem: DropDownListItem) {
+  const tag = knownTags.get(selectedItem.key);
+  if (!tag) return;
+
+  if (selectedItem.selected) {
+    selectedTags.add(tag);
+  } else {
+    selectedTags.deleteByKey(tag.id);
   }
 }
 </script>
 
-<div id="tag-search-container" class="relative">
+<div
+  id="tag-search-container"
+  class="relative"
+  onfocusout={tagSearchable.onFocusLoss}
+>
   <div class="flex">
     <input
-      class="input input-bordered grow"
+      class="h-12 p-2 rounded-sm border border-solid border-base-content grow rounded-r-none border-r-0"
       placeholder="Search tags"
       id="tag-search"
       type="search"
       autocomplete="off"
       bind:value={tagSearchQuery}
       oninput={searchTags}
-      onfocus={handleFocus}
-      onblur={handleBlur}
-      onkeydown={preventSubmit}
+      onfocus={tagSearchable.onFocus}
     />
-    <button class="btn" type="button">Search Tag</button>
-  </div>
-  {#if showDropdown && tagsSearchList.length > 0}
-    <div
-      id="tag-search-list"
-      class="border-solid border-2 grid grid-cols-1 absolute w-full bg-neutral"
+    <Dropdown
+      searchable={tagSearchable}
+      multiple
+      onSelect={onTagSelect}
+      bind:list
+    />
+
+    <button
+      class="bg-secondary text-secondary-content px-4 border border-solid border-base-content border-l-0"
+      type="button"
+      onclick={searchTags}
     >
-      {#each tagsSearchList as tag (tag.id)}
-        <div
-          class="cursor-pointer p-2"
-          tabindex="0"
-          data-tag-id={tag.id}
-          data-tag-title={tag.title}
-          role="button"
-          onclick={() => {
-            selectItem(tag);
-            closeDropdown();
-          }}
-          onkeypress={() => {
-            selectItem(tag);
-            closeDropdown();
-          }}
-        >
-          {tag.title}
-        </div>
-      {/each}
-    </div>
-  {:else if showDropdown && tagsSearchList.length === 0}
-    <div>
-      No tag found
-    </div>
-  {/if}
+      Search Tag
+    </button>
+  </div>
 </div>
 
 <style>

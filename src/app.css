@@ -65,6 +65,7 @@
   --color-error-content: rgb(18, 1, 3);
 
   --color-surface: var(--color-base-100);
+  --color-surface-content: var(--color-base-content);
   --color-default: var(--color-base-200);
 
   /* --color-primary-50: rgb(249, 220, 226);

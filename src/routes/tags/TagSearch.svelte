@@ -18,7 +18,6 @@ async function onFormSubmit(
   let parsed = validateSearchSchema(formEntries);
 
   if (!parsed.success) {
-    // response = parsed;
     console.error(parsed);
     return;
   }
@@ -42,8 +41,6 @@ async function onFormSubmit(
   }
 
   if (errorJson.data.success) {
-    // response = errorJson.data;
-    // list = errorJson.data.data;
     onSearch(errorJson.data.data);
   }
 }
