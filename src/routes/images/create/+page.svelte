@@ -2,8 +2,8 @@
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import TagSearch from "$components/TagSearch.svelte";
+import { validateCreateSchema } from "$features/images/models/create";
 import { X } from "$icons";
-import { validateCreateSchema } from "$lib/models/images";
 import { getToaster } from "$lib/toaster.svelte";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";

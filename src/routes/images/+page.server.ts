@@ -1,5 +1,5 @@
-import { createImage } from "$lib/backend/images";
-import { validateCreateSchema } from "$lib/models/images";
+import { createImage } from "$api/images";
+import { validateCreateSchema } from "$features/images/models/create";
 import type { Superposition } from "$utils";
 import { fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";

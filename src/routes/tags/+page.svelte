@@ -1,10 +1,10 @@
 <script lang="ts">
 import { Edit, Trash } from "$icons";
-import type { Tag } from "$lib/models/tags";
-import CreateTagDialog from "./CreateTagDialog.svelte";
-import DeleteTagDialog from "./DeleteTagDialog.svelte";
-import TagSearch from "./TagSearch.svelte";
-import UpdateTagDialog from "./UpdateTagDialog.svelte";
+import type { Tag } from "$type/tags";
+import CreateTagDialog from "./components/CreateTagDialog.svelte";
+import DeleteTagDialog from "./components/DeleteTagDialog.svelte";
+import TagSearch from "./components/TagSearch.svelte";
+import UpdateTagDialog from "./components/UpdateTagDialog.svelte";
 
 let selectedTag = $state<Tag>();
 let list = $state<Tag[]>();

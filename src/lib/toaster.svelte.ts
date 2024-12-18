@@ -1,9 +1,8 @@
-import { uuidv4 } from "$lib";
-import type { Toast, ToastType } from "$lib/types";
-import { clamp } from "$utils";
+import { DEFAULT_TOAST_DURATION_TIME } from "$constants";
+import type { Toast, ToastType } from "$type";
+import { clamp, uuidv4 } from "$utils/helpers";
 import { getContext, onDestroy, setContext } from "svelte";
 
-const DEFAULT_TOAST_DURATION_TIME = 5000; // in milliseconds
 type Hover = "pause" | "pause-all" | null;
 export class Toaster {
   private _toasts = $state<Toast[]>([]);

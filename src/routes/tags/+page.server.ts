@@ -1,7 +1,9 @@
-import { createTag, deleteTag, updateTag } from "$lib/backend/tags";
-import { type Tag, validateCreateSchema, validateUpdateSchema } from "$lib/models/tags";
-import { type Uuid, UuidSchema } from "$types";
+import { createTag, deleteTag, updateTag } from "$api/tags";
+import { validateCreateSchema } from "$features/tags/models/create";
+import { validateUpdateSchema } from "$features/tags/models/update";
+import type { Tag } from "$type/tags";
 import { type Superposition } from "$utils";
+import { type Uuid, UuidSchema } from "$utils/uuid";
 import { fail } from "@sveltejs/kit";
 import { safeParse } from "valibot";
 import type { Actions } from "./$types";

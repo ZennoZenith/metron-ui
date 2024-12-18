@@ -1,5 +1,5 @@
 <script lang="ts">
-import ColorTest from "$lib/components/colors-test.svelte";
+import ColorTest from "$components/colors-test.svelte";
 </script>
 
 <ColorTest />

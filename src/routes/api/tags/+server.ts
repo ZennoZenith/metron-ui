@@ -1,5 +1,5 @@
-import { searchTagByQueryTitle } from "$lib/backend/tags";
-import { validateSearchSchema } from "$lib/models/tags";
+import { searchTagByQueryTitle } from "$api/tags";
+import { validateSearchSchema } from "$features/tags/models/search";
 import { catchError, type Superposition } from "$utils";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
