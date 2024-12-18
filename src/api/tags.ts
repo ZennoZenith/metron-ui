@@ -1,6 +1,8 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/tags/models/create";
 import type { UpdateSchema } from "$features/tags/models/update";
+import { FetchError } from "$lib/error";
+import { Err, Ok } from "$lib/superposition";
 import type { Tag } from "$type/tags";
 import { fetchJson } from "$utils";
 import type { Uuid } from "$utils/uuid";
@@ -14,7 +16,12 @@ export async function createTag(tag: CreateSchema) {
     body: JSON.stringify(tag),
   });
 
-  return errorOrJson;
+  // return errorOrJson;
+  if (errorOrJson.success) {
+    return Ok(errorOrJson.data);
+  }
+  // return Err(errorOrJson.error);
+  return Err(new FetchError(errorOrJson.error));
 }
 
 export async function updateTag(tag: UpdateSchema) {

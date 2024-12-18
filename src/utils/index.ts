@@ -1,6 +1,6 @@
 import { NO_CONTENT } from "$utils/http-codes";
 
-export type FormDataValidationError = Record<string, [string, ...string[]] | undefined>;
+export type FormDataValidationError = Record<string, readonly [string, ...string[]] | undefined>;
 export type FormError<E extends FormDataValidationError> = {
   type: "VALIDATION";
   messages: [string, ...string[]];

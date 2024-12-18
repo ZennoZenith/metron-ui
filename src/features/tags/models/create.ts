@@ -1,4 +1,6 @@
-import type { FormDataValidationError, Superposition } from "$utils";
+import { ValidationError } from "$lib/error";
+import { Err, Ok } from "$lib/superposition";
+import { BAD_REQUEST } from "$utils/http-codes";
 import {
   flatten,
   type InferOutput,
@@ -27,26 +29,14 @@ export const createSchema = pipe(
 );
 export type CreateSchema = InferOutput<typeof createSchema>;
 
-export interface ValidationError extends FormDataValidationError {
-  title?: [string, ...string[]];
-}
-export function validateCreateSchema(data: unknown): Superposition<ValidationError, CreateSchema> {
+export function validateCreateSchema(data: unknown) {
   const d = safeParse(createSchema, data);
+
   if (d.success) {
-    return { success: true, data: d.output };
+    return Ok(d.output);
   }
 
-  const issues = flatten<typeof createSchema>(d.issues)["nested"];
+  const issues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
-  return {
-    success: false,
-    httpCode: 400,
-    error: {
-      type: "VALIDATION",
-      messages: ["Validation error"],
-      data: {
-        ...issues,
-      },
-    },
-  };
+  return Err(new ValidationError({ httpCode: BAD_REQUEST, issues }).error);
 }

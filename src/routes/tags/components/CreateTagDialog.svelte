@@ -2,14 +2,12 @@
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import { flyAndScale } from "$components/melt/utils/index";
-import {
-  validateCreateSchema,
-  type ValidationError,
-} from "$features/tags/models/create";
+import { validateCreateSchema } from "$features/tags/models/create";
 import { X } from "$icons";
+import type { ErrorObject } from "$lib/error";
+import { isErr } from "$lib/superposition";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$type/tags";
-import type { Superposition } from "$utils";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";
@@ -31,7 +29,8 @@ const {
 
 const toaster = getToaster();
 
-let response = $state<Superposition<ValidationError, Tag>>();
+let successResponse = $state<Tag>();
+let failureResopnse = $state<ErrorObject>();
 
 const submitTag: SubmitFunction = (
   { formData, formElement, cancel },
@@ -39,8 +38,9 @@ const submitTag: SubmitFunction = (
   const formEntries = Object.fromEntries(formData.entries());
   let parsed = validateCreateSchema(formEntries);
 
-  if (!parsed.success) {
-    response = parsed;
+  if (isErr(parsed)) {
+    failureResopnse = parsed.err;
+    console.error(parsed);
     toaster.error("Invalid form data");
     cancel();
     return;
@@ -55,17 +55,15 @@ const submitTag: SubmitFunction = (
         break;
       case "success":
         formElement.reset();
-        response = result.data;
+        successResponse = result.data;
         toaster.success(
-          `Tag created with name ${
-            result.data?.data.title ?? title.toString()
-          }`,
+          `Tag created with name ${result.data?.title ?? title.toString()}`,
         );
         open.set(false);
         break;
       case "failure":
-        response = result.data;
-        toaster.error(result.data?.error.messages[0] ?? "");
+        failureResopnse = result.data;
+        toaster.error(result.data?.message ?? "");
         break;
     }
     // await update();
@@ -120,16 +118,17 @@ const submitTag: SubmitFunction = (
             placeholder="Tag title"
             value=""
           />
-          {#if response?.success === false && response.error.type === "VALIDATION"
-    && response.error.data.title}
+          {#if successResponse?.success === false
+    && successResponse.error.type === "VALIDATION"
+    && successResponse.error.data.title}
             <div class="text-error">
-              {response.error.data.title[0]}
+              {successResponse.error.data.title[0]}
             </div>
           {/if}
         </fieldset>
-        {#if response?.success === false}
+        {#if successResponse?.success === false}
           <div class="text-error">
-            {response.error.messages[0]}
+            {successResponse.error.messages[0]}
           </div>
         {/if}
         <div class="mt-6 flex justify-end gap-4">
