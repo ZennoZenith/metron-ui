@@ -81,21 +81,11 @@ export async function fetchEmpty(
     };
   }
   const errorText = await catchError<string>(errorRes[1].text());
-  const errorJson = catchErrorSync<ApiError>(JSON.stringify, errorText[1]);
+  const contentType = errorRes[1].headers.get("Content-Type");
+  // if (contentType === "application/json") // do something with json
 
-  console.error("Error Json");
-  console.error(errorJson[0]);
-  console.error(errorJson[1]);
-  console.error("Error Res");
   console.error(errorRes[1]);
 
-  if (errorJson[0] === undefined && errorRes[1].status !== HTTP_NO_CONTENT && "error" in errorJson[1]) {
-    return {
-      success: false,
-      httpCode: errorJson[1].httpCode,
-      error: { type: "GENERIC", messages: [errorJson[1].error] },
-    };
-  }
   return {
     success: false,
     httpCode: errorRes[1].status,

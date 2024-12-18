@@ -64,7 +64,6 @@ const submitImage: SubmitFunction = (
   const formEntries = Object.fromEntries(formData.entries());
   let parsed = validateCreateSchema(formEntries);
 
-  console.log(parsed);
   if (!parsed.success) {
     toaster.error("Invalid form data");
     cancel();
