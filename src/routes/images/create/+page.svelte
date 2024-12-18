@@ -1,16 +1,19 @@
 <script lang="ts">
-// import { applyAction, enhance } from "$app/forms";
-// import { invalidateAll } from "$app/navigation";
+import { applyAction, enhance } from "$app/forms";
+import { invalidateAll } from "$app/navigation";
 import TagSearch from "$components/TagSearch.svelte";
 import { X } from "$icons";
+import { validateCreateSchema } from "$lib/models/images";
+import { getToaster } from "$lib/toaster.svelte";
 import { fade } from "svelte/transition";
-// import { getToaster } from "$lib/toaster.svelte";
-// import type { ActionData, SubmitFunction } from "./$types";
+import type { SubmitFunction } from "../$types";
 
-// const toaster = getToaster();
-// let { form }: { form: ActionData } = $props();
+let tagSearchRef = $state<TagSearch>();
+const toaster = getToaster();
 let imageInputElement = $state<HTMLInputElement>();
 let imagePreviewElement = $state<HTMLImageElement>();
+let imageType = $state("");
+
 let hasImage = $state(false);
 
 function previewImage(event: Event) {
@@ -28,6 +31,7 @@ function previewImage(event: Event) {
     const imageSrc = URL.createObjectURL(imageFiles[0]);
     imagePreviewElement.src = imageSrc;
     imagePreviewElement.removeAttribute("hidden");
+    imageType = imageFiles[0].type;
     hasImage = true;
   } else {
     imagePreviewElement.removeAttribute("src");
@@ -47,53 +51,55 @@ function removeImage() {
   hasImage = false;
 }
 
-// const submitImage: SubmitFunction = (
-//   { formData, cancel },
-// ) => {
-//   const { title } = Object.fromEntries(formData);
-//   if (title.toString().length < 1) {
-//     toaster.error("Title is empty");
-//     cancel();
-//   }
+const submitImage: SubmitFunction = (
+  { formData, cancel },
+) => {
+  if (formData.get("description")?.toString() === "") {
+    formData.delete("description");
+  }
+  if (formData.get("tags")?.toString() === "") {
+    formData.delete("tags");
+  }
 
-//   return async ({ result }) => {
-//     let message = "";
-//     switch (result.type) {
-//       case "redirect":
-//         break;
-//       case "error":
-//         console.error(result);
-//         toaster.error(JSON.stringify(result.error), "Internal server error");
-//         break;
-//       case "success":
-//         formElement?.reset();
-//         removeImage();
-//         toaster.success("Image saved");
-//         break;
-//       case "failure":
-//         message = result.data?.error.title?.message ?? "";
-//         toaster.error(message);
-//         break;
-//     }
-//     await applyAction(result);
-//     await invalidateAll();
-//     titleInput?.focus();
-//   };
-// };
+  const formEntries = Object.fromEntries(formData.entries());
+  let parsed = validateCreateSchema(formEntries);
 
-// function resetError(key: "title") {
-//   if (form?.error?.hasOwnProperty(key)) {
-//     form.error[key] = undefined;
-//   }
-// }
+  console.log(parsed);
+  if (!parsed.success) {
+    toaster.error("Invalid form data");
+    cancel();
+    return;
+  }
+
+  return async ({ result, formElement }) => {
+    switch (result.type) {
+      case "redirect":
+        break;
+      case "error":
+        toaster.error(JSON.stringify(result.error), "Internal server error");
+        break;
+      case "success":
+        removeImage();
+        toaster.success("Image saved");
+        formElement.reset();
+        tagSearchRef?.clearSelectedTags();
+        break;
+      case "failure":
+        toaster.error(result.data?.error.messages[0] ?? "");
+        break;
+    }
+
+    await applyAction(result);
+    await invalidateAll();
+  };
+};
 </script>
 
-<!-- 
-  use:enhance={submitImage}
- -->
 <form
   id="form"
   method="POST"
+  action="/images?/create"
+  use:enhance={submitImage}
   enctype="multipart/form-data"
   class="mx-auto max-w-(--breakpoint-xl) grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
@@ -123,7 +129,7 @@ function removeImage() {
       ></textarea>
     </label>
 
-    <TagSearch />
+    <TagSearch bind:this={tagSearchRef} />
   </div>
 
   <div class="px-2 py-4 flex flex-col gap-6">
@@ -139,7 +145,7 @@ function removeImage() {
           class="grow"
           type="file"
           id="image"
-          name="file"
+          name="image"
           accept=".png,.jpeg,.svg"
           onchange={previewImage}
           required
@@ -149,7 +155,7 @@ function removeImage() {
             class="mr-1"
             id="remove-file"
             type="button"
-            aria-label="search tag button"
+            aria-label="remove image"
             onclick={removeImage}
             transition:fade={{ duration: 100 }}
           >
@@ -159,6 +165,7 @@ function removeImage() {
       </div>
     </label>
 
+    <input type="hidden" name="imageType" value={imageType}>
     <img
       bind:this={imagePreviewElement}
       id="preview-selected-image"

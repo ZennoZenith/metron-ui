@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+export const HTTP_NO_CONTENT = 204 as const;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -39,6 +41,18 @@ export async function catchError<T, E extends { message: string } = Error>(
   }
 }
 
+export function catchErrorSync<T, E extends { message: string } = Error>(
+  fn: Function,
+  ...args: any[]
+): [undefined, T] | [E] {
+  try {
+    const data = fn(...args);
+    return [undefined, data] as [undefined, T];
+  } catch (error) {
+    return [error] as [E];
+  }
+}
+
 export type ApiError = {
   "httpCode": number;
   "errorCode": number;
@@ -47,11 +61,53 @@ export type ApiError = {
   "href": string;
 };
 
+export async function fetchEmpty(
+  url: RequestInfo | URL,
+  init?: RequestInit,
+): Promise<Superposition<{}, {}>> {
+  const errorRes = await catchError<Response>(fetch(url, init));
+  if (errorRes[0]) {
+    return {
+      success: false,
+      httpCode: 500,
+      error: { type: "GENERIC", messages: [errorRes[0].message] },
+    };
+  }
+
+  if (errorRes[1].status === HTTP_NO_CONTENT) {
+    return {
+      success: true,
+      data: {},
+    };
+  }
+  const errorText = await catchError<string>(errorRes[1].text());
+  const errorJson = catchErrorSync<ApiError>(JSON.stringify, errorText[1]);
+
+  console.error("Error Json");
+  console.error(errorJson[0]);
+  console.error(errorJson[1]);
+  console.error("Error Res");
+  console.error(errorRes[1]);
+
+  if (errorJson[0] === undefined && errorRes[1].status !== HTTP_NO_CONTENT && "error" in errorJson[1]) {
+    return {
+      success: false,
+      httpCode: errorJson[1].httpCode,
+      error: { type: "GENERIC", messages: [errorJson[1].error] },
+    };
+  }
+  return {
+    success: false,
+    httpCode: errorRes[1].status,
+    error: { type: "GENERIC", messages: [errorRes[1].statusText] },
+  };
+}
+
 export async function fetchJson<T extends {}>(
-  input: RequestInfo | URL,
+  url: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Superposition<{}, T>> {
-  const errorRes = await catchError<Response>(fetch(input, init));
+  const errorRes = await catchError<Response>(fetch(url, init));
   if (errorRes[0]) {
     return {
       success: false,

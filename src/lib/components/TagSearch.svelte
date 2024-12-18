@@ -12,26 +12,18 @@ const debounce = new Debounce();
 
 const SET_KEY = Symbol("SET");
 const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
+let tagIdsString = $derived(selectedTags.values.map(v => v.id).join(","));
 
 let tagSearchQuery = $state("");
 const knownTags = new Map<Tag["id"], Tag>();
 let inputRef = $state<HTMLInputElement>();
 
-let list = $state<DropDownListItem[]>([
-  {
-    dataText: "Hello",
-    key: "key1",
-    text: "Some text 1",
-    disabled: true,
-    selected: false,
-  },
-  {
-    dataText: "Hello",
-    key: "key2",
-    text: "Some text 2",
-    selected: true,
-  },
-]);
+let list = $state<DropDownListItem[]>([]);
+
+export function clearSelectedTags() {
+  selectedTags.clear();
+  list.forEach(v => v.selected = false);
+}
 
 async function autocomplete(query: string) {
   const errorJson = await fetchJson<Superposition<{}, Tag[]>>(
@@ -142,9 +134,7 @@ function removeTag(tagId: Tag["id"]) {
   </div>
 </div>
 
-{#each selectedTags.values as tag (tag.id)}
-  <input type="hidden" name="tags" value={tag.id}>
-{/each}
+<input type="hidden" name="tags" value={tagIdsString}>
 
 <style>
 /* .anchor {
