@@ -1,4 +1,4 @@
-import { HTTP_NO_CONTENT } from "$utils/http-codes";
+import { NO_CONTENT } from "$utils/http-codes";
 
 export type FormDataValidationError = Record<string, [string, ...string[]] | undefined>;
 export type FormError<E extends FormDataValidationError> = {
@@ -65,7 +65,7 @@ export async function fetchEmpty(
     };
   }
 
-  if (errorRes[1].status === HTTP_NO_CONTENT) {
+  if (errorRes[1].status === NO_CONTENT) {
     return {
       success: true,
       data: {},
