@@ -8,7 +8,6 @@ import {
 } from "$features/tags/models/create";
 import { X } from "$icons";
 import type { ErrorObject } from "$lib/error";
-import { isErr } from "$lib/superposition";
 import { getToaster } from "$lib/toaster.svelte";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
@@ -49,7 +48,7 @@ const submitTag: SubmitFunction = (
   const formEntries = Object.fromEntries(formData.entries());
   let parsed = validateCreateSchema(formEntries);
 
-  if (isErr(parsed)) {
+  if (parsed.isErr()) {
     setFailureResponse(parsed.err?.error);
     toaster.error("Invalid form data");
     cancel();
@@ -64,7 +63,6 @@ const submitTag: SubmitFunction = (
       case "error":
         toaster.error(result.error.message ?? "Internal Server Error");
         break;
-        console.error(parsed);
       case "success":
         formElement.reset();
         // successResponse = result.data;

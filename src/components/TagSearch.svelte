@@ -1,9 +1,9 @@
 <script lang="ts">
 import Dropdown from "$components/Dropdown.svelte";
+import { searchTag } from "$features/tags/api/client";
 import { X } from "$icons";
 import type { DropDownListItem } from "$type";
 import type { Tag } from "$type/tags";
-import { fetchJson, type Superposition } from "$utils";
 import { Debounce } from "$utils/debounce";
 import { Searchable } from "$utils/searchable.svelte";
 import { setMySet } from "$utils/set.svelte";
@@ -27,28 +27,14 @@ export function clearSelectedTags() {
 }
 
 async function autocomplete(query: string) {
-  const errorJson = await fetchJson<Superposition<{}, Tag[]>>(
-    "/api/tags",
-    {
-      method: "POST",
-      body: JSON.stringify({ search: query }),
-      headers: {
-        "content-type": "application/json",
-      },
-    },
-  );
+  const maybeTags = await searchTag({ search: query });
 
-  if (!errorJson.success) {
-    console.error(errorJson.error);
+  if (maybeTags.err) {
+    console.error(maybeTags.err);
     return;
   }
 
-  if (!errorJson.data.success) {
-    console.error(errorJson.data.error);
-    return;
-  }
-
-  let tags = errorJson.data.data;
+  let tags = maybeTags.unwrap();
   list = tags.map(v => {
     return {
       dataText: v.title,

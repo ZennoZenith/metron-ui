@@ -1,3 +1,5 @@
+import { ValidationError } from "$lib/error";
+import { Err, Ok } from "$lib/superposition";
 import { UuidSchema } from "$utils/uuid";
 import {
   custom,
@@ -56,30 +58,16 @@ const createSchema = pipe(
   ),
 );
 export type CreateSchema = InferOutput<typeof createSchema>;
-export interface ValidationError extends FormDataValidationError {
-  imageType?: [string, ...string[]];
-  title?: [string, ...string[]];
-  description?: [string, ...string[]];
-  image?: [string, ...string[]];
-  tags?: [string, ...string[]];
-}
-export function validateCreateSchema(data: unknown): Superposition<ValidationError, CreateSchema> {
+export type CreateIssues = ReturnType<typeof flatten<typeof createSchema>>["nested"];
+
+export function validateCreateSchema(data: unknown) {
   const d = safeParse(createSchema, data);
+
   if (d.success) {
-    return { success: true, data: d.output as CreateSchema };
+    return Ok(d.output);
   }
 
-  const issues = flatten<typeof createSchema>(d.issues);
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
-  return {
-    success: false,
-    httpCode: 400,
-    error: {
-      type: "VALIDATION",
-      messages: ["Validation error"],
-      data: {
-        ...issues.nested,
-      },
-    },
-  };
+  return Err(new ValidationError(issues));
 }

@@ -1,9 +1,13 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
-import { invalidateAll } from "$app/navigation";
+import { goto, invalidateAll } from "$app/navigation";
 import TagSearch from "$components/TagSearch.svelte";
-import { validateCreateSchema } from "$features/images/models/create";
+import {
+  type CreateIssues,
+  validateCreateSchema,
+} from "$features/images/models/create";
 import { X } from "$icons";
+import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";
@@ -13,8 +17,21 @@ const toaster = getToaster();
 let imageInputElement = $state<HTMLInputElement>();
 let imagePreviewElement = $state<HTMLImageElement>();
 let imageType = $state("");
-
 let hasImage = $state(false);
+let failureResopnse = $state<CreateIssues & { message?: string }>();
+
+function setFailureResponse(error?: ErrorObject) {
+  if (error?.type === "validation-error") {
+    failureResopnse = {
+      ...error.extra,
+      message: error?.message,
+    };
+  } else {
+    failureResopnse = {
+      message: error?.message,
+    };
+  }
+}
 
 function previewImage(event: Event) {
   if (!imagePreviewElement) return;
@@ -64,7 +81,8 @@ const submitImage: SubmitFunction = (
   const formEntries = Object.fromEntries(formData.entries());
   let parsed = validateCreateSchema(formEntries);
 
-  if (!parsed.success) {
+  if (parsed.isErr()) {
+    setFailureResponse(parsed.err?.error);
     toaster.error("Invalid form data");
     cancel();
     return;
@@ -73,18 +91,20 @@ const submitImage: SubmitFunction = (
   return async ({ result, formElement }) => {
     switch (result.type) {
       case "redirect":
+        goto(result.location);
         break;
       case "error":
-        toaster.error(JSON.stringify(result.error), "Internal server error");
+        toaster.error(result.error.message ?? "Internal Server Error");
         break;
       case "success":
-        removeImage();
-        toaster.success("Image saved");
         formElement.reset();
+        removeImage();
         tagSearchRef?.clearSelectedTags();
+        toaster.success("Image saved");
         break;
       case "failure":
-        toaster.error(result.data?.error.messages[0] ?? "");
+        setFailureResponse(result.data);
+        toaster.error(result.data?.message ?? "");
         break;
     }
 
@@ -114,6 +134,11 @@ const submitImage: SubmitFunction = (
         name="title"
         required
       ></textarea>
+      {#if failureResopnse?.title}
+        <div class="text-error">
+          {failureResopnse.title[0]}
+        </div>
+      {/if}
     </label>
 
     <label class="">
@@ -126,9 +151,19 @@ const submitImage: SubmitFunction = (
         placeholder=""
         name="description"
       ></textarea>
+      {#if failureResopnse?.description}
+        <div class="text-error">
+          {failureResopnse.description[0]}
+        </div>
+      {/if}
     </label>
 
     <TagSearch bind:this={tagSearchRef} />
+    {#if failureResopnse?.tags}
+      <div class="text-error">
+        {failureResopnse.tags[0]}
+      </div>
+    {/if}
   </div>
 
   <div class="px-2 py-4 flex flex-col gap-6">
@@ -162,6 +197,11 @@ const submitImage: SubmitFunction = (
           </button>
         {/if}
       </div>
+      {#if failureResopnse?.image}
+        <div class="text-error">
+          {failureResopnse.image[0]}
+        </div>
+      {/if}
     </label>
 
     <input type="hidden" name="imageType" value={imageType}>

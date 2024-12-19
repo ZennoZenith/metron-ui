@@ -1,23 +1,33 @@
-import { createImage } from "$api/images";
+import { createImage } from "$features/images/api/server";
 import { validateCreateSchema } from "$features/images/models/create";
-import type { Superposition } from "$utils";
-import { fail } from "@sveltejs/kit";
+import type { ErrorObject } from "$lib/error";
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
+import { error, fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
+
+const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { message });
 
 export const actions = {
   create: async ({ request }) => {
     const formData = await request.formData();
     const formEntries = Object.fromEntries(formData.entries());
     const reqData = validateCreateSchema(formEntries);
-    if (!reqData.success) {
-      return fail(400, reqData satisfies Superposition);
+    if (reqData.isErr()) {
+      return fail(BAD_REQUEST, reqData.unwrapErr(errorHandleFn).error as ErrorObject);
+    }
+    const data = await createImage(reqData.unwrap(errorHandleFn));
+
+    if (data.isErr()) {
+      return fail(
+        BAD_REQUEST,
+        data.unwrapErr(errorHandleFn).error as ErrorObject,
+      );
     }
 
-    const data = await createImage(reqData.data);
-
-    if (!data.success) {
-      return fail(data.httpCode, data satisfies Superposition);
-    }
-    return data satisfies Superposition<{}, {}>;
+    /**
+     * Code below is commented because for some reason when returning empty object correct return type is not set
+     */
+    // return data.unwrap(errorHandleFn);
+    return { success: true };
   },
 } satisfies Actions;

@@ -4,11 +4,11 @@ import { validateUpdateSchema } from "$features/tags/models/update";
 import { type ErrorObject, ValidationError } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
 import { type Uuid, UuidSchema } from "$utils/uuid";
-import { error, fail, redirect } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import { flatten, safeParse } from "valibot";
 import type { Actions } from "./$types";
 
-const errorHandleFn = (message: string) => error(500, { message });
+const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { message });
 
 export const actions = {
   create: async ({ request }) => {

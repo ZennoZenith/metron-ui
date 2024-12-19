@@ -20,6 +20,7 @@ async function onFormSubmit(
 
   if (maybeTags.err) {
     console.error(maybeTags.err);
+    return;
   }
   if (maybeTags.isOk()) {
     onSearch(maybeTags.unwrap());
