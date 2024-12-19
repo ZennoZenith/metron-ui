@@ -1,4 +1,3 @@
-import type { FormDataValidationError, Superposition } from "$utils";
 import { UuidSchema } from "$utils/uuid";
 import {
   custom,
@@ -19,11 +18,6 @@ import {
   trim,
   union,
 } from "valibot";
-
-export type Tag = {
-  id: string;
-  title: string;
-};
 
 const createSchema = pipe(
   object(

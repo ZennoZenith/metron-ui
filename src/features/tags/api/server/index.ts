@@ -1,6 +1,6 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/tags/models/create";
-import { type Tag, validateSchema } from "$features/tags/models/self";
+import { type Tag, validateSchema, validateSchemaArray } from "$features/tags/models/self";
 import type { UpdateSchema } from "$features/tags/models/update";
 import { ApiError, FetchError, JsonDeserializeError, ParseError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
@@ -45,7 +45,16 @@ export async function updateTag(tag: UpdateSchema) {
     body: JSON.stringify({ title: tag.title }),
   });
 
-  return errorOrJson;
+  if (errorOrJson.err) {
+    return errorOrJson as Result<never, typeof errorOrJson.err>;
+  }
+
+  const maybeParseJson = validateSchema(errorOrJson.unwrap());
+  if (maybeParseJson.err) {
+    return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
+  }
+
+  return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
 }
 
 /**
@@ -56,7 +65,16 @@ export async function deleteTag(id: Uuid) {
     method: "DELETE",
   });
 
-  return errorOrJson;
+  if (errorOrJson.err) {
+    return errorOrJson as Result<never, typeof errorOrJson.err>;
+  }
+
+  const maybeParseJson = validateSchema(errorOrJson.unwrap());
+  if (maybeParseJson.err) {
+    return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
+  }
+
+  return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
 }
 
 /**
@@ -67,6 +85,14 @@ export async function searchTagByQueryTitle(query: string) {
   url.searchParams.append("tagName", query);
   let errorOrJson = await fetchJson(url);
 
-  // Ok type: Tag[]
-  return errorOrJson;
+  if (errorOrJson.err) {
+    return errorOrJson as Result<never, typeof errorOrJson.err>;
+  }
+
+  const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
+  if (maybeParseJson.err) {
+    return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
+  }
+
+  return Ok(maybeParseJson.unwrap()) as Result<Tag[], never>;
 }

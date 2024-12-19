@@ -51,7 +51,7 @@ const deleteTag: SubmitFunction = (
   return async ({ result }) => {
     switch (result.type) {
       case "error":
-        toaster.error(result.error);
+        toaster.error(result.error.message ?? "Internal Server Error");
         break;
       case "success":
         formElement.reset();

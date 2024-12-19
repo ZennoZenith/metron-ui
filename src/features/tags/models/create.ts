@@ -27,6 +27,7 @@ export const createSchema = pipe(
   ),
 );
 export type CreateSchema = InferOutput<typeof createSchema>;
+export type CreateIssues = ReturnType<typeof flatten<typeof createSchema>>["nested"];
 
 export function validateCreateSchema(data: unknown) {
   const d = safeParse(createSchema, data);
@@ -35,7 +36,7 @@ export function validateCreateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
   return Err(new ValidationError(issues));
 }

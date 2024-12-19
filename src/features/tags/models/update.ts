@@ -13,6 +13,7 @@ const updateSchema = pipe(
 );
 
 export type UpdateSchema = InferOutput<typeof updateSchema>;
+export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];
 
 export function validateUpdateSchema(data: unknown) {
   const d = safeParse(updateSchema, data);
@@ -20,7 +21,7 @@ export function validateUpdateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
+  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues).error);
+  return Err(new ValidationError(issues));
 }

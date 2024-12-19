@@ -19,6 +19,8 @@ const schemaArray = array(schema, "invalid 'Tag' array");
 
 export type Tag = InferOutput<typeof schema>;
 export type TagArray = InferOutput<typeof schemaArray>;
+export type TagIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
+export type TagArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);
@@ -27,7 +29,7 @@ export function validateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues = flatten<typeof schema>(d.issues)["nested"] ?? {};
+  const issues: TagIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
 
   return Err(new ValidationError(issues));
 }
@@ -39,7 +41,7 @@ export function validateSchemaArray(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
+  const issues: TagArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
 
   return Err(new ValidationError(issues));
 }

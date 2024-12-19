@@ -12,6 +12,7 @@ const searchSchema = pipe(
     },
   ),
 );
+export type SearchIssues = ReturnType<typeof flatten<typeof searchSchema>>["nested"];
 
 export function validateSearchSchema(data: unknown) {
   const d = safeParse(searchSchema, data);
@@ -19,7 +20,7 @@ export function validateSearchSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
+  const issues: SearchIssues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
 
   return Err(new ValidationError(issues));
 }
