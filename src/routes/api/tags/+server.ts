@@ -1,35 +1,29 @@
-import { searchTagByQueryTitle } from "$api/tags";
+import { searchTagByQueryTitle } from "$features/tags/api/server";
 import { validateSearchSchema } from "$features/tags/models/search";
-import { catchError, type Superposition } from "$utils";
+import { type ErrorObject, JsonDeserializeError } from "$lib/error";
+import { catchError } from "$utils";
+import { BAD_REQUEST } from "$utils/http-codes";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 export const POST: RequestHandler = async ({ request }) => {
-  const j = await catchError<{ search?: string }>(request.json());
+  const maybeJson = await catchError(request.json());
 
-  if (j[0]) {
-    return json(
-      {
-        success: false,
-        httpCode: 400,
-        error: { type: "GENERIC", messages: ["Invalid JSON"] },
-      } satisfies Superposition,
-      { status: 400 },
-    );
+  if (maybeJson.err) {
+    return json(new JsonDeserializeError().fromError(maybeJson.err).error, { status: BAD_REQUEST });
   }
 
-  const parsed = validateSearchSchema(j[1]);
-
-  if (!parsed.success) {
-    return json(
-      parsed,
-      { status: parsed.httpCode },
-    );
+  const parsed = validateSearchSchema(maybeJson.unwrap());
+  if (parsed.err) {
+    return json(parsed.unwrapErr().error, { status: BAD_REQUEST });
   }
 
-  const search = parsed.data.search;
-
+  const search = parsed.unwrap().search;
   const errorJson = await searchTagByQueryTitle(search);
 
-  return json(errorJson, { status: errorJson.success === false ? errorJson.httpCode : 200 });
+  if (errorJson.err) {
+    json(errorJson.unwrapErr().error as ErrorObject, { status: BAD_REQUEST });
+  }
+
+  return json(errorJson.unwrap(), { status: 200 });
 };

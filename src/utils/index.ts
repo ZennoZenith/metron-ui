@@ -1,118 +1,78 @@
+import { ApiError, FetchError, JsonDeserializeError } from "$lib/error";
+import { Err, Ok, Result } from "$lib/superposition";
 import { NO_CONTENT } from "$utils/http-codes";
 
-export type FormDataValidationError = Record<string, readonly [string, ...string[]] | undefined>;
-export type FormError<E extends FormDataValidationError> = {
-  type: "VALIDATION";
-  messages: [string, ...string[]];
-  data: E;
-};
-
-export type GenericError = {
-  type: "GENERIC";
-  messages: [string, ...string[]];
-};
-
-export type Superposition<T extends FormDataValidationError = {}, U = {}> = {
-  success: false;
-  httpCode: number;
-  error: FormError<T> | GenericError;
-} | {
-  success: true;
-  data: U;
-};
-
-export async function catchError<T, E extends { message: string } = Error>(
+export async function catchError<T, E extends Error>(
   promise: Promise<T>,
-): Promise<[undefined, T] | [E]> {
+): Promise<Result<T, E>> {
   try {
     const data = await promise;
-    return [undefined, data] as [undefined, T];
+    return Ok(data);
   } catch (error) {
-    return [error] as [E];
+    return Err(error as E);
   }
 }
 
-export function catchErrorSync<T, E extends { message: string } = Error>(
-  fn: Function,
+export function catchErrorSync<T, E extends Error>(
+  fn: (...args: any) => T,
   ...args: any[]
-): [undefined, T] | [E] {
+): Result<T, E> {
   try {
     const data = fn(...args);
-    return [undefined, data] as [undefined, T];
+    return Ok(data);
   } catch (error) {
-    return [error] as [E];
+    return Err(error as E);
   }
 }
-
-export type ApiError = {
-  "httpCode": number;
-  "errorCode": number;
-  "title": string;
-  "error": string;
-  "href": string;
-};
 
 export async function fetchEmpty(
   url: RequestInfo | URL,
   init?: RequestInit,
-): Promise<Superposition<{}, {}>> {
-  const errorRes = await catchError<Response>(fetch(url, init));
-  if (errorRes[0]) {
-    return {
-      success: false,
-      httpCode: 500,
-      error: { type: "GENERIC", messages: [errorRes[0].message] },
-    };
+): Promise<Result<{}, FetchError | ApiError>> {
+  const maybeResponse = await catchError(fetch(url, init));
+  if (maybeResponse.err) {
+    return Err(new FetchError().fromError(maybeResponse.err));
   }
 
-  if (errorRes[1].status === NO_CONTENT) {
-    return {
-      success: true,
-      data: {},
-    };
+  const response = maybeResponse.unwrap();
+  if (response.status === NO_CONTENT) {
+    return Ok({});
   }
-  const errorText = await catchError<string>(errorRes[1].text());
-  const contentType = errorRes[1].headers.get("Content-Type");
-  // if (contentType === "application/json") // do something with json
 
-  console.error(errorRes[1]);
-
-  return {
-    success: false,
-    httpCode: errorRes[1].status,
-    error: { type: "GENERIC", messages: [errorRes[1].statusText] },
-  };
+  const text = (await catchError(response.text())).unwrapOr(() => "");
+  // const contentType = response.headers.get("Content-Type");
+  // if (contentType === "application/json") {
+  //   const maybeJson = catchErrorSync(JSON.parse, text).unwrapOr(() => { error: text });
+  //   return Err(new ApiError(maybeJson));
+  // }
+  const maybeJson = catchErrorSync(JSON.parse, text).unwrapOr(() => {
+    return { error: text };
+  });
+  return Err(new ApiError(maybeJson));
 }
 
-export async function fetchJson<T extends {}>(
+/**
+ * Only use with backed api as it tries to convert backend api error to ApiError
+ */
+export async function fetchJson(
   url: RequestInfo | URL,
   init?: RequestInit,
-): Promise<Superposition<{}, T>> {
-  const errorRes = await catchError<Response>(fetch(url, init));
-  if (errorRes[0]) {
-    return {
-      success: false,
-      httpCode: 500,
-      error: { type: "GENERIC", messages: [errorRes[0].message] },
-    };
-  }
-  const errorJson = await catchError<T | ApiError>(errorRes[1].json());
-
-  if (errorJson[0] === undefined && errorRes[1].status > 399 && "error" in errorJson[1]) {
-    return {
-      success: false,
-      httpCode: errorJson[1].httpCode,
-      error: { type: "GENERIC", messages: [errorJson[1].error] },
-    };
+): Promise<Result<Record<string, unknown>, FetchError | ApiError | JsonDeserializeError>> {
+  const maybeResponse = await catchError(fetch(url, init));
+  if (maybeResponse.err) {
+    return Err(new FetchError().fromError(maybeResponse.err));
   }
 
-  if (errorJson[0] === undefined) {
-    return { success: true, data: errorJson[1] as T };
+  const response = maybeResponse.unwrap();
+  const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
+  if (maybeJson.err) {
+    return Err(new JsonDeserializeError().fromError(maybeJson.err));
   }
 
-  return {
-    success: false,
-    httpCode: errorRes[1].status,
-    error: { type: "GENERIC", messages: [errorRes[1].statusText] },
-  };
+  const json = maybeJson.unwrap();
+  if (response.status > 399) {
+    return Err(new ApiError(json));
+  }
+
+  return Ok(json);
 }

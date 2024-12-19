@@ -1,6 +1,5 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { BAD_REQUEST } from "$utils/http-codes";
 import {
   flatten,
   type InferOutput,
@@ -38,5 +37,5 @@ export function validateCreateSchema(data: unknown) {
 
   const issues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError({ httpCode: BAD_REQUEST, issues }).error);
+  return Err(new ValidationError(issues));
 }

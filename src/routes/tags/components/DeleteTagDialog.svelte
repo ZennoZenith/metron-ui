@@ -61,7 +61,7 @@ const deleteTag: SubmitFunction = (
         open.set(false);
         break;
       case "failure":
-        toaster.error(result.data?.error.messages[0] ?? "");
+        toaster.error(result.data?.message ?? "");
         break;
     }
     // await update();

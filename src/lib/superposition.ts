@@ -1,4 +1,4 @@
-export class Result<T, E> {
+export class Result<T, E extends Error> {
   #ok?: T;
   #err?: E;
 
@@ -7,16 +7,22 @@ export class Result<T, E> {
     this.#err = err;
   }
 
-  get obj() {
-    return {
-      ok: this.#ok,
-      err: this.#err,
-    } as const;
+  unwrap() {
+    if (this.#ok === undefined || this.#ok === null) throw new Error("Unwrapping empty result", { cause: this.#err });
+    return this.#ok as NonNullable<T>;
   }
 
-  unwrap() {
-    if (!this.#ok) throw new Error("Unwrapping empty result", { cause: this.#err });
-    return this.#ok;
+  unwrapOr(fn: () => NonNullable<T>) {
+    if (!this.#ok) {
+      return fn();
+    } else {
+      return this.#ok;
+    }
+  }
+
+  unwrapErr() {
+    if (this.#err === undefined || this.#err === null) throw new Error("Unwrapping empty error", { cause: this.#ok });
+    return this.#err as NonNullable<E>;
   }
 
   isOk() {
@@ -40,10 +46,10 @@ export function Ok<T>(ok: T) {
   return new Result<T, never>(ok);
 }
 
-export function Err<E>(err: E) {
+export function Err<E extends Error>(err: E) {
   return new Result<never, E>(undefined, err);
 }
 
-export const isOk = <T, E>(value: Result<T, E>): value is Result<T, never> => value.isOk();
+export const isOk = <T, E extends Error>(value: Result<T, E>): value is Result<T, never> => value.isOk();
 
-export const isErr = <T, E>(value: Result<T, E>): value is Result<never, E> => value.isErr();
+export const isErr = <T, E extends Error>(value: Result<T, E>): value is Result<never, E> => value.isErr();

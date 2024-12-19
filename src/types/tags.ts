@@ -1,1 +1,1 @@
-export type { Tag } from "$features/tags/types.ts";
+export type { Tag } from "$features/tags/models/self";

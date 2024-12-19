@@ -1,5 +1,6 @@
-import type { FormDataValidationError, Superposition } from "$utils";
-import { flatten, type InferOutput, object, pipe, safeParse, string, trim } from "valibot";
+import { ValidationError } from "$lib/error";
+import { Err, Ok } from "$lib/superposition";
+import { flatten, object, pipe, safeParse, string, trim } from "valibot";
 
 const searchSchema = pipe(
   object(
@@ -12,29 +13,13 @@ const searchSchema = pipe(
   ),
 );
 
-type SearchSchemaOutput = InferOutput<typeof searchSchema>;
-
-export interface ValidationSearchError extends FormDataValidationError {
-  search?: [string, ...string[]];
-}
-
-export function validateSearchSchema(data: unknown): Superposition<ValidationSearchError, SearchSchemaOutput> {
+export function validateSearchSchema(data: unknown) {
   const d = safeParse(searchSchema, data);
   if (d.success) {
-    return { success: true, data: d.output };
+    return Ok(d.output);
   }
 
-  const issues = flatten<typeof searchSchema>(d.issues);
+  const issues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
 
-  return {
-    success: false,
-    httpCode: 400,
-    error: {
-      type: "VALIDATION",
-      messages: ["Validation error"],
-      data: {
-        ...issues.nested,
-      },
-    },
-  };
+  return Err(new ValidationError(issues));
 }

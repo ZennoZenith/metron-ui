@@ -2,12 +2,12 @@
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
 import { flyAndScale } from "$components/melt/utils/index";
-import type { ValidationError } from "$features/tags/models/create";
 import { validateUpdateSchema } from "$features/tags/models/update";
 import { X } from "$icons";
+import type { ErrorObject } from "$lib/error";
+import { isErr } from "$lib/superposition";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$type/tags";
-import type { Superposition } from "$utils";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";
@@ -35,7 +35,8 @@ export function openDialog() {
   open.set(true);
 }
 
-let response = $state<Superposition<ValidationError, Tag>>();
+let successResponse = $state<Tag>();
+let failureResopnse = $state<ErrorObject>();
 
 const updateTag: SubmitFunction = (
   { formData, formElement, cancel },
@@ -43,8 +44,9 @@ const updateTag: SubmitFunction = (
   const formEntries = Object.fromEntries(formData.entries());
   let parsed = validateUpdateSchema(formEntries);
 
-  if (!parsed.success) {
-    response = parsed;
+  if (isErr(parsed)) {
+    failureResopnse = parsed.err;
+    console.error(parsed);
     toaster.error("Invalid form data");
     cancel();
     return;
@@ -57,15 +59,15 @@ const updateTag: SubmitFunction = (
         break;
       case "success":
         formElement.reset();
-        response = result.data;
+        successResponse = result.data;
         toaster.success(
           "Tag updated",
         );
         open.set(false);
         break;
       case "failure":
-        response = result.data;
-        toaster.error(result.data?.error.messages[0] ?? "");
+        failureResopnse = result.data;
+        toaster.error(result.data?.message ?? "");
         break;
     }
     // await update();

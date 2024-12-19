@@ -39,7 +39,7 @@ const submitTag: SubmitFunction = (
   let parsed = validateCreateSchema(formEntries);
 
   if (isErr(parsed)) {
-    failureResopnse = parsed.err;
+    failureResopnse = parsed.err?.error;
     console.error(parsed);
     toaster.error("Invalid form data");
     cancel();
@@ -118,11 +118,11 @@ const submitTag: SubmitFunction = (
             placeholder="Tag title"
             value=""
           />
-          {#if successResponse?.success === false
-    && successResponse.error.type === "VALIDATION"
-    && successResponse.error.data.title}
+          {#if failureResopnse
+    && failureResopnse.type === "validation-error"
+    && failureResopnse.extra?.title}
             <div class="text-error">
-              {successResponse.error.data.title[0]}
+              {failureResopnse.extra.title?.[0]}
             </div>
           {/if}
         </fieldset>

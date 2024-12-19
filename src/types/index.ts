@@ -16,10 +16,11 @@ export type Toast = {
 };
 
 export type InternalApiError = {
-  [key: string]: {
-    message: string;
-    [key: string]: any;
-  };
+  "httpCode": number;
+  "errorCode": number;
+  "title": string;
+  "error": string;
+  "href": string;
 };
 
 export type DropDownListItem = {

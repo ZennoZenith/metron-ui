@@ -1,4 +1,5 @@
-import type { FormDataValidationError, Superposition } from "$utils";
+import { ValidationError } from "$lib/error";
+import { Err, Ok } from "$lib/superposition";
 import { flatten, type InferOutput, object, pipe, safeParse, string, uuid } from "valibot";
 import { createSchema } from "./create";
 
@@ -12,28 +13,14 @@ const updateSchema = pipe(
 );
 
 export type UpdateSchema = InferOutput<typeof updateSchema>;
-export interface ValidationUpdateError extends FormDataValidationError {
-  id?: [string, ...string[]];
-  title?: [string, ...string[]];
-}
 
-export function validateUpdateSchema(data: unknown): Superposition<ValidationUpdateError, UpdateSchema> {
+export function validateUpdateSchema(data: unknown) {
   const d = safeParse(updateSchema, data);
   if (d.success) {
-    return { success: true, data: d.output };
+    return Ok(d.output);
   }
 
-  const issues = flatten<typeof updateSchema>(d.issues);
+  const issues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
 
-  return {
-    success: false,
-    httpCode: 400,
-    error: {
-      type: "VALIDATION",
-      messages: ["Validation error"],
-      data: {
-        ...issues.nested,
-      },
-    },
-  };
+  return Err(new ValidationError(issues).error);
 }

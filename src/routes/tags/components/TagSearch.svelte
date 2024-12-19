@@ -1,7 +1,6 @@
 <script lang="ts">
-import { validateSearchSchema } from "$features/tags/models/search";
+import { searchTag } from "$features/tags/api/client";
 import type { Tag } from "$type/tags";
-import { fetchJson, type Superposition } from "$utils";
 import { onMount } from "svelte";
 
 type Props = { onSearch: (list: Tag[]) => void; loadListOnLoad?: boolean };
@@ -16,33 +15,14 @@ async function onFormSubmit(
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
-  let parsed = validateSearchSchema(formEntries);
 
-  if (!parsed.success) {
-    console.error(parsed);
-    return;
+  const maybeTags = await searchTag(formEntries);
+
+  if (maybeTags.err) {
+    console.error(maybeTags.err);
   }
-
-  let search = parsed.data;
-
-  const errorJson = await fetchJson<Superposition<{}, Tag[]>>(
-    "/api/tags",
-    {
-      method: "POST",
-      body: JSON.stringify(search),
-      headers: {
-        "content-type": "application/json",
-      },
-    },
-  );
-
-  if (!errorJson.success) {
-    console.error(errorJson.error);
-    return;
-  }
-
-  if (errorJson.data.success) {
-    onSearch(errorJson.data.data);
+  if (maybeTags.isOk()) {
+    onSearch(maybeTags.unwrap());
   }
 }
 
