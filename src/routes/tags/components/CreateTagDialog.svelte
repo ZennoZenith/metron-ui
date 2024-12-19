@@ -1,6 +1,6 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
-import { invalidateAll } from "$app/navigation";
+import { goto, invalidateAll } from "$app/navigation";
 import { flyAndScale } from "$components/melt/utils/index";
 import { validateCreateSchema } from "$features/tags/models/create";
 import { X } from "$icons";
@@ -40,7 +40,6 @@ const submitTag: SubmitFunction = (
 
   if (isErr(parsed)) {
     failureResopnse = parsed.err?.error;
-    console.error(parsed);
     toaster.error("Invalid form data");
     cancel();
     return;
@@ -49,9 +48,11 @@ const submitTag: SubmitFunction = (
   return async ({ result }) => {
     switch (result.type) {
       case "redirect":
+        goto(result.location);
         break;
       case "error":
-        toaster.error(result.error);
+        toaster.error(result.error.message ?? "Internal Server Error");
+        console.error(result);
         break;
       case "success":
         formElement.reset();

@@ -7,8 +7,14 @@ export class Result<T, E extends Error> {
     this.#err = err;
   }
 
-  unwrap() {
-    if (this.#ok === undefined || this.#ok === null) throw new Error("Unwrapping empty result", { cause: this.#err });
+  unwrap(errorFn?: (message: string) => void) {
+    if (this.#ok === undefined || this.#ok === null) {
+      if (errorFn) {
+        errorFn("Unwrapping empty result");
+      } else {
+        throw new Error("Unwrapping empty result", { cause: this.#err });
+      }
+    }
     return this.#ok as NonNullable<T>;
   }
 
@@ -20,8 +26,15 @@ export class Result<T, E extends Error> {
     }
   }
 
-  unwrapErr() {
-    if (this.#err === undefined || this.#err === null) throw new Error("Unwrapping empty error", { cause: this.#ok });
+  unwrapErr(errorFn?: (message: string) => void) {
+    if (this.#err === undefined || this.#err === null) {
+      if (errorFn) {
+        errorFn("Unwrapping empty error");
+      } else {
+        throw new Error("Unwrapping empty error", { cause: this.#ok });
+      }
+    }
+
     return this.#err as NonNullable<E>;
   }
 

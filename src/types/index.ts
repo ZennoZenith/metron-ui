@@ -1,3 +1,5 @@
+import type { POSSIBLE_HTTP_CODE } from "$utils/http-codes";
+
 export type ToastType = "INFO" | "SUCCESS" | "WARNING" | "ERROR";
 
 export type Toast = {
@@ -16,7 +18,7 @@ export type Toast = {
 };
 
 export type InternalApiError = {
-  "httpCode": number;
+  "httpCode": POSSIBLE_HTTP_CODE;
   "errorCode": number;
   "title": string;
   "error": string;
