@@ -8,6 +8,7 @@ const errorType = [
   "json-deserialize-error",
   "api-error",
   "parse-error",
+  "api-model-error",
 ] as const;
 
 export type ErrorType = typeof errorType[number];
@@ -172,10 +173,20 @@ export class ApiError extends CustomError {
 }
 
 /**
+ * DEPRECATED use ApiModelError instead
  * Parse error shoud only thrown when backend and frontend schema are out of sync
  */
 export class ParseError extends CustomError {
   constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
     super("parse-error", extra, messages ?? ["Api Error"]);
+  }
+}
+
+/**
+ * Parse error shoud only thrown when api backend and svelte backend schema are out of sync
+ */
+export class ApiModelError extends CustomError {
+  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
+    super("api-model-error", extra, messages ?? ["Api Model Error"]);
   }
 }

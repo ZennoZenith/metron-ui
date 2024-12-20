@@ -1,5 +1,5 @@
-import { searchTagByQueryTitle } from "$features/tags/api/server";
-import { validateSearchSchema } from "$features/tags/models/search";
+import { searchImagesByQueryTitle } from "$features/images/api/server";
+import { validateSearchSchema } from "$features/images/models/search";
 import { type ErrorObject, JsonDeserializeError } from "$lib/error";
 import { catchError } from "$utils";
 import { BAD_REQUEST } from "$utils/http-codes";
@@ -19,11 +19,11 @@ export const POST: RequestHandler = async ({ request }) => {
   }
 
   const search = parsed.unwrap().search;
-  const errorJson = await searchTagByQueryTitle(search);
+  const errorOrJson = await searchImagesByQueryTitle(search);
 
-  if (errorJson.err) {
-    return json(errorJson.unwrapErr().error as ErrorObject, { status: BAD_REQUEST });
+  if (errorOrJson.err) {
+    return json(errorOrJson.unwrapErr().error as ErrorObject, { status: BAD_REQUEST });
   }
 
-  return json(errorJson.unwrap(), { status: 200 });
+  return json(errorOrJson.unwrap(), { status: 200 });
 };

@@ -1,1 +1,1 @@
-in utils.ts `fetchJson` should not have used ApiError type directly
+may be try to move tags and images mode outside of features and into root/models

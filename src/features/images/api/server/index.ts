@@ -1,8 +1,9 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/images/models/create";
-import type { ApiError, FetchError } from "$lib/error";
-import { Ok, type Result } from "$lib/superposition";
-import { fetchEmpty } from "$utils";
+import { type ImageArray, validateSchemaArray } from "$features/images/models/self";
+import { type ApiError, ApiModelError, type FetchError } from "$lib/error";
+import { Err, Ok, type Result } from "$lib/superposition";
+import { fetchEmpty, fetchJson } from "$utils";
 
 /**
  * Call from serverside only
@@ -26,4 +27,24 @@ export async function createImage(
   }
 
   return Ok({}) as Result<{}, never>;
+}
+
+/**
+ * Call from serverside only
+ */
+export async function searchImagesByQueryTitle(query: string) {
+  const url = new URL(`${API_BASE_ROUTE}/images`);
+  url.searchParams.append("search", query);
+  let errorOrJson = await fetchJson(url);
+
+  if (errorOrJson.err) {
+    return errorOrJson as Result<never, typeof errorOrJson.err>;
+  }
+
+  const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
+  if (maybeParseJson.err) {
+    return Err(new ApiModelError(maybeParseJson.unwrapErr().extra));
+  }
+
+  return Ok(maybeParseJson.unwrap()) as Result<ImageArray, never>;
 }
