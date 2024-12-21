@@ -71,10 +71,10 @@ function removeImage() {
 const submitImage: SubmitFunction = (
   { formData, cancel },
 ) => {
-  if (formData.get("description")?.toString() === "") {
+  if (formData.get("description")?.toString().trim() === "") {
     formData.delete("description");
   }
-  if (formData.get("tags")?.toString() === "") {
+  if (formData.get("tags")?.toString().trim() === "") {
     formData.delete("tags");
   }
 

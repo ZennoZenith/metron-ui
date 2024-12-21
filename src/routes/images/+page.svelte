@@ -107,11 +107,5 @@ const submitDeleteImage: SubmitFunction = (
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as image}
     <ImageCard {image} {onClickDelete} />
-    <!-- 
-    <pre>
-{JSON.stringify(image, null, 2)}
-  </pre>
-  <img src={image.fileLocation} alt="">
- -->
   {/each}
 </div>

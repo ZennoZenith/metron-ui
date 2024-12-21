@@ -21,7 +21,7 @@ import {
   union,
 } from "valibot";
 
-const createSchema = pipe(
+export const createSchema = pipe(
   object(
     {
       imageType: union(

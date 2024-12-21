@@ -38,7 +38,7 @@ const { image, onClickDelete = () => {} }: Props = $props();
     <div class="flex-1">{image.description}</div>
     <div>{new Date(image.createdAt).toLocaleString()}</div>
     <div class="flex justify-between">
-      <a href="/images/{image.id}?edit=true">
+      <a href="/images/{image.id}?edit=true" target="_blank">
         <button
           class="flex gap-2 items-center bg-warning text-warning-content rounded-full px-4 py-1"
         >

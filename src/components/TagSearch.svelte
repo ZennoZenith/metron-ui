@@ -8,11 +8,18 @@ import { Debounce } from "$utils/debounce";
 import { Searchable } from "$utils/searchable.svelte";
 import { setMySet } from "$utils/set.svelte";
 
+type Props = {
+  defaultSelectedTags?: Tag[];
+};
+
+const { defaultSelectedTags = [] }: Props = $props();
+
 const tagSearchable = new Searchable(100);
 const debounce = new Debounce();
 
 const SET_KEY = Symbol("SET");
 const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
+defaultSelectedTags.forEach(v => selectedTags.add(v));
 let tagIdsString = $derived(selectedTags.values.map(v => v.id).join(","));
 
 let tagSearchQuery = $state("");
@@ -68,8 +75,6 @@ function onTagSelect(selectedItem: DropDownListItem) {
 }
 
 function removeTag(tagId: Tag["id"]) {
-  console.log(tagId);
-  if (!knownTags.get(tagId)) return;
   selectedTags.deleteByKey(tagId);
 
   const item = list.find(v => v.key === tagId);
