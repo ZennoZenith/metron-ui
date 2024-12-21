@@ -1,11 +1,9 @@
 import { createTag, deleteTag, updateTag } from "$features/tags/api/server";
 import { validateCreateSchema } from "$features/tags/models/create";
 import { validateUpdateSchema } from "$features/tags/models/update";
-import { type ErrorObject, ValidationError } from "$lib/error";
+import { type ErrorObject } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
-import { type Uuid, UuidSchema } from "$utils/uuid";
 import { error, fail } from "@sveltejs/kit";
-import { flatten, safeParse } from "valibot";
 import type { Actions } from "./$types";
 
 const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { message });
@@ -52,18 +50,7 @@ export const actions = {
   delete: async ({ request }) => {
     const formData = await request.formData();
     const { id } = Object.fromEntries(formData.entries());
-    const reqData = safeParse(UuidSchema, id);
-    if (!reqData.success) {
-      return fail(
-        BAD_REQUEST,
-        new ValidationError(
-          flatten<typeof UuidSchema>(reqData.issues)["nested"] ?? {},
-        ).error as ErrorObject,
-      );
-    }
-
-    const tagId = reqData.output as Uuid;
-    const data = await deleteTag(tagId);
+    const data = await deleteTag(id.toString());
 
     if (data.err) {
       return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);

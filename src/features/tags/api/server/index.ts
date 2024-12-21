@@ -2,10 +2,10 @@ import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/tags/models/create";
 import { type Tag, validateSchema, validateSchemaArray } from "$features/tags/models/self";
 import type { UpdateSchema } from "$features/tags/models/update";
-import { ApiError, FetchError, JsonDeserializeError, ParseError } from "$lib/error";
+import { ApiError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { fetchJson } from "$utils";
-import type { Uuid } from "$utils/uuid";
+import { validateUuid } from "$utils/uuid";
 
 /**
  * Call from serverside only
@@ -60,7 +60,12 @@ export async function updateTag(tag: UpdateSchema) {
 /**
  * Call from serverside only
  */
-export async function deleteTag(id: Uuid) {
+export async function deleteTag(id: string) {
+  const isValidUuid = validateUuid(id);
+  if (!isValidUuid) {
+    return Err(new ValidationError({}, ["Invalid tag id:uuid"]));
+  }
+
   let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags/id/${id}`, {
     method: "DELETE",
   });

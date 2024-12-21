@@ -1,4 +1,3 @@
-import { IMAGE_BASE_ROUTE } from "$constants";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import {
@@ -11,7 +10,6 @@ import {
   pipe,
   safeParse,
   string,
-  transform,
   union,
   uuid,
 } from "valibot";
@@ -23,10 +21,7 @@ const schema = pipe(
       title: string("image title should be string"),
       description: nullable(string("description should be string")),
       imageHash: string("image hash should be string"),
-      fileLocation: pipe(
-        string("file location should be string"),
-        transform(v => v.replace("file:///", `${IMAGE_BASE_ROUTE}/`)),
-      ),
+      fileLocation: string("file location should be string"),
       imageType: union(
         [literal("Png"), literal("Jpeg"), literal("Svg")],
         "image type must be Png, Jpg or Svg",

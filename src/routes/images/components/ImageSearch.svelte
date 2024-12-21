@@ -1,12 +1,12 @@
 <script lang="ts">
 import { searchImage } from "$features/images/api/client";
 import { getToaster } from "$lib/toaster.svelte";
-import type { Tag } from "$type/tags";
+import type { Image } from "$type/images";
 import { onMount } from "svelte";
 
 const toaster = getToaster();
 
-type Props = { onSearch: (list: Tag[]) => void; loadListOnLoad?: boolean };
+type Props = { onSearch: (list: Image[]) => void; loadListOnLoad?: boolean };
 let { onSearch, loadListOnLoad = false }: Props = $props();
 
 let formRef = $state<HTMLFormElement>();
@@ -29,7 +29,6 @@ async function onFormSubmit(
   }
   if (maybeImages.isOk()) {
     onSearch(maybeImages.unwrap());
-    console.log(maybeImages.unwrap());
   }
 }
 

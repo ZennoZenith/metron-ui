@@ -1,4 +1,4 @@
-import { createImage } from "$features/images/api/server";
+import { createImage, deleteImage } from "$features/images/api/server";
 import { validateCreateSchema } from "$features/images/models/create";
 import type { ErrorObject } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
@@ -24,10 +24,17 @@ export const actions = {
       );
     }
 
-    /**
-     * Code below is commented because for some reason when returning empty object correct return type is not set
-     */
-    // return data.unwrap(errorHandleFn);
-    return { success: true };
+    return data.unwrap(errorHandleFn);
+  },
+  delete: async ({ request }) => {
+    const formData = await request.formData();
+    const { id } = Object.fromEntries(formData.entries());
+    const data = await deleteImage(id.toString());
+
+    if (data.err) {
+      return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);
+    }
+
+    return data.unwrap(errorHandleFn);
   },
 } satisfies Actions;
