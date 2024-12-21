@@ -82,7 +82,8 @@ const submitDeleteImage: SubmitFunction = (
 <ConformationDialog
   bind:this={conformationDialog}
   title="Delete Image "
-  content="Delete image with title '{imageToBeDeleted?.title}'"
+  content="Are you sure you want to delete image with title "
+  highlight={imageToBeDeleted?.title}
   onResponse={onDeleteResponse}
 />
 

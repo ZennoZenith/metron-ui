@@ -31,7 +31,7 @@ export const actions = {
     const { id } = Object.fromEntries(formData.entries());
     const data = await deleteImage(id.toString());
 
-    if (data.err) {
+    if (data.isErr()) {
       return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);
     }
 
