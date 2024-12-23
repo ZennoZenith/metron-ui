@@ -11,6 +11,7 @@ import {
 import { Edit, Trash, X } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
+import { base64ToFile } from "$utils/imageConversion";
 import { validateUuid } from "$utils/uuid";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
@@ -18,7 +19,6 @@ import type { PageData } from "./$types";
 const toaster = getToaster();
 
 let deleteFormRef = $state<HTMLFormElement>();
-let imageInputRef = $state<HTMLInputElement>();
 let deleteConformationDialog = $state<ConformationDialog>();
 let failureResopnse = $state<UpdateIssues & { message?: string }>();
 
@@ -29,7 +29,7 @@ let useNewImage = $state(false);
 
 const defaultImageSrc = data.imageSrc; // encoded as base64
 const defaultImageType = data.imageType;
-const defaultImagefile = base64ToFile(
+const defaultImageFile = base64ToFile(
   defaultImageSrc,
   "current",
   defaultImageType,
@@ -62,23 +62,12 @@ function setFailureResponse(error?: ErrorObject) {
 }
 
 function updatePreviewImage() {
-  if (!imageInputRef) {
-    return;
-  }
-  const dataTransfer = new DataTransfer();
-
   if (useNewImage) {
     imageSrc = newImageSrc;
     imageType = newImageType;
-    if (newImageFile) {
-      dataTransfer.items.add(newImageFile);
-      imageInputRef.files = dataTransfer.files;
-    }
   } else {
     imageSrc = defaultImageSrc;
     imageType = defaultImageType;
-    dataTransfer.items.add(defaultImagefile);
-    imageInputRef.files = dataTransfer.files;
   }
 }
 function previewImage(
@@ -102,25 +91,6 @@ function previewImage(
     newImageFile = undefined;
   }
   updatePreviewImage();
-}
-
-function base64ToFile(
-  base64: string,
-  fileName = "current.png",
-  mimeType = "image/png",
-) {
-  // Decode Base64 string
-  const binaryString = atob(base64.split(",")[1]); // Remove the data URI prefix
-  const len = binaryString.length;
-  const bytes = new Uint8Array(len);
-
-  for (let i = 0; i < len; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-
-  // Create a Blob and File from the binary data
-  const blob = new Blob([bytes], { type: mimeType });
-  return new File([blob], fileName, { type: mimeType });
 }
 
 const deleteImage: SubmitFunction = (
@@ -167,10 +137,19 @@ const updateImage: SubmitFunction = (
   if (formData.get("tags")?.toString().trim() === "") {
     formData.delete("tags");
   }
+  if (useNewImage && newImageFile) {
+    formData.set(
+      "image",
+      new Blob([newImageFile], { type: newImageFile.type }),
+    );
+  } else if (useNewImage === false) {
+    formData.set(
+      "image",
+      new Blob([defaultImageFile], { type: defaultImageFile.type }),
+    );
+  }
 
   const formEntries = Object.fromEntries(formData.entries());
-
-  console.log(formEntries);
 
   let parsed = validateUpdateSchema(formEntries);
 
@@ -193,6 +172,7 @@ const updateImage: SubmitFunction = (
       case "success":
         formElement.reset();
         toaster.success("Image saved");
+        setTimeout(() => window.location.replace(`/images/${image.id}`), 3000);
         break;
       case "failure":
         setFailureResponse(result.data);
@@ -346,11 +326,9 @@ const updateImage: SubmitFunction = (
         class="flex gap-2 rounded border border-solid border-base-content items-center"
       >
         <input
-          bind:this={imageInputRef}
           class="grow"
           type="file"
           id="image"
-          name="image"
           onchange={previewImage}
           accept=".png,.jpeg,.svg"
           required
