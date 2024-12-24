@@ -1,6 +1,6 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
-import { goto, invalidateAll } from "$app/navigation";
+import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { Switch } from "$components/melt";
 import TagSearch from "$components/TagSearch.svelte";
@@ -13,12 +13,14 @@ import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { base64ToFile } from "$utils/imageConversion";
 import { validateUuid } from "$utils/uuid";
+import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
 
 const toaster = getToaster();
 
 let deleteFormRef = $state<HTMLFormElement>();
+let imageInputElement = $state<HTMLInputElement>();
 let deleteConformationDialog = $state<ConformationDialog>();
 let failureResopnse = $state<UpdateIssues & { message?: string }>();
 
@@ -93,6 +95,17 @@ function previewImage(
   updatePreviewImage();
 }
 
+function removeImage() {
+  console.log("remove image");
+  newImageSrc = "";
+  newImageType = "";
+  newImageFile = undefined;
+  updatePreviewImage();
+  if (imageInputElement) {
+    imageInputElement.value = "";
+  }
+}
+
 const deleteImage: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
@@ -100,7 +113,7 @@ const deleteImage: SubmitFunction = (
   const isValidUuid = validateUuid(id.toString());
 
   if (!isValidUuid) {
-    toaster.error("Invalid tag id:uuid");
+    toaster.error("Invalid image id:uuid");
     cancel();
     return;
   }
@@ -161,7 +174,7 @@ const updateImage: SubmitFunction = (
     return;
   }
 
-  return async ({ result, formElement }) => {
+  return async ({ result }) => {
     switch (result.type) {
       case "redirect":
         goto(result.location);
@@ -170,9 +183,8 @@ const updateImage: SubmitFunction = (
         toaster.error(result.error.message ?? "Internal Server Error");
         break;
       case "success":
-        formElement.reset();
         toaster.success("Image saved");
-        setTimeout(() => window.location.replace(`/images/${image.id}`), 3000);
+        setTimeout(() => window.location.replace(`/images/${image.id}`), 5000);
         break;
       case "failure":
         setFailureResponse(result.data);
@@ -181,7 +193,6 @@ const updateImage: SubmitFunction = (
     }
 
     await applyAction(result);
-    await invalidateAll();
   };
 };
 </script>
@@ -195,7 +206,7 @@ const updateImage: SubmitFunction = (
 <form
   bind:this={deleteFormRef}
   method="POST"
-  action="/images/?/delete"
+  action="/images?/delete"
   use:enhance={deleteImage}
   hidden
   class="absolute w-0 h-0 overflow-hidden"
@@ -294,9 +305,9 @@ const updateImage: SubmitFunction = (
       >
         {#each image.tags as tag}
           <span
-            class="bg-info text-info-content font-semibold pl-3 pr-1 rounded-full flex items-center gap-1"
+            class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
           >
-            {tag.title} <X class="text-error h-5" />
+            {tag.title}
           </span>
         {/each}
       </div>
@@ -326,6 +337,7 @@ const updateImage: SubmitFunction = (
         class="flex gap-2 rounded border border-solid border-base-content items-center"
       >
         <input
+          bind:this={imageInputElement}
           class="grow"
           type="file"
           id="image"
@@ -334,14 +346,18 @@ const updateImage: SubmitFunction = (
           required
           disabled={!edit || !useNewImage}
         />
-        <button
-          class="mr-1"
-          id="remove-file"
-          type="button"
-          aria-label="remove image"
-        >
-          <X />
-        </button>
+        {#if newImageSrc !== ""}
+          <button
+            class="mx-1"
+            id="remove-file"
+            type="button"
+            aria-label="remove image"
+            onclick={removeImage}
+            transition:fade={{ duration: 100 }}
+          >
+            <X />
+          </button>
+        {/if}
       </div>
       {#if failureResopnse?.image}
         <div class="text-error">

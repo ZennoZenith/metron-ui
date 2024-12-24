@@ -38,7 +38,7 @@ const submitDeleteImage: SubmitFunction = (
   const isValidUuid = validateUuid(id.toString());
 
   if (!isValidUuid) {
-    toaster.error("Invalid tag id:uuid");
+    toaster.error("Invalid image id:uuid");
     cancel();
     return;
   }

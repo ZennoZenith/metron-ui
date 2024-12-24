@@ -46,17 +46,17 @@ function selectDropdownItem(
     class="anchored flex flex-col z-10"
     style={`position-anchor: ${anchorName};`}
    -->
-  <div class="w-full flex flex-col z-10">
+  <div class="w-full flex flex-col">
     {#if list.length === 0}
       <div
-        class="bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap"
+        class="bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap z-10"
       >
         No result found
       </div>
     {/if}
     {#each list as item (item.key)}
       <button
-        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} px-3 overflow-hidden flex items-center h-10 whitespace-nowrap"
+        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} px-3 overflow-hidden flex items-center h-10 z-10"
         type="button"
         data-key={item.key}
         data-data-text={item.dataText}

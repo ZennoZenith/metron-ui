@@ -50,7 +50,6 @@ onMount(() => {
       id="name"
       name="search"
       placeholder="Search image"
-      value="co"
     />
     <button
       type="submit"
