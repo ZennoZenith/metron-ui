@@ -23,7 +23,10 @@ export async function createEquation(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(equation),
+    body: JSON.stringify({
+      ...equation,
+      tags: equation.tags?.split(",") ?? null,
+    }),
   });
 
   if (errorOrJson.err) {
@@ -49,7 +52,10 @@ export async function updateEquation(
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(equation),
+    body: JSON.stringify({
+      ...equation,
+      tags: equation.tags?.split(",") ?? null,
+    }),
   });
 
   if (errorOrJson.err) {

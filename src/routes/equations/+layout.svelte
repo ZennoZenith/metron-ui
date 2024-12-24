@@ -3,7 +3,7 @@ let { children } = $props();
 </script>
 
 <svelte:head>
-  <title>Image form</title>
+  <title>Equation form</title>
 </svelte:head>
 
 <main class="px-2 pt-10">
