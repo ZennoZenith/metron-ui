@@ -1,9 +1,9 @@
 <script lang="ts">
 import { applyAction, enhance } from "$app/forms";
 import { invalidateAll } from "$app/navigation";
-import TagSearch from "$lib/components/TagSearch.svelte";
+import TagSearch from "$components/TagSearch.svelte";
 import { getToaster } from "$lib/toaster.svelte";
-import type { Tag } from "$lib/types";
+import type { Tag } from "$type/tags";
 import type { ActionData, SubmitFunction } from "./$types";
 
 const toaster = getToaster();
@@ -11,8 +11,7 @@ let { form }: { form: ActionData } = $props();
 let selectedTags: Tag[] = $state([]);
 let formElement = $state<HTMLFormElement>();
 let titleInput = $state<HTMLInputElement>();
-let tagSearchQuery: string = $state("");
-let hasImage = $state(false);
+let tagSearchRef = $state<TagSearch>();
 
 function selectTag(tag: Tag) {
   if (selectedTags.findIndex(value => value.id === tag.id) !== -1) {
@@ -135,10 +134,7 @@ function resetError(key: "title") {
       </div>
     {/if}
 
-    <TagSearch
-      bind:tagSearchQuery
-      selectItem={selectTag}
-    />
+    <TagSearch bind:this={tagSearchRef} />
   </div>
 
   <div class="px-2 py-4 flex flex-col gap-6">
