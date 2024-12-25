@@ -22,12 +22,12 @@ export type ErrorObject = Readonly<{
   extra: Record<string, unknown>;
 }>;
 
-function stringToNumber(value: any) {
+function stringToNumber(value: unknown) {
   const n = Number(value);
   return isNaN(n) ? null : n;
 }
 
-function constructApiError(err?: any): InternalApiError {
+function constructApiError(err?: unknown): InternalApiError {
   if (typeof err === "object" && err !== null) {
     return {
       error: err?.error?.toString() ?? "-1",

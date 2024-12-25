@@ -61,12 +61,12 @@ class MySet<T extends object, K extends keyof T> {
 // const SET_KEY = Symbol("TOAST");
 
 export function setMySet<T extends object, K extends keyof T>(
-  symbol: Symbol,
+  symbol: symbol,
   key: K,
   list?: T[],
 ) {
   return setContext(symbol, new MySet<T, K>(key, list));
 }
-export function getMySet(symbol: Symbol) {
+export function getMySet(symbol: symbol) {
   return getContext<ReturnType<typeof setMySet>>(symbol);
 }

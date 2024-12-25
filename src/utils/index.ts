@@ -13,10 +13,12 @@ export async function catchError<T, E extends Error>(
   }
 }
 
-export function catchErrorSync<T, E extends Error>(
-  fn: (...args: any) => T,
-  ...args: any[]
-): Result<T, E> {
+// Disabled because of any type
+// eslint-disable-next-line
+export function catchErrorSync<TArgs extends any[], TReturn, E extends Error>(
+  fn: (...args: TArgs) => TReturn,
+  ...args: TArgs
+): Result<TReturn, E> {
   try {
     const data = fn(...args);
     return Ok(data);
@@ -28,7 +30,7 @@ export function catchErrorSync<T, E extends Error>(
 export async function fetchEmpty(
   url: RequestInfo | URL,
   init?: RequestInit,
-): Promise<Result<{}, FetchError | ApiError>> {
+): Promise<Result<0, FetchError | ApiError>> {
   const maybeResponse = await catchError(fetch(url, init));
   if (maybeResponse.err) {
     return Err(new FetchError().fromError(maybeResponse.err));
@@ -36,7 +38,7 @@ export async function fetchEmpty(
 
   const response = maybeResponse.unwrap();
   if (response.status === NO_CONTENT) {
-    return Ok({});
+    return Ok(0);
   }
 
   const text = (await catchError(response.text())).unwrapOr(() => "");

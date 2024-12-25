@@ -7,7 +7,7 @@ import type { PageServerLoad } from "./$types";
 const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { message });
 
 export const load: PageServerLoad = async ({ params, url }) => {
-  let equationId = params.equationId;
+  const equationId = params.equationId;
   const equation = await searchEquationById(equationId);
 
   if (equation.isErr()) {

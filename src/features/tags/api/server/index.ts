@@ -13,7 +13,7 @@ import { validateUuid } from "$utils/uuid";
 export async function createTag(
   tag: CreateSchema,
 ): Promise<Result<Tag, FetchError | ApiError | JsonDeserializeError | ParseError>> {
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -37,7 +37,7 @@ export async function createTag(
  * Call from serverside only
  */
 export async function updateTag(tag: UpdateSchema) {
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags/id/${tag.id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags/id/${tag.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -66,7 +66,7 @@ export async function deleteTag(id: string) {
     return Err(new ValidationError({}, ["Invalid tag id:uuid"]));
   }
 
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags/id/${id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/tags/id/${id}`, {
     method: "DELETE",
   });
 
@@ -88,7 +88,7 @@ export async function deleteTag(id: string) {
 export async function searchTagByQueryTitle(query: string) {
   const url = new URL(`${API_BASE_ROUTE}/tags`);
   url.searchParams.append("tagName", query);
-  let errorOrJson = await fetchJson(url);
+  const errorOrJson = await fetchJson(url);
 
   if (errorOrJson.err) {
     return errorOrJson as Result<never, typeof errorOrJson.err>;

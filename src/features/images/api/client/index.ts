@@ -7,7 +7,7 @@ import { catchError } from "$utils";
 export async function searchImage(
   data: unknown,
 ): Promise<Result<ImageArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-  let parsed = validateSearchSchema(data);
+  const parsed = validateSearchSchema(data);
   if (parsed.err) {
     return parsed;
   }

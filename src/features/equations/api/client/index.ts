@@ -7,7 +7,7 @@ import { catchError } from "$utils";
 export async function searchEquation(
   data: unknown,
 ): Promise<Result<EquationArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-  let parsed = validateSearchSchema(data);
+  const parsed = validateSearchSchema(data);
   if (parsed.err) {
     return parsed;
   }

@@ -18,7 +18,7 @@ import { validateUuid } from "$utils/uuid";
 export async function createEquation(
   equation: CreateSchema,
 ) {
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +47,7 @@ export async function createEquation(
 export async function updateEquation(
   equation: UpdateSchema,
 ) {
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations/id/${equation.id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations/id/${equation.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
@@ -76,7 +76,7 @@ export async function updateEquation(
 export async function searchEquationsByQueryTitle(query: string) {
   const url = new URL(`${API_BASE_ROUTE}/equations`);
   url.searchParams.append("search", query);
-  let errorOrJson = await fetchJson(url);
+  const errorOrJson = await fetchJson(url);
 
   if (errorOrJson.err) {
     return errorOrJson as Result<never, typeof errorOrJson.err>;

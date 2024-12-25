@@ -7,6 +7,8 @@ export class Searchable {
     this.focusLossTimeMs = focusLossTimeMs;
   }
 
+  // Disabled because of unused var type
+  // eslint-disable-next-line
   onFocus = (_event: FocusEvent) => {
     this.showDropdown = true;
   };

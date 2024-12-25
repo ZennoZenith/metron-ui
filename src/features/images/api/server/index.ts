@@ -20,7 +20,7 @@ export async function createImage(
   if (image.description) newFormData.append("description", image.description);
   if (image.tags) newFormData.append("tags", image.tags);
 
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/images`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/images`, {
     method: "POST",
     body: newFormData,
   });
@@ -49,7 +49,7 @@ export async function updateImage(
   if (image.description) newFormData.append("description", image.description);
   if (image.tags) newFormData.append("tags", image.tags);
 
-  let errorOrJson = await fetchJson(`${API_BASE_ROUTE}/images/id/${image.id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/images/id/${image.id}`, {
     method: "PATCH",
     body: newFormData,
   });
@@ -72,7 +72,7 @@ export async function updateImage(
 export async function searchImagesByQueryTitle(query: string) {
   const url = new URL(`${API_BASE_ROUTE}/images`);
   url.searchParams.append("search", query);
-  let errorOrJson = await fetchJson(url);
+  const errorOrJson = await fetchJson(url);
 
   if (errorOrJson.err) {
     return errorOrJson as Result<never, typeof errorOrJson.err>;

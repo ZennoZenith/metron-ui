@@ -9,7 +9,7 @@ import type { PageServerLoad } from "./$types";
 const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { message });
 
 export const load: PageServerLoad = async ({ params, url }) => {
-  let imageId = params.imageId;
+  const imageId = params.imageId;
   const image = await searchImageById(imageId);
 
   if (image.isErr()) {

@@ -4,7 +4,7 @@ import type { ToastType } from "$type";
 
 const toaster = getToaster();
 
-function showToast(toastType: ToastType): any {
+function showToast(toastType: ToastType) {
   switch (toastType) {
     case "INFO":
       toaster.info("Info Message", "Info title");
