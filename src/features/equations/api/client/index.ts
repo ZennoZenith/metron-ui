@@ -1,4 +1,4 @@
-import { validateSearchSchema } from "$features/equations/models/search";
+import { validateSearchSchema } from "$features/equations/schemas/search";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { type EquationArray, validateSchemaArray } from "$schemas/equations/self";

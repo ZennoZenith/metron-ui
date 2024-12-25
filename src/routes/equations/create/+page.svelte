@@ -5,7 +5,7 @@ import TagSearch from "$components/TagSearch.svelte";
 import {
   type CreateIssues,
   validateCreateSchema,
-} from "$features/equations/models/create";
+} from "$features/equations/schemas/create";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import type { SubmitFunction } from "../$types";

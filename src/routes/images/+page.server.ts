@@ -1,6 +1,6 @@
 import { createImage, deleteImage, updateImage } from "$features/images/api/server";
-import { validateCreateSchema } from "$features/images/models/create";
-import { validateUpdateSchema } from "$features/images/models/update";
+import { validateCreateSchema } from "$features/images/schemas/create";
+import { validateUpdateSchema } from "$features/images/schemas/update";
 import type { ErrorObject } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
 import { error, fail } from "@sveltejs/kit";

@@ -1,4 +1,4 @@
-import { validateSearchSchema } from "$features/images/models/search";
+import { validateSearchSchema } from "$features/images/schemas/search";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { type ImageArray, validateSchemaArray } from "$schemas/images/self";

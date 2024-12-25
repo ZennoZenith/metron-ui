@@ -1,5 +1,5 @@
 import { searchTagByQueryTitle } from "$features/tags/api/server";
-import { validateSearchSchema } from "$features/tags/models/search";
+import { validateSearchSchema } from "$features/tags/schemas/search";
 import { type ErrorObject, JsonDeserializeError } from "$lib/error";
 import { catchError } from "$utils";
 import { BAD_REQUEST } from "$utils/http-codes";

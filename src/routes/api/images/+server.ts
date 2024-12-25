@@ -1,5 +1,5 @@
 import { searchImagesByQueryTitle } from "$features/images/api/server";
-import { validateSearchSchema } from "$features/images/models/search";
+import { validateSearchSchema } from "$features/images/schemas/search";
 import { type ErrorObject, JsonDeserializeError } from "$lib/error";
 import { catchError } from "$utils";
 import { BAD_REQUEST } from "$utils/http-codes";

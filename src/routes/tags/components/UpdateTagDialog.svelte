@@ -5,7 +5,7 @@ import { flyAndScale } from "$components/melt/utils/index";
 import {
   type UpdateIssues,
   validateUpdateSchema,
-} from "$features/tags/models/update";
+} from "$features/tags/schemas/update";
 import { X } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { isErr } from "$lib/superposition";

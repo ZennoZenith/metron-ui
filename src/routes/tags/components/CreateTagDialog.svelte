@@ -5,7 +5,7 @@ import { flyAndScale } from "$components/melt/utils/index";
 import {
   type CreateIssues,
   validateCreateSchema,
-} from "$features/tags/models/create";
+} from "$features/tags/schemas/create";
 import { X } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";

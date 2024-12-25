@@ -5,7 +5,7 @@ import TagSearch from "$components/TagSearch.svelte";
 import {
   type CreateIssues,
   validateCreateSchema,
-} from "$features/images/models/create";
+} from "$features/images/schemas/create";
 import { X } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";

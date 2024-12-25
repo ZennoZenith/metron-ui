@@ -6,7 +6,7 @@ import TagSearch from "$components/TagSearch.svelte";
 import {
   type UpdateIssues,
   validateUpdateSchema,
-} from "$features/equations/models/update";
+} from "$features/equations/schemas/update";
 import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";

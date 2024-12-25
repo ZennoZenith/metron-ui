@@ -1,6 +1,6 @@
 import { createTag, deleteTag, updateTag } from "$features/tags/api/server";
-import { validateCreateSchema } from "$features/tags/models/create";
-import { validateUpdateSchema } from "$features/tags/models/update";
+import { validateCreateSchema } from "$features/tags/schemas/create";
+import { validateUpdateSchema } from "$features/tags/schemas/update";
 import { type ErrorObject } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
 import { error, fail } from "@sveltejs/kit";

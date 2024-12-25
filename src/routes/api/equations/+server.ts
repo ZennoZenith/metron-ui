@@ -1,5 +1,5 @@
 import { searchEquationsByQueryTitle } from "$features/equations/api/server";
-import { validateSearchSchema } from "$features/equations/models/search";
+import { validateSearchSchema } from "$features/equations/schemas/search";
 import { type ErrorObject, JsonDeserializeError } from "$lib/error";
 import { catchError } from "$utils";
 import { BAD_REQUEST } from "$utils/http-codes";

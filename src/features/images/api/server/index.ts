@@ -1,6 +1,6 @@
 import { API_BASE_ROUTE } from "$constants";
-import type { CreateSchema } from "$features/images/models/create";
-import type { UpdateSchema } from "$features/images/models/update";
+import type { CreateSchema } from "$features/images/schemas/create";
+import type { UpdateSchema } from "$features/images/schemas/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
 import { type ImageArray, validateSchema, validateSchemaArray } from "$schemas/images/self";

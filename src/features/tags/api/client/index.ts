@@ -1,4 +1,4 @@
-import { validateSearchSchema } from "$features/tags/models/search";
+import { validateSearchSchema } from "$features/tags/schemas/search";
 
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
