@@ -4,8 +4,8 @@ import type { UpdateSchema } from "$features/equations/schemas/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
 import { type Equation, type EquationArray, validateSchema, validateSchemaArray } from "$schemas/equations/self";
+import { validateUuid } from "$schemas/uuid";
 import { fetchJson } from "$utils";
-import { validateUuid } from "$utils/uuid";
 
 /**
  * Call from serverside only

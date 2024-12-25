@@ -1,50 +1,28 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import {
-  array,
-  flatten,
-  type InferOutput,
-  literal,
-  nullable,
-  object,
-  pipe,
-  safeParse,
-  string,
-  union,
-  uuid,
-} from "valibot";
+import { schemaArray as tags } from "$schemas/tags/self";
+import { uuidSchema } from "$schemas/uuid";
+import { array, flatten, type InferOutput, literal, nullable, object, safeParse, string, union } from "valibot";
 
-const schema = pipe(
-  object(
-    {
-      id: pipe(string("image id shoud be string"), uuid("The image id:Uuid is badly formatted.")),
-      title: string("image title should be string"),
-      description: nullable(string("description should be string")),
-      imageHash: string("image hash should be string"),
-      fileLocation: string("file location should be string"),
-      imageType: union(
-        [literal("Png"), literal("Jpeg"), literal("Svg")],
-        "image type must be Png, Jpg or Svg",
-      ),
-      tags: array(
-        object({
-          id: pipe(string("tag id should be string"), uuid("The tag id:Uuid is badly formatted.")),
-          title: string("tag title should be string"),
-        }, "Tag must be of type object {id, title}"),
-        "tags must be array of Tag",
-      ),
-      createdAt: string("created at should be string"),
-      updatedAt: string("updated at should be string"),
-    },
-  ),
+const schema = object(
+  {
+    id: uuidSchema(),
+    title: string("Should be string"),
+    description: nullable(string("Should be string")),
+    imageHash: string("Should be string"),
+    fileLocation: string("Should be string"),
+    imageType: union(
+      [literal("Png"), literal("Jpeg"), literal("Svg")],
+      "image type must be Png, Jpg or Svg",
+    ),
+    tags,
+    createdAt: string("Should be string"),
+    updatedAt: string("Should be string"),
+  },
+  "Should be an object",
 );
 
 const schemaArray = array(schema, "invalid 'Image' array");
-
-export type Image = InferOutput<typeof schema>;
-export type ImageArray = InferOutput<typeof schemaArray>;
-export type ImageIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
-export type ImageArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);
@@ -69,3 +47,8 @@ export function validateSchemaArray(data: unknown) {
 
   return Err(new ValidationError(issues));
 }
+
+export type Image = InferOutput<typeof schema>;
+export type ImageArray = InferOutput<typeof schemaArray>;
+export type ImageIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
+export type ImageArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];

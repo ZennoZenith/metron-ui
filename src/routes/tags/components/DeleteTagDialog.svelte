@@ -4,8 +4,8 @@ import { invalidateAll } from "$app/navigation";
 import { flyAndScale } from "$components/melt/utils/index";
 import { X } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
+import { uuidSchema } from "$schemas/uuid";
 import { type Tag } from "$type/tags";
-import { UuidSchema } from "$utils/uuid";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 import { safeParse } from "valibot";
@@ -40,7 +40,7 @@ const deleteTag: SubmitFunction = (
 ) => {
   const { id } = Object.fromEntries(formData.entries());
 
-  let parsed = safeParse(UuidSchema, id);
+  let parsed = safeParse(uuidSchema(), id);
 
   if (!parsed.success) {
     toaster.error(parsed.issues[0].message);

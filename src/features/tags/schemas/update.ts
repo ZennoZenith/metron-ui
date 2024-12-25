@@ -1,19 +1,16 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { flatten, type InferOutput, object, pipe, safeParse, string, uuid } from "valibot";
+import { uuidSchema } from "$schemas/uuid";
+import { flatten, type InferOutput, object, safeParse } from "valibot";
 import { createSchema } from "./create";
 
-const updateSchema = pipe(
-  object(
-    {
-      id: pipe(string(), uuid("The UUID is badly formatted.")),
-      ...createSchema.entries,
-    },
-  ),
+const updateSchema = object(
+  {
+    id: uuidSchema(),
+    ...createSchema.entries,
+  },
+  "Should be an object",
 );
-
-export type UpdateSchema = InferOutput<typeof updateSchema>;
-export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];
 
 export function validateUpdateSchema(data: unknown) {
   const d = safeParse(updateSchema, data);
@@ -25,3 +22,6 @@ export function validateUpdateSchema(data: unknown) {
 
   return Err(new ValidationError(issues));
 }
+
+export type UpdateSchema = InferOutput<typeof updateSchema>;
+export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];

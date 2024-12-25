@@ -11,8 +11,8 @@ import {
 import { Edit, Trash, X } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
+import { validateUuid } from "$schemas/uuid";
 import { base64ToFile } from "$utils/imageConversion";
-import { validateUuid } from "$utils/uuid";
 import { fade } from "svelte/transition";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";

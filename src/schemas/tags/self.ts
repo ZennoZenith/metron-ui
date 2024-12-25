@@ -1,26 +1,17 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { array, flatten, type InferOutput, nonEmpty, object, pipe, safeParse, string, trim, uuid } from "valibot";
+import { uuidSchema } from "$schemas/uuid";
+import { array, custom, flatten, type InferOutput, object, pipe, safeParse, string } from "valibot";
 
-const schema = pipe(
-  object(
-    {
-      id: pipe(string(), uuid("The UUID is badly formatted.")),
-      title: pipe(
-        string("title should be string"),
-        trim(),
-        nonEmpty("title shoud not be empty"),
-      ),
-    },
-  ),
+export const schema = object(
+  {
+    id: uuidSchema(),
+    title: string("Should be string"),
+  },
+  "Should be an object",
 );
 
-const schemaArray = array(schema, "invalid 'Tag' array");
-
-export type Tag = InferOutput<typeof schema>;
-export type TagArray = InferOutput<typeof schemaArray>;
-export type TagIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
-export type TagArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
+export const schemaArray = array(schema, "invalid 'Tag' array");
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);
@@ -45,3 +36,16 @@ export function validateSchemaArray(data: unknown) {
 
   return Err(new ValidationError(issues));
 }
+
+export const tagsStringSchema = pipe(
+  string("Should be string"),
+  custom<string>(input => {
+    if (typeof input !== "string") return false;
+    return input.split(",").every(v => safeParse(uuidSchema(), v));
+  }, "The UUID is badly formatted."),
+);
+
+export type Tag = InferOutput<typeof schema>;
+export type TagArray = InferOutput<typeof schemaArray>;
+export type TagIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
+export type TagArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];

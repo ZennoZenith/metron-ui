@@ -1,16 +1,13 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { flatten, object, pipe, safeParse, string, trim } from "valibot";
+import { search } from "$schemas";
+import { flatten, object, safeParse } from "valibot";
 
-const searchSchema = pipe(
-  object(
-    {
-      search: pipe(
-        string("search should be string"),
-        trim(),
-      ),
-    },
-  ),
+const searchSchema = object(
+  {
+    search: search(),
+  },
+  "Should be an object",
 );
 export type SearchIssues = ReturnType<typeof flatten<typeof searchSchema>>["nested"];
 

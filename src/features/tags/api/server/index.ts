@@ -4,8 +4,8 @@ import type { UpdateSchema } from "$features/tags/schemas/update";
 import { ApiError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { type Tag, validateSchema, validateSchemaArray } from "$schemas/tags/self";
+import { validateUuid } from "$schemas/uuid";
 import { fetchJson } from "$utils";
-import { validateUuid } from "$utils/uuid";
 
 /**
  * Call from serverside only
