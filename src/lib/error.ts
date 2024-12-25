@@ -28,33 +28,30 @@ function stringToNumber(value: unknown) {
 }
 
 function constructApiError(err?: unknown): InternalApiError {
-  if (typeof err === "object" && err !== null) {
+  if (typeof err !== "object" || err === null) {
     return {
-      error: err?.error?.toString() ?? "-1",
-      errorCode: stringToNumber(err?.errorCode) ?? -1,
-      href: err?.href?.toString() ?? "",
-      httpCode: stringToNumber(err?.errorCode) ?? 418,
-      title: err?.title?.toString() ?? "",
+      error: "-1",
+      errorCode: -1,
+      href: "",
+      httpCode: 418,
+      title: "",
     } satisfies InternalApiError;
   }
+  const obj: Partial<InternalApiError> = {};
+  if ("error" in err) obj.error = err?.error?.toString();
+  if ("errorCode" in err) stringToNumber(err?.errorCode);
+  if ("href" in err) err?.href?.toString();
+  if ("httpCode" in err) stringToNumber(err?.httpCode);
+  if ("title" in err) err?.title?.toString();
+
   return {
-    error: "-1",
-    errorCode: -1,
-    href: "",
-    httpCode: 418,
-    title: "",
+    error: obj.error ?? "-1",
+    errorCode: obj.errorCode ?? -1,
+    href: obj.href ?? "",
+    httpCode: obj.httpCode ?? 418,
+    title: obj.title ?? "",
   } satisfies InternalApiError;
 }
-/*
-    "success": false,
-    "type": "validation-error",
-    "message": "Validation Error",
-    "messages": [
-        "Validation Error"
-    ],
-    "extra": {}
-}
-*/
 
 const errorSchema = pipe(
   object(

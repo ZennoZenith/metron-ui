@@ -1,7 +1,7 @@
 import { validateSearchSchema } from "$features/images/models/search";
-import { type ImageArray, validateSchemaArray } from "$features/images/models/self";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
+import { type ImageArray, validateSchemaArray } from "$schemas/images/self";
 import { catchError } from "$utils";
 
 export async function searchImage(

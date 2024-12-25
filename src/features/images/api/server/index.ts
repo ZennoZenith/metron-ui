@@ -1,9 +1,9 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/images/models/create";
-import { type ImageArray, validateSchema, validateSchemaArray } from "$features/images/models/self";
 import type { UpdateSchema } from "$features/images/models/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
+import { type ImageArray, validateSchema, validateSchemaArray } from "$schemas/images/self";
 import type { Image } from "$type/images";
 import { fetchJson } from "$utils";
 import { validateUuid } from "$utils/uuid";

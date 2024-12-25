@@ -17,6 +17,8 @@ export default {
       "$utils/*": "src/utils/*",
       $api: "src/api",
       "$api/*": "src/api/*",
+      $schemas: "src/schemas",
+      "$schemas/*": "src/schemas/*",
       $constants: "src/constants",
       $type: "src/types",
       $icons: "src/icons",

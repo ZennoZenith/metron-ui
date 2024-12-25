@@ -1,1 +1,1 @@
-export type { Tag } from "$features/tags/models/self";
+export type { Tag } from "$schemas/tags/self";

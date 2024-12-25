@@ -1,1 +1,1 @@
-export type { Equation } from "$features/equations/models/self";
+export type { Equation } from "$schemas/equations/self";

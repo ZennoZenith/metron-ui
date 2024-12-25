@@ -1,14 +1,9 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/equations/models/create";
-import {
-  type Equation,
-  type EquationArray,
-  validateSchema,
-  validateSchemaArray,
-} from "$features/equations/models/self";
 import type { UpdateSchema } from "$features/equations/models/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
+import { type Equation, type EquationArray, validateSchema, validateSchemaArray } from "$schemas/equations/self";
 import { fetchJson } from "$utils";
 import { validateUuid } from "$utils/uuid";
 

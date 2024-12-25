@@ -1,7 +1,8 @@
 import { validateSearchSchema } from "$features/tags/models/search";
-import { type TagArray, validateSchemaArray } from "$features/tags/models/self";
+
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
+import { type TagArray, validateSchemaArray } from "$schemas/tags/self";
 import { catchError } from "$utils";
 
 export async function searchTag(

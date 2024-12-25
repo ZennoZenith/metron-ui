@@ -1,9 +1,9 @@
 import { API_BASE_ROUTE } from "$constants";
 import type { CreateSchema } from "$features/tags/models/create";
-import { type Tag, validateSchema, validateSchemaArray } from "$features/tags/models/self";
 import type { UpdateSchema } from "$features/tags/models/update";
 import { ApiError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
+import { type Tag, validateSchema, validateSchemaArray } from "$schemas/tags/self";
 import { fetchJson } from "$utils";
 import { validateUuid } from "$utils/uuid";
 

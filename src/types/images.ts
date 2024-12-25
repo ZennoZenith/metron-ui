@@ -1,1 +1,1 @@
-export type { Image } from "$features/images/models/self";
+export type { Image } from "$schemas/images/self";
