@@ -235,7 +235,7 @@ const updateImage: SubmitFunction = (
   {#if !edit}
     <button
       class="flex gap-2 items-center bg-error text-error-content rounded-full px-4 py-1"
-      onclick={() => deleteConformationDialog?.openDialog()}
+      onclick={() => deleteConformationDialog?.setOpenState()}
     >
       Delete
       <Trash />

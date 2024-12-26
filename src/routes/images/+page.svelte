@@ -2,13 +2,12 @@
 import { applyAction, enhance } from "$app/forms";
 import { goto, invalidateAll } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
+import { ImageCard, ImageSearch } from "$features/images/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
 import type { Image } from "$type/images";
 import type { SubmitFunction } from "./$types";
-import ImageCard from "./components/ImageCard.svelte";
-import ImageSearch from "./components/ImageSearch.svelte";
 
 let list = $state<Image[]>([]);
 let conformationDialog = $state<ConformationDialog>();
@@ -22,7 +21,7 @@ function onSearch(images: Image[]) {
 
 function onClickDelete(image: Image) {
   imageToBeDeleted = image;
-  conformationDialog?.openDialog();
+  conformationDialog?.setOpenState();
 }
 
 function onDeleteResponse(answer: boolean) {

@@ -1,7 +1,7 @@
-import { createTag, deleteTag, updateTag } from "$features/tags/api/server";
-import { validateCreateSchema } from "$features/tags/schemas/create";
-import { validateUpdateSchema } from "$features/tags/schemas/update";
-import { type ErrorObject } from "$lib/error";
+import { createEquation, deleteEquation, updateEquation } from "$features/equations/api/server";
+import { validateCreateSchema } from "$features/equations/schemas/create";
+import { validateUpdateSchema } from "$features/equations/schemas/update";
+import type { ErrorObject } from "$lib/error";
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from "$utils/http-codes";
 import { error, fail } from "@sveltejs/kit";
 import type { Actions } from "./$types";
@@ -13,14 +13,16 @@ export const actions = {
     const formData = await request.formData();
     const formEntries = Object.fromEntries(formData.entries());
     const reqData = validateCreateSchema(formEntries);
-    if (reqData.err) {
+    if (reqData.isErr()) {
       return fail(BAD_REQUEST, reqData.unwrapErr(errorHandleFn).error as ErrorObject);
     }
+    const data = await createEquation(reqData.unwrap(errorHandleFn));
 
-    const data = await createTag(reqData.unwrap(errorHandleFn));
-
-    if (data.err) {
-      return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);
+    if (data.isErr()) {
+      return fail(
+        BAD_REQUEST,
+        data.unwrapErr(errorHandleFn).error as ErrorObject,
+      );
     }
 
     return data.unwrap(errorHandleFn);
@@ -29,14 +31,16 @@ export const actions = {
     const formData = await request.formData();
     const formEntries = Object.fromEntries(formData.entries());
     const reqData = validateUpdateSchema(formEntries);
-    if (reqData.err) {
+    if (reqData.isErr()) {
       return fail(BAD_REQUEST, reqData.unwrapErr(errorHandleFn).error as ErrorObject);
     }
+    const data = await updateEquation(reqData.unwrap(errorHandleFn));
 
-    const data = await updateTag(reqData.unwrap(errorHandleFn));
-
-    if (data.err) {
-      return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);
+    if (data.isErr()) {
+      return fail(
+        BAD_REQUEST,
+        data.unwrapErr(errorHandleFn).error as ErrorObject,
+      );
     }
 
     return data.unwrap(errorHandleFn);
@@ -44,9 +48,9 @@ export const actions = {
   delete: async ({ request }) => {
     const formData = await request.formData();
     const { id } = Object.fromEntries(formData.entries());
-    const data = await deleteTag(id.toString());
+    const data = await deleteEquation(id.toString());
 
-    if (data.err) {
+    if (data.isErr()) {
       return fail(BAD_REQUEST, data.unwrapErr(errorHandleFn).error as ErrorObject);
     }
 

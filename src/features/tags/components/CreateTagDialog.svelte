@@ -3,22 +3,17 @@ import { flyAndScale } from "$components/melt/utils/index";
 import { X } from "$icons";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
+import type { CreateIssues } from "../schemas/create";
 
 type Props = {
-  title: string;
-  content?: string;
-  highlight?: string;
+  failureResopnse: CreateIssues & { message?: string };
   closeOnYes?: boolean;
-  onResponse?: (answer: boolean) => void;
+  onResponse?: (answer: boolean, title?: string) => void;
 };
 
-const {
-  title: dialogTitle,
-  content: dialogContent = "",
-  highlight = "",
-  closeOnYes = true,
-  onResponse = () => {},
-}: Props = $props();
+const { failureResopnse, closeOnYes = true, onResponse = () => {} }: Props =
+  $props();
+let tagTitle = $state("");
 
 const {
   elements: {
@@ -27,7 +22,6 @@ const {
     title,
     close,
     portalled,
-    description,
   },
   states: { open },
 } = createDialog({
@@ -58,17 +52,28 @@ export function setOpenState(state: boolean = true) {
       use:melt={$content}
     >
       <h2 use:melt={$title} class="m-0 text-lg font-medium">
-        {dialogTitle}
+        Create Tag
       </h2>
 
-      <p use:melt={$description} class="mb-5 mt-2 leading-normal text-zinc-600">
-        {dialogContent}
-        <span class="text-error">
-          {highlight}
-        </span>
-      </p>
-
       <div class="w-full grid grid-cols-1 p-4">
+        <fieldset class="mb-4 flex items-center gap-5">
+          <label class="w-[90px] text-right" for="name"> Title </label>
+          <input
+            class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
+            placeholder="New tag title"
+            bind:value={tagTitle}
+          />
+          {#if failureResopnse?.title}
+            <div class="text-error">
+              {failureResopnse.title[0]}
+            </div>
+          {/if}
+        </fieldset>
+        {#if failureResopnse?.message}
+          <div class="text-error">
+            {failureResopnse.message}
+          </div>
+        {/if}
         <div class="mt-6 flex justify-end gap-4">
           <button
             use:melt={$close}
@@ -79,16 +84,16 @@ export function setOpenState(state: boolean = true) {
             Cancel
           </button>
           <button
-            class="inline-flex h-8 items-center justify-center rounded-sm bg-error px-4 font-medium leading-none text-error-content"
+            class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
             type="submit"
             onclick={() => {
-              onResponse(true);
+              onResponse(true, $state.snapshot(tagTitle));
               if (closeOnYes) {
                 open.set(false);
               }
             }}
           >
-            Delete
+            Save changes
           </button>
         </div>
         <button
@@ -104,3 +109,19 @@ export function setOpenState(state: boolean = true) {
     </div>
   </div>
 {/if}
+
+<style>
+fieldset {
+  display: grid;
+  gap: 0 1em;
+  align-items: center;
+  grid-template-columns: max-content auto;
+  grid-template-rows: 2.5em 1em;
+
+  div {
+    grid-column-start: 2;
+    font-size: smaller;
+    overflow: hidden;
+  }
+}
+</style>

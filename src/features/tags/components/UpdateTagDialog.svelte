@@ -1,21 +1,24 @@
 <script lang="ts">
-import { applyAction, enhance } from "$app/forms";
-import { goto, invalidateAll } from "$app/navigation";
 import { flyAndScale } from "$components/melt/utils/index";
-import {
-  type CreateIssues,
-  validateCreateSchema,
-} from "$features/tags/schemas/create";
 import { X } from "$icons";
-import type { ErrorObject } from "$lib/error";
-import { getToaster } from "$lib/toaster.svelte";
+import type { Tag } from "$type/tags";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
-import type { SubmitFunction } from "../$types";
+import type { UpdateIssues } from "../schemas/update";
+
+type Props = {
+  tag?: Tag;
+  failureResopnse: UpdateIssues & { message?: string };
+  closeOnYes?: boolean;
+  onResponse?: (answer: boolean, newTitle?: string) => void;
+};
+
+const { tag, failureResopnse, closeOnYes = true, onResponse = () => {} }:
+  Props = $props();
+let newTitle = $state("");
 
 const {
   elements: {
-    trigger,
     overlay,
     content,
     title,
@@ -28,68 +31,10 @@ const {
   role: "alertdialog",
 });
 
-const toaster = getToaster();
-
-// let successResponse = $state<Tag>();
-let failureResopnse = $state<CreateIssues & { message?: string }>();
-
-function setFailureResponse(error?: ErrorObject) {
-  failureResopnse = {
-    title: error?.type === "validation-error"
-      ? error.extra?.title as [string, ...string[]]
-      : undefined,
-    message: error?.message,
-  };
+export function setOpenState(state: boolean = true) {
+  open.set(state);
 }
-
-const submitTag: SubmitFunction = (
-  { formData, formElement, cancel },
-) => {
-  const formEntries = Object.fromEntries(formData.entries());
-  let parsed = validateCreateSchema(formEntries);
-
-  if (parsed.isErr()) {
-    setFailureResponse(parsed.err?.error);
-    toaster.error("Invalid form data");
-    cancel();
-    return;
-  }
-
-  return async ({ result }) => {
-    switch (result.type) {
-      case "redirect":
-        goto(result.location);
-        break;
-      case "error":
-        toaster.error(result.error.message ?? "Internal Server Error");
-        break;
-      case "success":
-        formElement.reset();
-        // successResponse = result.data;
-        toaster.success(
-          `Tag created with name ${result.data?.title ?? title.toString()}`,
-        );
-        open.set(false);
-        break;
-      case "failure":
-        setFailureResponse(result.data);
-        toaster.error(result.data?.message ?? "");
-        break;
-    }
-    // await update();
-    await applyAction(result);
-    await invalidateAll();
-  };
-};
 </script>
-
-<button
-  use:melt={$trigger}
-  class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-  type="button"
->
-  Create tag
-</button>
 
 {#if $open}
   <div class="" use:melt={$portalled}>
@@ -109,24 +54,28 @@ const submitTag: SubmitFunction = (
       use:melt={$content}
     >
       <h2 use:melt={$title} class="m-0 text-lg font-medium">
-        Create Tag
+        Update Tag
       </h2>
 
-      <form
-        method="POST"
-        action="?/create"
-        use:enhance={submitTag}
-        id="form"
-        class="w-full grid grid-cols-1 p-4"
-      >
+      <div class="w-full grid grid-cols-1 p-4">
+        <fieldset class="mb-4 flex items-center gap-5">
+          <label class="w-[90px] text-right" for="orignal-title">
+            Orignal Title
+          </label>
+          <input
+            class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
+            placeholder={tag ? tag.title : ""}
+            value={tag ? tag.title : ""}
+            disabled
+            aria-disabled="true"
+          />
+        </fieldset>
         <fieldset class="mb-4 flex items-center gap-5">
           <label class="w-[90px] text-right" for="name"> Title </label>
           <input
             class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-            id="name"
-            name="title"
-            placeholder="Tag title"
-            value=""
+            placeholder="New tag title"
+            bind:value={newTitle}
           />
           {#if failureResopnse?.title}
             <div class="text-error">
@@ -144,12 +93,19 @@ const submitTag: SubmitFunction = (
             use:melt={$close}
             class="inline-flex h-8 items-center justify-center rounded-sm px-4 font-medium leading-none bg-neutral text-neutral-content"
             type="button"
+            onclick={() => onResponse(false)}
           >
             Cancel
           </button>
           <button
             class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
             type="submit"
+            onclick={() => {
+              onResponse(true, $state.snapshot(newTitle));
+              if (closeOnYes) {
+                open.set(false);
+              }
+            }}
           >
             Save changes
           </button>
@@ -159,10 +115,11 @@ const submitTag: SubmitFunction = (
           type="button"
           aria-label="close"
           class="absolute right-4 top-4 inline-flex h-6 w-6 appearance-none items-center justify-center rounded-full p-1 text-magnum-800 hover:bg-magnum-100 focus:shadow-magnum-400"
+          onclick={() => onResponse(false)}
         >
           <X class="size-4" />
         </button>
-      </form>
+      </div>
     </div>
   </div>
 {/if}

@@ -2,8 +2,7 @@
 import { applyAction, enhance } from "$app/forms";
 import { goto, invalidateAll } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
-import EquationCard from "$features/equations/components/EquationCard.svelte";
-import EquationSearch from "$features/equations/components/EquationSearch.svelte";
+import { ConceptCard, ConceptSearch } from "$features/concepts/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
@@ -67,17 +66,17 @@ const submitDeleteEquation: SubmitFunction = (
 };
 </script>
 
-<a href="/equations/create">
+<a href="/concepts/create">
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full mb-4 flex gap-2"
     type="button"
   >
-    Create equation
+    Create concept
     <ArrowRight />
   </button>
 </a>
 
-<EquationSearch {onSearch} loadListOnLoad />
+<ConceptSearch {onSearch} loadListOnLoad />
 <ConformationDialog
   bind:this={conformationDialog}
   title="Delete Equation "
@@ -105,6 +104,6 @@ const submitDeleteEquation: SubmitFunction = (
 
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as equation}
-    <EquationCard {equation} {onClickDelete} />
+    <ConceptCard {equation} {onClickDelete} />
   {/each}
 </div>
