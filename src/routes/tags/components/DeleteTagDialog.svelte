@@ -40,7 +40,7 @@ const deleteTag: SubmitFunction = (
 ) => {
   const { id } = Object.fromEntries(formData.entries());
 
-  let parsed = safeParse(uuidSchema(), id);
+  let parsed = safeParse(uuidSchema, id);
 
   if (!parsed.success) {
     toaster.error(parsed.issues[0].message);

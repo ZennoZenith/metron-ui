@@ -4,9 +4,9 @@ import { schemaArray as tags } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
 import { array, flatten, type InferOutput, literal, nullable, object, safeParse, string, union } from "valibot";
 
-const schema = object(
+export const schema = object(
   {
-    id: uuidSchema(),
+    id: uuidSchema,
     title: string("Should be string"),
     description: nullable(string("Should be string")),
     imageHash: string("Should be string"),
@@ -22,7 +22,7 @@ const schema = object(
   "Should be an object",
 );
 
-const schemaArray = array(schema, "invalid 'Image' array");
+export const schemaArray = array(schema, "invalid 'Image' array");
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);

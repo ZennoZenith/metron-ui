@@ -1,7 +1,7 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content, title } from "$schemas";
-import { tagsStringSchema } from "$schemas/tags/self";
+import { uuidArrayString } from "$schemas/uuid";
 import {
   file,
   flatten,
@@ -22,14 +22,14 @@ export const createSchema = object(
       [literal("image/png"), literal("image/jpeg"), literal("image/svg+xml")],
       "image type must be image/png, image/jpeg or image/svg+xml",
     ),
-    title: title(),
-    description: optional(content()),
+    title,
+    description: optional(content),
     image: pipe(
       file("Please select an image file."),
       mimeType(["image/jpeg", "image/png", "image/svg+xml"], "Please select a JPEG, PNG or SVG file."),
       maxSize(1024 * 1024 * 3, "Please select a file smaller than 3 MB."),
     ),
-    tags: optional(tagsStringSchema),
+    tags: optional(uuidArrayString),
   },
   "Should be an object",
 );

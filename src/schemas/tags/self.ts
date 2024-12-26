@@ -1,11 +1,11 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { uuidSchema } from "$schemas/uuid";
-import { array, custom, flatten, type InferOutput, object, pipe, safeParse, string } from "valibot";
+import { array, flatten, type InferOutput, object, safeParse, string } from "valibot";
 
 export const schema = object(
   {
-    id: uuidSchema(),
+    id: uuidSchema,
     title: string("Should be string"),
   },
   "Should be an object",
@@ -36,14 +36,6 @@ export function validateSchemaArray(data: unknown) {
 
   return Err(new ValidationError(issues));
 }
-
-export const tagsStringSchema = pipe(
-  string("Should be string"),
-  custom<string>(input => {
-    if (typeof input !== "string") return false;
-    return input.split(",").every(v => safeParse(uuidSchema(), v));
-  }, "The UUID is badly formatted."),
-);
 
 export type Tag = InferOutput<typeof schema>;
 export type TagArray = InferOutput<typeof schemaArray>;

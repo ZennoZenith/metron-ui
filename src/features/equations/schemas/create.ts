@@ -1,15 +1,15 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content, title } from "$schemas";
-import { tagsStringSchema } from "$schemas/tags/self";
+import { uuidArrayString } from "$schemas/uuid";
 import { flatten, type InferOutput, object, optional, safeParse } from "valibot";
 
 export const createSchema = object(
   {
-    title: title(),
-    description: optional(content()),
-    content: content(),
-    tags: optional(tagsStringSchema),
+    title,
+    description: optional(content),
+    content,
+    tags: optional(uuidArrayString),
   },
   "Should be an object",
 );

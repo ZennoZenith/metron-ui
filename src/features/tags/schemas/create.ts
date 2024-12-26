@@ -5,7 +5,7 @@ import { flatten, type InferOutput, object, safeParse } from "valibot";
 
 export const createSchema = object(
   {
-    title: title(),
+    title,
   },
   "Should be an object",
 );

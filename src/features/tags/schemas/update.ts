@@ -6,7 +6,7 @@ import { createSchema } from "./create";
 
 const updateSchema = object(
   {
-    id: uuidSchema(),
+    id: uuidSchema,
     ...createSchema.entries,
   },
   "Should be an object",

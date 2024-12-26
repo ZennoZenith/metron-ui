@@ -5,7 +5,7 @@ import { flatten, object, safeParse } from "valibot";
 
 const searchSchema = object(
   {
-    search: search(),
+    search,
   },
   "Should be an object",
 );
