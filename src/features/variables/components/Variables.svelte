@@ -11,6 +11,9 @@ let lastGreatestIndex = 1;
 
 interface Props {
   disableNullable?: boolean;
+  allowedVariableTypes?:
+    | ["image", "equation", "concept", "problem", "string"]
+    | ({} & string[]);
 }
 
 interface Variable {
@@ -30,7 +33,16 @@ const variables = $state<[number, Partial<Variable>][]>([
   }],
 ]);
 
-const { disableNullable = false }: Props = $props();
+const {
+  disableNullable = false,
+  allowedVariableTypes = [
+    "image",
+    "equation",
+    "concept",
+    "problem",
+    "string",
+  ],
+}: Props = $props();
 
 let variableImageSearchRef = $state<VariableSearch>();
 let currentSelectVariableIndex = $state<number>();
@@ -94,7 +106,7 @@ function onImageSelect(searchResult?: SearchResult) {
       >
       <VariableSelect
         defaultValue={variable.typ}
-        allowedVariableTypes={["image", "equation"]}
+        {allowedVariableTypes}
         onChange={({ next }) => {
           variable.typ = next?.value;
           currentSelectVariableIndex = undefined;
@@ -122,13 +134,17 @@ function onImageSelect(searchResult?: SearchResult) {
         >
       {:else if variable.typ !== undefined}
         <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
-          <button class="px-2 flex items-center gap-1 h-full grow">
+          <button
+            class="px-2 flex items-center gap-1 h-full grow"
+            type="button"
+          >
             <IdCard class="text-warning shrink" />
             <div class="grow text-left">
               {variable.defaultValueLabel}
             </div>
           </button>
           <button
+            type="button"
             class="h-full text-success px-2"
             onclick={() => {
               currentSelectVariableIndex = index;
@@ -144,6 +160,7 @@ function onImageSelect(searchResult?: SearchResult) {
       <button
         class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
         onclick={() => removeVariable(index)}
+        type="button"
       >
         <Trash class="text-sm" />
       </button>
@@ -153,6 +170,7 @@ function onImageSelect(searchResult?: SearchResult) {
     <button
       class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
       onclick={addVariable}
+      type="button"
     >
       Add variable <PlusCircled />
     </button>

@@ -6,6 +6,7 @@ import {
   type CreateIssues,
   validateCreateSchema,
 } from "$features/concepts/schemas/create";
+import Variables from "$features/variables/components/Variables.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import type { SubmitFunction } from "../$types";
@@ -141,6 +142,8 @@ const submitEquation: SubmitFunction = (
       {failureResopnse.tags[0]}
     </div>
   {/if}
+
+  <Variables allowedVariableTypes={["image", "equation"]} disableNullable />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

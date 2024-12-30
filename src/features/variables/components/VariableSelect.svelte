@@ -76,6 +76,7 @@ const {
     class="flex h-10 items-center justify-between rounded-lg bg-base-300 text-surface-content hover:bg-base-100 px-3 py-2 shadow transition-opacity hover:opacity-90"
     use:melt={$trigger}
     aria-label="Food"
+    type="button"
   >
     {$selectedLabel || "Select variable type*"} <ChevronDown class="size-5" />
   </button>
