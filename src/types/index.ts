@@ -25,10 +25,11 @@ export type InternalApiError = {
   "href": string;
 };
 
-export type DropDownListItem = {
+export type DropDownListItem<T extends Record<string, unknown> = { nothing: "" }> = {
   key: string;
   text: string;
   dataText: string;
   disabled?: boolean;
   selected: boolean;
+  extra: T;
 };

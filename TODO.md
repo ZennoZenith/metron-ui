@@ -1,1 +1,3 @@
-may be try to move tags and images mode outside of features and into root/models
+move tagsearch component out from components to features
+rename tagsearch to tagselect
+use eslint on svelte files

@@ -1,8 +1,9 @@
+import { browser } from "$app/environment";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function uuidv4() {
-  if (window?.isSecureContext) {
+  if (browser && window?.isSecureContext) {
     return crypto.randomUUID();
   }
 

@@ -4,12 +4,9 @@ import {
   type InferOutput,
   literal,
   maxLength,
-  maxValue,
   minLength,
-  minValue,
   nonEmpty,
   nullable,
-  number,
   object,
   pipe,
   string,
@@ -19,11 +16,6 @@ import {
 
 export const schema = object(
   {
-    id: pipe(
-      number("Should be number"),
-      minValue(1, "Number should be greater than 0"),
-      maxValue(9999, "Number should be less than 10000"),
-    ),
     name: pipe(
       string("Should be string"),
       trim(),
@@ -44,4 +36,5 @@ export const schema = object(
 export const schemaArray = array(schema, "invalid 'Variable' array");
 
 export type Variable = InferOutput<typeof schema>;
+export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableArray = InferOutput<typeof schemaArray>;

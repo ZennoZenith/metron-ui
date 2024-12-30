@@ -176,7 +176,6 @@ const updateEquation: SubmitFunction = (
   method="POST"
   action="/equations?/update"
   use:enhance={updateEquation}
-  enctype="multipart/form-data"
   class="mx-auto max-w-(--breakpoint-xl) grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
   <input type="hidden" name="id" value={equation.id}>

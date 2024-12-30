@@ -319,7 +319,6 @@ const updateImage: SubmitFunction = (
       <div>
         <Switch
           label="Use new image"
-          id="use-current-iamge"
           onChange={state => {
             useNewImage = state;
             updatePreviewImage();

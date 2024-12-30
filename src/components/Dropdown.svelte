@@ -4,7 +4,6 @@ import type { DropDownListItem } from "$type";
 import type { Searchable } from "$utils/searchable.svelte";
 
 type Props = {
-  // anchorName: `--${string}`;
   searchable: Searchable;
   onSelect?: (
     selectedItem: DropDownListItem,
@@ -15,14 +14,12 @@ type Props = {
 };
 
 let {
-  // anchorName,
   searchable,
   onSelect = () => {},
   list = $bindable(),
   multiple = false,
 }: Props = $props();
 
-// $inspect(list);
 function selectDropdownItem(
   event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement },
 ) {
@@ -42,21 +39,17 @@ function selectDropdownItem(
 </script>
 
 {#if searchable.showDropdown}
-  <!-- 
-    class="anchored flex flex-col z-10"
-    style={`position-anchor: ${anchorName};`}
-   -->
-  <div class="w-full flex flex-col">
+  <div class="w-full max-h-60 overflow-y-auto">
     {#if list.length === 0}
       <div
-        class="bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap z-10"
+        class="w-full bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap z-10"
       >
         No result found
       </div>
     {/if}
     {#each list as item (item.key)}
       <button
-        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} px-3 overflow-hidden flex items-center h-10 z-10"
+        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} w-full px-3 overflow-hidden flex items-center h-10 z-10"
         type="button"
         data-key={item.key}
         data-data-text={item.dataText}
@@ -75,12 +68,3 @@ function selectDropdownItem(
     {/each}
   </div>
 {/if}
-
-<style>
-/* .anchored {
-  position: fixed;
-  left: anchor(left);
-  top: calc(anchor(bottom) + 0.25rem);
-  width: anchor-size(width);
-} */
-</style>

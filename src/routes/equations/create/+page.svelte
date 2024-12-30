@@ -80,7 +80,6 @@ const submitEquation: SubmitFunction = (
   method="POST"
   action="/equations?/create"
   use:enhance={submitEquation}
-  enctype="multipart/form-data"
   class="mx-auto max-w-(--breakpoint-xl) grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
 >
   <div class="px-2 py-4 flex flex-col gap-6">

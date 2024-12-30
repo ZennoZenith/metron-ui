@@ -77,13 +77,13 @@ export default ts.config(
               from: ["shared"],
               allow: ["shared"],
             },
-            // {
-            //   from: ["feature"],
-            //   allow: [
-            //     "shared",
-            //     ["feature", { "featureName": "${from.featureName}" }],
-            //   ],
-            // },
+            {
+              from: ["feature"],
+              allow: [
+                "shared",
+                ["feature", { "featureName": "${from.featureName}" }],
+              ],
+            },
             {
               from: ["routes", "neverImport"],
               allow: ["shared", "feature"],

@@ -41,7 +41,7 @@ async function autocomplete(query: string) {
     return;
   }
 
-  let tags = maybeTags.unwrap();
+  const tags = maybeTags.unwrap();
   list = tags.map(v => {
     return {
       dataText: v.title,
@@ -85,7 +85,6 @@ function removeTag(tagId: Tag["id"]) {
 </script>
 
 <div
-  id="tag-search-container"
   class="min-h-fit"
   onfocusout={tagSearchable.onFocusLoss}
 >

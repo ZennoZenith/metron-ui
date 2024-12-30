@@ -13,14 +13,14 @@ export default {
     // See https://kit.svelte.dev/docs/adapters for more information about adapters.
     adapter: adapter(),
     alias: {
+      $type: "src/types",
       $utils: "src/utils",
       "$utils/*": "src/utils/*",
       $api: "src/api",
       "$api/*": "src/api/*",
+      $constants: "src/constants",
       $schemas: "src/schemas",
       "$schemas/*": "src/schemas/*",
-      $constants: "src/constants",
-      $type: "src/types",
       $icons: "src/icons",
       "$icons/*": "src/icons/*",
       $components: "src/components",

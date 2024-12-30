@@ -1,21 +1,29 @@
 <script lang="ts">
-import { cn } from "$utils/helpers";
+import { cn, uuidv4 } from "$utils/helpers";
 import { createSwitch, melt } from "@melt-ui/svelte";
 
 type Props = {
-  label: string;
-  id: string;
+  label?: string;
+  id?: string;
   ariaLabelledby?: string;
   class?: string;
+  name?: string;
+  value?: string;
   disabled?: boolean;
+  required?: boolean;
+  defaultChecked?: boolean;
   onChange?: (state: boolean) => void;
 };
 const {
   class: className = "",
-  id,
+  id = uuidv4(),
   ariaLabelledby,
-  label,
+  label = "",
   disabled = false,
+  defaultChecked = false,
+  name,
+  value,
+  required,
   onChange = () => {},
 }: Props = $props();
 
@@ -24,6 +32,10 @@ const {
   states: { checked },
 } = createSwitch({
   disabled,
+  defaultChecked,
+  name,
+  value,
+  required,
   onCheckedChange: ({ next }) => {
     onChange(next);
     return next;
@@ -37,15 +49,21 @@ export function setState(state: boolean) {
 
 <div class="flex items-center">
   <label
-    class={cn("pr-4 leading-none", className)}
+    class={cn("pr-4 leading-none {disabled ? 'bg-gray-500' : ''}", className)}
     for={id}
   >
-    {label}
+    {#if disabled}
+      <strike>
+        {label}
+      </strike>
+    {:else}
+      {label}
+    {/if}
   </label>
   <button
     {id}
     use:melt={$root}
-    class="relative h-6 cursor-default rounded-full bg-warning transition-colors data-[state=checked]:bg-success"
+    class="relative h-6 cursor-default rounded-full {disabled ? 'bg-gray-500' : 'bg-warning'} transition-colors data-[state=checked]:bg-success"
     aria-labelledby={ariaLabelledby}
   >
     <span class="thumb block rounded-full bg-white transition"></span>

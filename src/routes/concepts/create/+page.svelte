@@ -5,7 +5,7 @@ import TagSearch from "$components/TagSearch.svelte";
 import {
   type CreateIssues,
   validateCreateSchema,
-} from "$features/equations/schemas/create";
+} from "$features/concepts/schemas/create";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import type { SubmitFunction } from "../$types";
@@ -78,73 +78,69 @@ const submitEquation: SubmitFunction = (
 <form
   id="form"
   method="POST"
-  action="/equations?/create"
+  action="/concepts?/create"
   use:enhance={submitEquation}
-  enctype="multipart/form-data"
-  class="mx-auto max-w-(--breakpoint-xl) grid sm:grid-cols-1 xl:grid-cols-2 gap-4"
+  class="mx-auto grid grid-cols-1 gap-4"
 >
-  <div class="px-2 py-4 flex flex-col gap-6">
-    <label class="">
-      <div class="">
-        Title <span class="text-error" aria-label="required"> * </span>
-      </div>
-      <textarea
-        id="title"
-        class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
-        placeholder=""
-        name="title"
-        required
-      ></textarea>
-      {#if failureResopnse?.title}
-        <div class="text-error">
-          {failureResopnse.title[0]}
-        </div>
-      {/if}
-    </label>
-
-    <label class="">
-      <div class="label">
-        Description <span aria-label="optional"></span>
-      </div>
-      <textarea
-        id="description"
-        class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
-        placeholder=""
-        name="description"
-      ></textarea>
-      {#if failureResopnse?.description}
-        <div class="text-error">
-          {failureResopnse.description[0]}
-        </div>
-      {/if}
-    </label>
-
-    <TagSearch bind:this={tagSearchRef} />
-    {#if failureResopnse?.tags}
+  <label>
+    <div>
+      Title <span class="text-error" aria-label="required"> * </span>
+    </div>
+    <textarea
+      id="title"
+      class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="title"
+      required
+    ></textarea>
+    {#if failureResopnse?.title}
       <div class="text-error">
-        {failureResopnse.tags[0]}
+        {failureResopnse.title[0]}
       </div>
     {/if}
-  </div>
-  <div class="px-2 py-4 flex flex-col gap-6">
-    <label class="">
-      <div class="label">
-        Content <span class="text-error" aria-label="required"> * </span>
+  </label>
+
+  <label>
+    <div>
+      Description <span aria-label="optional"></span>
+    </div>
+    <textarea
+      id="description"
+      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="description"
+    ></textarea>
+    {#if failureResopnse?.description}
+      <div class="text-error">
+        {failureResopnse.description[0]}
       </div>
-      <textarea
-        id="content"
-        class="w-full text-xl min-h-12 h-96 p-2 rounded border border-solid border-base-content"
-        placeholder=""
-        name="content"
-        required
-      ></textarea>
-      {#if failureResopnse?.content}
-        <div class="text-error">
-          {failureResopnse.content[0]}
-        </div>
-      {/if}
-    </label>
-  </div>
+    {/if}
+  </label>
+
+  <label>
+    <div>
+      Content <span class="text-error" aria-label="required"> * </span>
+    </div>
+    <textarea
+      id="content"
+      class="w-full text-xl min-h-12 h-96 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="content"
+      required
+    ></textarea>
+    {#if failureResopnse?.content}
+      <div class="text-error">
+        {failureResopnse.content[0]}
+      </div>
+    {/if}
+  </label>
+
+  <TagSearch bind:this={tagSearchRef} />
+  {#if failureResopnse?.tags}
+    <div class="text-error">
+      {failureResopnse.tags[0]}
+    </div>
+  {/if}
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
