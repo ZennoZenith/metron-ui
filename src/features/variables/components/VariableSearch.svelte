@@ -1,7 +1,7 @@
 <script lang="ts">
 import { flyAndScale } from "$components/melt/utils/index";
 import { IMAGE_BASE_ROUTE } from "$constants";
-import { searchEquation } from "$features/concepts/api/client";
+import { searchEquation } from "$features/equations/api/client";
 import { searchImage } from "$features/images/api/client";
 import { MagnifyingGlass } from "$icons";
 import { X } from "$icons";
@@ -49,6 +49,7 @@ const {
 let searchedResults = $state<SearchResult[]>([]);
 
 export function setOpenState(state: boolean = true) {
+  searchedResults = [];
   open.set(state);
 }
 
@@ -112,6 +113,7 @@ async function onFormSubmit(
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
+  // if (formEntries?.search.toString().trim().length === 0) return;
 
   if (!variableType) return;
   switch (variableType) {
@@ -163,6 +165,7 @@ let formRef = $state<HTMLFormElement>();
             id="name"
             name="search"
             placeholder="Search {variableType}"
+            required
             oninput={() => {
               debounce.debounceAsync(() => formRef?.requestSubmit())();
             }}

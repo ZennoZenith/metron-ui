@@ -82,6 +82,10 @@ function removeTag(tagId: Tag["id"]) {
   item.selected = false;
   inputRef?.focus();
 }
+
+export function getTagIdStrings() {
+  return $state.snapshot(tagIdsString);
+}
 </script>
 
 <div

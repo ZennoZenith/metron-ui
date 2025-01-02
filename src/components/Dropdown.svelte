@@ -39,17 +39,17 @@ function selectDropdownItem(
 </script>
 
 {#if searchable.showDropdown}
-  <div class="w-full max-h-60 overflow-y-auto">
+  <div class="absolute w-full max-h-60 overflow-y-auto z-10">
     {#if list.length === 0}
       <div
-        class="w-full bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap z-10"
+        class="w-full bg-base-300 text-surface-content px-3 overflow-hidden flex items-center hover:bg-base-100 h-10 whitespace-nowrap"
       >
         No result found
       </div>
     {/if}
     {#each list as item (item.key)}
       <button
-        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content/80' : 'bg-base-300 text-surface-content hover:bg-base-100'} w-full px-3 overflow-hidden flex items-center h-10 z-10"
+        class="{item?.disabled === true ? 'bg-zinc-700 text-surface-content' : 'bg-base-300 text-surface-content hover:bg-base-100'} w-full px-3 overflow-hidden flex items-center h-10"
         type="button"
         data-key={item.key}
         data-data-text={item.dataText}

@@ -1,17 +1,13 @@
 <script lang="ts">
-import { applyAction, enhance } from "$app/forms";
-import { goto, invalidateAll } from "$app/navigation";
 import TagSearch from "$components/TagSearch.svelte";
-import {
-  type CreateIssues,
-  validateCreateSchema,
-} from "$features/concepts/schemas/create";
+import { createConcept } from "$features/concepts/api/client";
+import { type CreateIssues } from "$features/concepts/schemas/create";
 import Variables from "$features/variables/components/Variables.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
-import type { SubmitFunction } from "../$types";
 
 let tagSearchRef = $state<TagSearch>();
+let variablesRef = $state<Variables>();
 const toaster = getToaster();
 let failureResopnse = $state<CreateIssues & { message?: string }>();
 
@@ -28,59 +24,75 @@ function setFailureResponse(error?: ErrorObject) {
   }
 }
 
-const submitEquation: SubmitFunction = (
-  { formData, cancel },
-) => {
-  if (formData.get("description")?.toString().trim() === "") {
-    formData.delete("description");
-  }
-  if (formData.get("tags")?.toString().trim() === "") {
-    formData.delete("tags");
-  }
-  if (formData.get("content")?.toString().trim() === "") {
-    formData.delete("content");
-  }
+function resetForm(formElement: HTMLFormElement) {
+  formElement.reset();
+  tagSearchRef?.clearSelectedTags();
+  variablesRef?.clearVariables();
+}
 
-  const formEntries = Object.fromEntries(formData.entries());
-  let parsed = validateCreateSchema(formEntries);
+async function onFormSubmit(
+  event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
+) {
+  event.preventDefault();
+  // Taking reference because current element becomes null for some reason down in function
+  const formElement = event.currentTarget;
+  const formData = new FormData(formElement);
 
-  if (parsed.isErr()) {
-    setFailureResponse(parsed.err?.error);
-    toaster.error("Invalid form data");
-    cancel();
+  const title = formData.get("title")?.toString() ?? "";
+  const description = formData.get("description")?.toString() ?? "";
+  const content = formData.get("content")?.toString() ?? "";
+  const tags = tagSearchRef?.getTagIdStrings() ?? "";
+
+  const variables = variablesRef?.getVariables();
+  if (variables === undefined) {
+    toaster.error("Variable ref not set");
     return;
   }
 
-  return async ({ result, formElement }) => {
-    switch (result.type) {
-      case "redirect":
-        goto(result.location);
-        break;
-      case "error":
-        toaster.error(result.error.message ?? "Internal Server Error");
-        break;
-      case "success":
-        formElement.reset();
-        tagSearchRef?.clearSelectedTags();
-        toaster.success("Equation saved");
-        break;
-      case "failure":
-        setFailureResponse(result.data);
-        toaster.error(result.data?.message ?? "");
-        break;
-    }
+  const images = variables.filter(v => v.typ === "image").map(v =>
+    v.defaultValue
+  ).join(",");
 
-    await applyAction(result);
-    await invalidateAll();
-  };
-};
+  const equations = variables.filter(v => v.typ === "equation").map(v =>
+    v.defaultValue
+  )
+    .join(",");
+
+  const concepts = variables.filter(v => v.typ === "concept").map(v =>
+    v.defaultValue
+  )
+    .join(",");
+
+  const maybeConcepts = await createConcept({
+    title,
+    description: description.trim().length === 0 ? null : description,
+    content,
+    equations,
+    tags,
+    images,
+    concepts,
+    variables,
+  });
+
+  if (maybeConcepts.err) {
+    toaster.error(
+      maybeConcepts.unwrapErr().message ?? "Internal Server Error",
+    );
+    const errorObj = maybeConcepts.unwrapErr().error;
+    console.error(errorObj);
+    setFailureResponse(errorObj);
+    return;
+  }
+
+  if (maybeConcepts.isOk()) {
+    toaster.success("Concept saved");
+    resetForm(formElement);
+  }
+}
 </script>
 
 <form
-  id="form"
-  method="POST"
-  action="/concepts?/create"
-  use:enhance={submitEquation}
+  onsubmit={onFormSubmit}
   class="mx-auto grid grid-cols-1 gap-4"
 >
   <label>
@@ -143,7 +155,11 @@ const submitEquation: SubmitFunction = (
     </div>
   {/if}
 
-  <Variables allowedVariableTypes={["image", "equation"]} disableNullable />
+  <Variables
+    bind:this={variablesRef}
+    allowedVariableTypes={["image", "equation"]}
+    disableNullable
+  />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

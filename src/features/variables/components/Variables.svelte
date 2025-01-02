@@ -23,16 +23,16 @@ interface Variable {
   defaultValue?: string | null;
   defaultValueLabel?: string | null;
 }
+const DEFAULT_VARIABLE = {
+  name: undefined,
+  typ: undefined,
+  nullable: false,
+  defaultValue: null,
+  defaultValueLabel: undefined,
+};
 const variables = $state<[number, Partial<Variable>][]>([
-  [1, {
-    name: undefined,
-    typ: undefined,
-    nullable: false,
-    defaultValue: null,
-    defaultValueLabel: undefined,
-  }],
+  [1, structuredClone(DEFAULT_VARIABLE)],
 ]);
-
 const {
   disableNullable = false,
   allowedVariableTypes = [
@@ -53,14 +53,8 @@ const currentSelectedVariable = $derived(
 function addVariable() {
   lastGreatestIndex += 1;
   variables.push([
-    lastGreatestIndex + 1,
-    {
-      name: undefined,
-      typ: undefined,
-      nullable: false,
-      defaultValue: null,
-      defaultValueLabel: undefined,
-    },
+    lastGreatestIndex,
+    structuredClone(DEFAULT_VARIABLE),
   ]);
 }
 
@@ -82,6 +76,18 @@ function onImageSelect(searchResult?: SearchResult) {
   variables[currentVariableIndex][1].defaultValue = searchResult.id;
   variables[currentVariableIndex][1].defaultValueLabel = searchResult.title;
 }
+
+export function getVariables() {
+  return $state.snapshot(variables.map(v => v[1]));
+}
+
+export function clearVariables() {
+  variables.length = 0;
+  lastGreatestIndex = 1;
+  variables.push(
+    [lastGreatestIndex, structuredClone(DEFAULT_VARIABLE)],
+  );
+}
 </script>
 
 <VariableSearch
@@ -91,12 +97,12 @@ function onImageSelect(searchResult?: SearchResult) {
 />
 
 <div class="grid grid-cols-1 gap-1 p-4">
-  {#each variables as [index, variable] (index)}
+  {#each variables as [indexId, variable], index (indexId)}
     <div class="relative grid grid-cols-1 sm:grid-cols-2 border-2 gap-2 p-2">
       <input
         type="text"
         class="w-full h-10 outline-none"
-        value={variable.name}
+        value={variable?.name}
         placeholder="Variable name*"
         oninput={event => {
           debounce.debounceAsync((value: string) => {
@@ -147,7 +153,7 @@ function onImageSelect(searchResult?: SearchResult) {
             type="button"
             class="h-full text-success px-2"
             onclick={() => {
-              currentSelectVariableIndex = index;
+              currentSelectVariableIndex = indexId;
               variableImageSearchRef?.setOpenState();
             }}
           >
@@ -159,7 +165,7 @@ function onImageSelect(searchResult?: SearchResult) {
       {/if}
       <button
         class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
-        onclick={() => removeVariable(index)}
+        onclick={() => removeVariable(indexId)}
         type="button"
       >
         <Trash class="text-sm" />

@@ -94,7 +94,7 @@ const updateEquation: SubmitFunction = (
   if (parsed.isErr()) {
     setFailureResponse(parsed.err?.error);
     toaster.error("Invalid form data");
-    console.log(parsed.unwrapErr().error);
+    console.error(parsed.unwrapErr().error);
     cancel();
     return;
   }

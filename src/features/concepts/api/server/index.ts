@@ -1,26 +1,29 @@
 import { API_BASE_ROUTE } from "$constants";
-import type { CreateSchema } from "$features/equations/schemas/create";
-import type { UpdateSchema } from "$features/equations/schemas/update";
+import type { CreateSchema } from "$features/concepts/schemas/create";
+import type { UpdateSchema } from "$features/concepts/schemas/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
-import { type Equation, type EquationArray, validateSchema, validateSchemaArray } from "$schemas/equations/self";
+import { type Concept, type ConceptArray, validateSchema, validateSchemaArray } from "$schemas/concepts/self";
 import { validateUuid } from "$schemas/uuid";
 import { fetchJson } from "$utils";
 
 /**
  * Call from serverside only
  */
-export async function createEquation(
-  equation: CreateSchema,
+export async function createConcept(
+  concept: CreateSchema,
 ) {
-  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      ...equation,
-      tags: equation.tags?.split(",") ?? null,
+      ...concept,
+      tags: concept.tags?.split(",") ?? null,
+      equations: concept.equations?.split(",") ?? null,
+      concepts: concept.concepts?.split(",") ?? null,
+      images: concept.images?.split(",") ?? null,
     }),
   });
 
@@ -33,23 +36,23 @@ export async function createEquation(
     return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
 }
 
 /**
  * Call from serverside only
  */
-export async function updateEquation(
-  equation: UpdateSchema,
+export async function updateConcept(
+  concept: UpdateSchema,
 ) {
-  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations/id/${equation.id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts/id/${concept.id}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      ...equation,
-      tags: equation.tags?.split(",") ?? null,
+      ...concept,
+      tags: concept.tags?.split(",") ?? null,
     }),
   });
 
@@ -62,14 +65,14 @@ export async function updateEquation(
     return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
 }
 
 /**
  * Call from serverside only
  */
-export async function searchEquationsByQueryTitle(query: string) {
-  const url = new URL(`${API_BASE_ROUTE}/equations`);
+export async function searchConceptsByQueryTitle(query: string) {
+  const url = new URL(`${API_BASE_ROUTE}/concepts`);
   url.searchParams.append("search", query);
   const errorOrJson = await fetchJson(url);
 
@@ -82,19 +85,19 @@ export async function searchEquationsByQueryTitle(query: string) {
     return Err(new ApiModelError(maybeParseJson.unwrapErr().extra));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<EquationArray, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<ConceptArray, never>;
 }
 
 /**
  * Call from serverside only
  */
-export async function searchEquationById(id: string) {
+export async function searchConceptById(id: string) {
   const isValidUuid = validateUuid(id);
   if (!isValidUuid) {
-    return Err(new ValidationError({}, ["Invalid equation id:uuid"]));
+    return Err(new ValidationError({}, ["Invalid concept id:uuid"]));
   }
 
-  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations/id/${id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts/id/${id}`, {
     method: "GET",
   });
 
@@ -107,19 +110,19 @@ export async function searchEquationById(id: string) {
     return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
 }
 
 /**
  * Call from serverside only
  */
-export async function deleteEquation(id: string) {
+export async function deleteConcept(id: string) {
   const isValidUuid = validateUuid(id);
   if (!isValidUuid) {
-    return Err(new ValidationError({}, ["Invalid equation id:uuid"]));
+    return Err(new ValidationError({}, ["Invalid concept id:uuid"]));
   }
 
-  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/equations/id/${id}`, {
+  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts/id/${id}`, {
     method: "DELETE",
   });
 
@@ -132,5 +135,5 @@ export async function deleteEquation(id: string) {
     return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
 }

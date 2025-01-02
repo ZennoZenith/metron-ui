@@ -96,7 +96,6 @@ function previewImage(
 }
 
 function removeImage() {
-  console.log("remove image");
   newImageSrc = "";
   newImageType = "";
   newImageFile = undefined;

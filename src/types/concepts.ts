@@ -1,1 +1,1 @@
-export type { Equation } from "$schemas/equations/self";
+export type { Concept, ConceptShort } from "$schemas/concepts/self";

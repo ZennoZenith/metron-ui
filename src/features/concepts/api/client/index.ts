@@ -1,19 +1,21 @@
-import { validateSearchSchema } from "$features/equations/schemas/search";
+import { validateCreateSchema } from "$features/concepts/schemas/create";
+import { validateSearchSchema } from "$features/concepts/schemas/search";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type EquationArray, validateSchemaArray } from "$schemas/equations/self";
+import { type ConceptShortArray, validateSchema, validateShortSchemaArray } from "$schemas/concepts/self";
+import type { Concept } from "$type/concepts";
 import { catchError } from "$utils";
 
-export async function searchEquation(
+export async function searchConcept(
   data: unknown,
-): Promise<Result<EquationArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+): Promise<Result<ConceptShortArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
   const parsed = validateSearchSchema(data);
   if (parsed.err) {
     return parsed;
   }
 
   const search = parsed.unwrap();
-  const maybeResponse = await catchError(fetch("/api/equations", {
+  const maybeResponse = await catchError(fetch("/api/concepts", {
     method: "POST",
     body: JSON.stringify(search),
     headers: {
@@ -36,10 +38,51 @@ export async function searchEquation(
     return Err(CustomError.parseError(json));
   }
 
-  const maybeParseJson = validateSchemaArray(json);
+  const maybeParseJson = validateShortSchemaArray(json);
   if (maybeParseJson.err) {
     return Err(new ParseError().fromSelf(maybeParseJson.err));
   }
 
-  return Ok(maybeParseJson.unwrap()) as Result<EquationArray, never>;
+  return Ok(maybeParseJson.unwrap()) as Result<ConceptShortArray, never>;
+}
+
+export async function createConcept(
+  data: unknown,
+): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  console.log(data);
+  const parsed = validateCreateSchema(data);
+  if (parsed.err) {
+    return parsed;
+  }
+
+  const maybeResponse = await catchError(fetch("/api/concepts?/create", {
+    method: "POST",
+    body: JSON.stringify(parsed.unwrap()),
+    headers: {
+      "content-type": "application/json",
+    },
+  }));
+
+  if (maybeResponse.isErr()) {
+    return Err(new FetchError().fromError(maybeResponse.unwrapErr()));
+  }
+
+  const response = maybeResponse.unwrap();
+  const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
+
+  if (maybeJson.err) {
+    return Err(new JsonDeserializeError().fromError(maybeJson.err));
+  }
+
+  const json = maybeJson.unwrap();
+  if (response.status > 399) {
+    return Err(CustomError.parseError(json));
+  }
+
+  const maybeParseJson = validateSchema(json);
+  if (maybeParseJson.err) {
+    return Err(new ParseError().fromSelf(maybeParseJson.err));
+  }
+
+  return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
 }

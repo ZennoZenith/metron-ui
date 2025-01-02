@@ -64,7 +64,36 @@ export function validateSchemaArray(data: unknown) {
   return Err(new ValidationError(issues));
 }
 
+export function validateShortSchema(data: unknown) {
+  const d = safeParse(schemaShort, data);
+
+  if (d.success) {
+    return Ok(d.output);
+  }
+
+  const issues: ConceptShortArrayIssues = flatten<typeof schemaShort>(d.issues)["nested"] ?? {};
+
+  return Err(new ValidationError(issues));
+}
+
+export function validateShortSchemaArray(data: unknown) {
+  const d = safeParse(schemaShortArray, data);
+
+  if (d.success) {
+    return Ok(d.output);
+  }
+
+  const issues: ConceptArrayIssues = flatten<typeof schemaShortArray>(d.issues)["nested"] ?? {};
+
+  return Err(new ValidationError(issues));
+}
+
 export type Concept = InferOutput<typeof schema>;
 export type ConceptArray = InferOutput<typeof schemaArray>;
+export type ConceptShort = InferOutput<typeof schemaShort>;
+export type ConceptShortArray = InferOutput<typeof schemaShortArray>;
+
 export type ConceptIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
 export type ConceptArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
+export type ConceptShortIssues = ReturnType<typeof flatten<typeof schemaShort>>["nested"];
+export type ConceptShortArrayIssues = ReturnType<typeof flatten<typeof schemaShortArray>>["nested"];
