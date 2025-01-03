@@ -7,9 +7,10 @@ import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 import VariableSelect from "./VariableSelect.svelte";
 
 const debounce = new Debounce();
-let lastGreatestIndex = 1;
+let lastGreatestIndex = 0;
 
 interface Props {
+  defaultVariables?: Variable[];
   disableNullable?: boolean;
   allowedVariableTypes?:
     | ["image", "equation", "concept", "problem", "string"]
@@ -30,11 +31,9 @@ const DEFAULT_VARIABLE = {
   defaultValue: null,
   defaultValueLabel: undefined,
 };
-const variables = $state<[number, Partial<Variable>][]>([
-  [1, structuredClone(DEFAULT_VARIABLE)],
-]);
 const {
   disableNullable = false,
+  defaultVariables = [],
   allowedVariableTypes = [
     "image",
     "equation",
@@ -43,6 +42,13 @@ const {
     "string",
   ],
 }: Props = $props();
+
+const variables = $state<[number, Partial<Variable>][]>(
+  defaultVariables.map(v => {
+    lastGreatestIndex += 1;
+    return [lastGreatestIndex, v];
+  }),
+);
 
 let variableImageSearchRef = $state<VariableSearch>();
 let currentSelectVariableIndex = $state<number>();
@@ -97,7 +103,7 @@ export function clearVariables() {
 />
 
 <div class="grid grid-cols-1 gap-1 p-4">
-  {#each variables as [indexId, variable], index (indexId)}
+  {#each variables as [indexId, variable] (indexId)}
     <div class="relative grid grid-cols-1 sm:grid-cols-2 border-2 gap-2 p-2">
       <input
         type="text"

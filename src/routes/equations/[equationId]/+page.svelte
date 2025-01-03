@@ -108,7 +108,7 @@ const updateEquation: SubmitFunction = (
         toaster.error(result.error.message ?? "Internal Server Error");
         break;
       case "success":
-        toaster.success("Equation saved");
+        toaster.success("Equation updated");
         setTimeout(
           () => window.location.replace(`/equations/${equation.id}`),
           5000,

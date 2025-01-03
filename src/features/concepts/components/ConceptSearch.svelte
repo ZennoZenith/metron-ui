@@ -1,16 +1,18 @@
 <script lang="ts">
-import { searchEquation } from "$features/equations/api/client";
+import { searchConcept } from "$features/concepts/api/client";
 import { getToaster } from "$lib/toaster.svelte";
-import type { Equation } from "$type/equations";
+import type { ConceptShortArray } from "$schemas/concepts/self";
 import { onMount } from "svelte";
 
 const toaster = getToaster();
 
-type Props = { onSearch: (list: Equation[]) => void; loadListOnLoad?: boolean };
+type Props = {
+  onSearch: (list: ConceptShortArray) => void;
+  loadListOnLoad?: boolean;
+};
 let { onSearch, loadListOnLoad = false }: Props = $props();
 
 let formRef = $state<HTMLFormElement>();
-// let response = $state<Superposition<ValidationError, Tag[]>>();
 
 async function onFormSubmit(
   event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
@@ -19,16 +21,16 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeEquations = await searchEquation(formEntries);
+  const maybeConcepts = await searchConcept(formEntries);
 
-  if (maybeEquations.isErr()) {
-    const error = maybeEquations.unwrapErr();
+  if (maybeConcepts.isErr()) {
+    const error = maybeConcepts.unwrapErr();
     console.error(error);
     toaster.error(error.message);
     return;
   }
-  if (maybeEquations.isOk()) {
-    onSearch(maybeEquations.unwrap());
+  if (maybeConcepts.isOk()) {
+    onSearch(maybeConcepts.unwrap());
   }
 }
 
@@ -49,7 +51,7 @@ onMount(() => {
       class="inline-flex h-10 w-full flex-1 items-center justify-center rounded border border-solid border-accent px-3 leading-none"
       id="name"
       name="search"
-      placeholder="Search equations"
+      placeholder="Search concepts"
     />
     <button
       type="submit"

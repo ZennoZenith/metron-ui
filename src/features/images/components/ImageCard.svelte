@@ -22,7 +22,7 @@ const { image, onClickDelete = () => {} }: Props = $props();
   </div>
   <div class="p-2 bg-base-300 rounded-b-xl flex-1 flex flex-col">
     <a
-      class="font-bold text-xl mb-1 block flex items-center gap-2"
+      class="font-bold text-xl mb-1 flex items-center gap-2"
       href="/images/{image.id}"
       target="_blank"
     >

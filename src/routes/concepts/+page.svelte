@@ -5,22 +5,22 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ConceptCard, ConceptSearch } from "$features/concepts/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
+import type { ConceptShort, ConceptShortArray } from "$schemas/concepts/self";
 import { validateUuid } from "$schemas/uuid";
-import type { Equation } from "$type/equations";
 import type { SubmitFunction } from "./$types";
 
-let list = $state<Equation[]>([]);
+let list = $state<ConceptShortArray>([]);
 let conformationDialog = $state<ConformationDialog>();
-let equationToBeDeleted = $state<Equation>();
+let conceptToBeDeleted = $state<ConceptShort>();
 let deleteFormRef = $state<HTMLFormElement>();
 const toaster = getToaster();
 
-function onSearch(equations: Equation[]) {
-  list = equations;
+function onSearch(concepts: ConceptShortArray) {
+  list = concepts;
 }
 
-function onClickDelete(equation: Equation) {
-  equationToBeDeleted = equation;
+function onClickDelete(concept: ConceptShort) {
+  conceptToBeDeleted = concept;
   conformationDialog?.setOpenState();
 }
 
@@ -30,14 +30,14 @@ function onDeleteResponse(answer: boolean) {
   }
 }
 
-const submitDeleteEquation: SubmitFunction = (
+const submitDeleteConcept: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
   const { id } = Object.fromEntries(formData.entries());
   const isValidUuid = validateUuid(id.toString());
 
   if (!isValidUuid) {
-    toaster.error("Invalid equation id:uuid");
+    toaster.error("Invalid concept id:uuid");
     cancel();
     return;
   }
@@ -53,7 +53,7 @@ const submitDeleteEquation: SubmitFunction = (
       case "success":
         formElement.reset();
         toaster.success(
-          `Equation deleted successfully`,
+          `Concept deleted successfully`,
         );
         break;
       case "failure":
@@ -79,9 +79,9 @@ const submitDeleteEquation: SubmitFunction = (
 <ConceptSearch {onSearch} loadListOnLoad />
 <ConformationDialog
   bind:this={conformationDialog}
-  title="Delete Equation "
-  content="Are you sure you want to delete equation with title "
-  highlight={equationToBeDeleted?.title}
+  title="Delete Concept "
+  content="Are you sure you want to delete concept with title "
+  highlight={conceptToBeDeleted?.title}
   onResponse={onDeleteResponse}
 />
 
@@ -89,21 +89,21 @@ const submitDeleteEquation: SubmitFunction = (
   bind:this={deleteFormRef}
   method="POST"
   action="?/delete"
-  use:enhance={submitDeleteEquation}
+  use:enhance={submitDeleteConcept}
   hidden
   class="absolute w-0 h-0 overflow-hidden"
 >
   <input
     name="id"
     class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-    value={equationToBeDeleted?.id}
+    value={conceptToBeDeleted?.id}
     type="hidden"
     aria-disabled="true"
   />
 </form>
 
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
-  {#each list as equation}
-    <ConceptCard {equation} {onClickDelete} />
+  {#each list as concept}
+    <ConceptCard {concept} {onClickDelete} />
   {/each}
 </div>

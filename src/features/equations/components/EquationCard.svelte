@@ -13,7 +13,7 @@ const { equation, onClickDelete = () => {} }: Props = $props();
 <div class="rounded-xl bg-base-200 flex flex-col">
   <div class="p-2 bg-base-300 rounded-b-xl flex-1 flex flex-col gap-2">
     <a
-      class="font-bold text-xl mb-1 block flex items-center gap-2"
+      class="font-bold text-xl mb-1 flex items-center gap-2"
       href="/equations/{equation.id}"
       target="_blank"
     >

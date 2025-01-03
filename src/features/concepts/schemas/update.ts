@@ -1,6 +1,6 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { flatten, type InferOutput, object, pipe, safeParse, string, uuid } from "valibot";
+import { flatten, type InferOutput, object, pipe, safeParse, string, transform, uuid } from "valibot";
 import { createSchema } from "./create";
 
 const updateSchema = pipe(
@@ -10,6 +10,15 @@ const updateSchema = pipe(
       ...createSchema.entries,
     },
   ),
+  transform(v => {
+    return {
+      ...v,
+      tags: v.tags.length === 0 ? null : v.tags,
+      equations: v.equations.length === 0 ? null : v.equations,
+      images: v.images.length === 0 ? null : v.images,
+      concepts: v.concepts.length === 0 ? null : v.concepts,
+    };
+  }),
 );
 
 export type UpdateSchema = InferOutput<typeof updateSchema>;

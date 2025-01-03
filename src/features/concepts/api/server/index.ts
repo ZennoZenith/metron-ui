@@ -3,7 +3,7 @@ import type { CreateSchema } from "$features/concepts/schemas/create";
 import type { UpdateSchema } from "$features/concepts/schemas/update";
 import { ApiModelError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, type Result } from "$lib/superposition";
-import { type Concept, type ConceptArray, validateSchema, validateSchemaArray } from "$schemas/concepts/self";
+import { type Concept, type ConceptArray, validateSchema, validateShortSchemaArray } from "$schemas/concepts/self";
 import { validateUuid } from "$schemas/uuid";
 import { fetchJson } from "$utils";
 
@@ -45,6 +45,16 @@ export async function createConcept(
 export async function updateConcept(
   concept: UpdateSchema,
 ) {
+  console.log(concept);
+  console.log(
+    {
+      ...concept,
+      tags: concept.tags?.split(",") ?? null,
+      equations: concept.equations?.split(",") ?? null,
+      concepts: concept.concepts?.split(",") ?? null,
+      images: concept.images?.split(",") ?? null,
+    },
+  );
   const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts/id/${concept.id}`, {
     method: "PATCH",
     headers: {
@@ -53,6 +63,9 @@ export async function updateConcept(
     body: JSON.stringify({
       ...concept,
       tags: concept.tags?.split(",") ?? null,
+      equations: concept.equations?.split(",") ?? null,
+      concepts: concept.concepts?.split(",") ?? null,
+      images: concept.images?.split(",") ?? null,
     }),
   });
 
@@ -80,7 +93,7 @@ export async function searchConceptsByQueryTitle(query: string) {
     return errorOrJson as Result<never, typeof errorOrJson.err>;
   }
 
-  const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
+  const maybeParseJson = validateShortSchemaArray(errorOrJson.unwrap());
   if (maybeParseJson.err) {
     return Err(new ApiModelError(maybeParseJson.unwrapErr().extra));
   }
