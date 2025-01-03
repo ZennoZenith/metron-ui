@@ -1,6 +1,7 @@
 <script lang="ts">
 import { flyAndScale } from "$components/melt/utils/index";
 import { IMAGE_BASE_ROUTE } from "$constants";
+import { searchConcept } from "$features/concepts/api/client";
 import { searchEquation } from "$features/equations/api/client";
 import { searchImage } from "$features/images/api/client";
 import { MagnifyingGlass } from "$icons";
@@ -107,6 +108,33 @@ async function searchEquations(
   return [];
 }
 
+async function searchConcepts(
+  value: Record<string, unknown>,
+): Promise<SearchResult[]> {
+  const maybeConcepts = await searchConcept(value);
+
+  if (maybeConcepts.isErr()) {
+    const error = maybeConcepts.unwrapErr();
+    console.error(error);
+    toaster.error(error.message);
+    return [];
+  }
+  if (maybeConcepts.isOk()) {
+    return maybeConcepts.unwrap().map(
+      ({ id, description, title }) => {
+        return {
+          id,
+          description,
+          title,
+          value: id,
+          content: "",
+        };
+      },
+    );
+  }
+  return [];
+}
+
 async function onFormSubmit(
   event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
 ) {
@@ -124,7 +152,7 @@ async function onFormSubmit(
       searchedResults = await searchEquations(formEntries);
       break;
     case "concept":
-      // searchedResults = await searchImages(formEntries);
+      searchedResults = await searchConcepts(formEntries);
       break;
     case "problem":
       // searchedResults = await searchImages(formEntries);
