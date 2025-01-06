@@ -12,9 +12,7 @@ let lastGreatestIndex = 0;
 interface Props {
   defaultVariables?: Variable[];
   disableNullable?: boolean;
-  allowedVariableTypes?:
-    | ["image", "equation", "concept", "problem", "string"]
-    | ({} & string[]);
+  allowedValues?: (VariableType | {} & string)[];
 }
 
 interface Variable {
@@ -34,7 +32,7 @@ const DEFAULT_VARIABLE = {
 const {
   disableNullable = false,
   defaultVariables = [],
-  allowedVariableTypes = [
+  allowedValues = [
     "image",
     "equation",
     "concept",
@@ -118,7 +116,7 @@ export function clearVariables() {
       >
       <VariableSelect
         defaultValue={variable.typ}
-        {allowedVariableTypes}
+        {allowedValues}
         onChange={({ next }) => {
           variable.typ = next?.value;
           currentSelectVariableIndex = undefined;

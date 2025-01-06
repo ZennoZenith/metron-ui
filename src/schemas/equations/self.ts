@@ -2,13 +2,13 @@ import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { schemaArray as tags } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
-import { array, flatten, type InferOutput, nullable, object, safeParse, string } from "valibot";
+import { array, flatten, type InferOutput, nullish, object, safeParse, string } from "valibot";
 
 export const schema = object(
   {
     id: uuidSchema,
     title: string("Should be string"),
-    description: nullable(string("Should be string")),
+    description: nullish(string("Should be string")),
     content: string("Should be string"),
     tags,
     createdAt: string("created at should be string"),

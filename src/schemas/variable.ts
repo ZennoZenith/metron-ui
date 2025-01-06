@@ -1,43 +1,31 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import {
-  array,
-  boolean,
-  flatten,
-  type InferOutput,
-  literal,
-  maxLength,
-  minLength,
-  nonEmpty,
-  nullable,
-  object,
-  pipe,
-  safeParse,
-  string,
-  trim,
-  union,
-} from "valibot";
+import { title } from "$schemas";
+import { array, boolean, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
 
 export const schema = object(
   {
-    name: pipe(
-      string("Should be string"),
-      trim(),
-      nonEmpty("Shoud not be empty"),
-      minLength(3, "Number of characters should be more than 2"),
-      maxLength(150, "Number of characters should be less than 151"),
-    ),
+    name: title,
     typ: union(
       [literal("image"), literal("equation"), literal("concept"), literal("problem"), literal("string")],
       "image type must be image, equation, concept, problem or string",
     ),
     nullable: boolean("Should be boolean"),
-    defaultValue: nullable(string("Should be string or null")),
+    defaultValue: nullish(string("Should be string or null")),
   },
   "Should be an object",
 );
 
 export const schemaArray = array(schema, "invalid 'Variable' array");
+
+export const variableValueSchema = object(
+  {
+    name: title,
+    defaultValue: string("Should be string"),
+  },
+  "Should be an object",
+);
+export const variableValueSchemaArray = array(schema, "invalid 'VariableValue' array");
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);

@@ -307,7 +307,7 @@ async function onFormSubmit(
 
   <Variables
     bind:this={variablesRef}
-    allowedValues={["image", "equation", "concept"]}
+    allowedVariableTypes={["image", "equation", "concept"]}
     {defaultVariables}
     disableNullable
   />

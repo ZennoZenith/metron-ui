@@ -1,7 +1,8 @@
 <script lang="ts">
 import TagSearch from "$components/TagSearch.svelte";
-import { createConcept } from "$features/concepts/api/client";
-import { type CreateIssues } from "$features/concepts/schemas/create";
+import { createProblem } from "$features/problems/api/client";
+import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect.svelte";
+import { type CreateIssues } from "$features/problems/schemas/create";
 import Variables from "$features/variables/components/Variables.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
@@ -63,7 +64,7 @@ async function onFormSubmit(
   )
     .join(",");
 
-  const maybeConcepts = await createConcept({
+  const maybeProblems = await createProblem({
     title,
     description: description.trim().length === 0 ? null : description,
     content,
@@ -74,18 +75,18 @@ async function onFormSubmit(
     variables,
   });
 
-  if (maybeConcepts.err) {
+  if (maybeProblems.err) {
     toaster.error(
-      maybeConcepts.unwrapErr().message ?? "Internal Server Error",
+      maybeProblems.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = maybeConcepts.unwrapErr().error;
+    const errorObj = maybeProblems.unwrapErr().error;
     console.error(errorObj);
     setFailureResponse(errorObj);
     return;
   }
 
-  if (maybeConcepts.isOk()) {
-    toaster.success("Concept saved");
+  if (maybeProblems.isOk()) {
+    toaster.success("Problem saved");
     resetForm(formElement);
   }
 }
@@ -97,56 +98,39 @@ async function onFormSubmit(
 >
   <label>
     <div>
-      Title <span class="text-error" aria-label="required"> * </span>
+      Problem Statement
+      <span class="text-error" aria-label="required"> * </span>
     </div>
     <textarea
-      id="title"
+      class="w-full text-xl h-36 min-h-12 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="problemStatement"
+      required
+    ></textarea>
+    {#if failureResopnse?.problemStatement}
+      <div class="text-error">
+        {failureResopnse.problemStatement[0]}
+      </div>
+    {/if}
+  </label>
+
+  <label>
+    <div>
+      Hint <span aria-label="optional"></span>
+    </div>
+    <textarea
       class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
       placeholder=""
-      name="title"
-      required
+      name="hint"
     ></textarea>
-    {#if failureResopnse?.title}
+    {#if failureResopnse?.hint}
       <div class="text-error">
-        {failureResopnse.title[0]}
+        {failureResopnse.hint[0]}
       </div>
     {/if}
   </label>
 
-  <label>
-    <div>
-      Description <span aria-label="optional"></span>
-    </div>
-    <textarea
-      id="description"
-      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="description"
-    ></textarea>
-    {#if failureResopnse?.description}
-      <div class="text-error">
-        {failureResopnse.description[0]}
-      </div>
-    {/if}
-  </label>
-
-  <label>
-    <div>
-      Content <span class="text-error" aria-label="required"> * </span>
-    </div>
-    <textarea
-      id="content"
-      class="w-full text-xl min-h-12 h-96 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="content"
-      required
-    ></textarea>
-    {#if failureResopnse?.content}
-      <div class="text-error">
-        {failureResopnse.content[0]}
-      </div>
-    {/if}
-  </label>
+  <QuestionTypeSelect />
 
   <TagSearch bind:this={tagSearchRef} />
   {#if failureResopnse?.tags}
@@ -157,9 +141,24 @@ async function onFormSubmit(
 
   <Variables
     bind:this={variablesRef}
-    allowedValues={["image", "equation", "concept"]}
-    disableNullable
+    allowedValues={["string", "image", "equation", "concept", "problem"]}
   />
+
+  <label>
+    <div>
+      Explanation <span aria-label="optional"></span>
+    </div>
+    <textarea
+      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="explanation"
+    ></textarea>
+    {#if failureResopnse?.explanation}
+      <div class="text-error">
+        {failureResopnse.explanation[0]}
+      </div>
+    {/if}
+  </label>
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

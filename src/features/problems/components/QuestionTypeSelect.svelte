@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Check, ChevronDown } from "$icons/index.js";
-import type { VariableType } from "$type/variables";
+import type { QuestionType } from "$type/problems";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
@@ -8,8 +8,8 @@ type Props = {
   name?: string;
   disabled?: boolean;
   required?: boolean;
-  defaultValue?: VariableType | ({} & string);
-  allowedValues?: (VariableType | {} & string)[];
+  defaultValue?: QuestionType | ({} & string);
+  allowedValues?: (QuestionType | {} & string)[];
   onChange?: (
     state: {
       curr?: { value: string; label?: string };
@@ -23,28 +23,22 @@ const {
   name,
   required,
   defaultValue,
-  allowedValues = [
-    "image",
-    "equation",
-    "concept",
-    "problem",
-    "string",
-  ],
+  allowedValues = ["mcq", "mca", "binary", "fillblank", "matching"],
   onChange = () => {},
 }: Props = $props();
 
-interface Variable {
-  value: VariableType | ({} & string);
+interface QuestionTypeSelectValue {
+  value: QuestionType | ({} & string);
   label: string;
   disabled: boolean;
 }
 
-const options: Variable[] = [
-  { value: "image", label: "Image", disabled: false },
-  { value: "equation", label: "Equation", disabled: false },
-  { value: "concept", label: "Concept", disabled: false },
-  { value: "problem", label: "Problem", disabled: false },
-  { value: "string", label: "String", disabled: false },
+const options: QuestionTypeSelectValue[] = [
+  { value: "mcq", label: "MCQ", disabled: false },
+  { value: "mca", label: "MCA", disabled: false },
+  { value: "binary", label: "Binary", disabled: false },
+  { value: "fillblank", label: "Fill in the blanks", disabled: false },
+  { value: "matching", label: "Matching", disabled: false },
 ].filter(v => allowedValues.includes(v.value));
 
 const {
@@ -76,7 +70,7 @@ const {
     aria-label="Food"
     type="button"
   >
-    {$selectedLabel || "Select variable type*"} <ChevronDown class="size-5" />
+    {$selectedLabel || "Select question type*"} <ChevronDown class="size-5" />
   </button>
   {#if $open}
     <div
