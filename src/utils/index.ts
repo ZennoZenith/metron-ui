@@ -78,3 +78,11 @@ export async function fetchJson(
 
   return Ok(json);
 }
+
+export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(data: T[], key: (obj: T) => T[keyof T]) {
+  return [
+    ...new Map(
+      data.map(x => [key(x), x]),
+    ).values(),
+  ];
+}

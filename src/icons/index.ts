@@ -1,3 +1,4 @@
+export { CirclePlus as PlusCircled } from "svelte-lucide";
 export {
   ArrowRight,
   Check,
@@ -8,7 +9,7 @@ export {
   IdCard,
   MagnifyingGlass,
   Pencil2 as Edit,
-  PlusCircled,
+  // PlusCircled,
   Trash,
 } from "svelte-radix";
 export { default as Error } from "./error.svelte";

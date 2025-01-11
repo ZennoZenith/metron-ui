@@ -3,7 +3,7 @@ let { children } = $props();
 </script>
 
 <svelte:head>
-  <title>Concept</title>
+  <title>Problem</title>
 </svelte:head>
 
 <main class="px-2 pt-10">

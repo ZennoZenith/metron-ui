@@ -1,6 +1,7 @@
 <script lang="ts">
 import { Switch } from "$components/melt";
 import { IdCard, MagnifyingGlass, PlusCircled, Trash } from "$icons";
+import type { VariableArray } from "$schemas/variable";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
@@ -16,14 +17,14 @@ interface Props {
 }
 
 interface Variable {
-  name?: string;
+  name: string;
   typ?: VariableType | ({} & string);
   nullable?: boolean;
   defaultValue?: string | null;
   defaultValueLabel?: string | null;
 }
 const DEFAULT_VARIABLE = {
-  name: undefined,
+  name: "",
   typ: undefined,
   nullable: false,
   defaultValue: null,
@@ -41,7 +42,7 @@ const {
   ],
 }: Props = $props();
 
-const variables = $state<[number, Partial<Variable>][]>(
+const variables = $state<[number, Variable][]>(
   defaultVariables.map(v => {
     lastGreatestIndex += 1;
     return [lastGreatestIndex, v];
@@ -82,7 +83,23 @@ function onImageSelect(searchResult?: SearchResult) {
 }
 
 export function getVariables() {
-  return $state.snapshot(variables.map(v => v[1]));
+  return $state.snapshot(variables.map(v => {
+    let typ: VariableType = "string";
+    if (
+      ["image", "equation", "concept", "problem", "string"].includes(
+        v[1].typ ?? "",
+      )
+    ) {
+      typ = v[1].typ as VariableType;
+    }
+
+    return {
+      name: v[1].name,
+      nullable: v[1].nullable ?? true,
+      typ,
+      defaultValue: v[1].defaultValue,
+    };
+  })) satisfies VariableArray as VariableArray;
 }
 
 export function clearVariables() {

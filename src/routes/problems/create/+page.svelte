@@ -4,6 +4,7 @@ import { createProblem } from "$features/problems/api/client";
 import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect.svelte";
 import { type CreateIssues } from "$features/problems/schemas/create";
 import Variables from "$features/variables/components/Variables.svelte";
+import Variants from "$features/variants/components/Variants.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 
@@ -144,6 +145,7 @@ async function onFormSubmit(
     allowedValues={["string", "image", "equation", "concept", "problem"]}
   />
 
+  <Variants variables={variablesRef?.getVariables()} />
   <label>
     <div>
       Explanation <span aria-label="optional"></span>

@@ -21,11 +21,11 @@ export const schemaArray = array(schema, "invalid 'Variable' array");
 export const variableValueSchema = object(
   {
     name: title,
-    defaultValue: string("Should be string"),
+    value: string("Should be string"),
   },
   "Should be an object",
 );
-export const variableValueSchemaArray = array(schema, "invalid 'VariableValue' array");
+export const variableValueSchemaArray = array(variableValueSchema, "invalid 'VariableValue' array");
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);
@@ -52,6 +52,7 @@ export function validateSchemaArray(data: unknown) {
 }
 
 export type Variable = InferOutput<typeof schema>;
+export type VariableValue = InferOutput<typeof variableValueSchema>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableArray = InferOutput<typeof schemaArray>;
 
