@@ -1,7 +1,10 @@
 <script lang="ts">
 import { IdCard, MagnifyingGlass } from "$icons";
-import type { VariableLoose } from "$schemas/variable";
-import { Debounce } from "$utils/debounce";
+import {
+  VARIABLE_TYPES,
+  type VariableLoose,
+  type VariableType,
+} from "$schemas/variable";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
@@ -11,11 +14,9 @@ interface Props {
 const { variable, oninput = () => {} }: Props = $props();
 let variableImageSearchRef = $state<VariableSearch>();
 
-const debounce = new Debounce();
-
 const reactiveVariable = $state(variable);
 
-function onImageSelect(searchResult?: SearchResult) {
+function onVariableSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
   reactiveVariable.value = searchResult.id;
@@ -28,7 +29,7 @@ function onImageSelect(searchResult?: SearchResult) {
 <VariableSearch
   variableType={variable?.typ}
   bind:this={variableImageSearchRef}
-  onResponse={onImageSelect}
+  onResponse={onVariableSelect}
 />
 
 {#if variable.typ === "text"}
@@ -38,12 +39,11 @@ function onImageSelect(searchResult?: SearchResult) {
     placeholder="Default value"
     value={reactiveVariable.value}
     oninput={event => {
-      debounce.debounceAsync((value: string) => {
-        reactiveVariable.value = value;
-      })(event.currentTarget.value);
+      reactiveVariable.value = event.currentTarget.value;
+      oninput(event.currentTarget.value);
     }}
   >
-{:else if variable.typ !== undefined}
+{:else if VARIABLE_TYPES.includes(variable.typ as VariableType)}
   <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
     <button
       class="px-2 flex items-center gap-1 h-full grow"

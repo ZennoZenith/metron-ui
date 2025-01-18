@@ -5,6 +5,7 @@ import type {
   VariableValue,
 } from "$schemas/variable";
 import { uniqByKeepLast } from "$utils";
+import { Debounce } from "$utils/debounce";
 import { untrack } from "svelte";
 import VariableValueComp from "./VariableValue.svelte";
 
@@ -12,9 +13,9 @@ interface Props {
   variables: VariableArray;
 }
 
-const {
-  variables,
-}: Props = $props();
+const { variables }: Props = $props();
+
+const debounce = new Debounce();
 
 const requiredVariables = $derived(
   variables.filter(v =>
@@ -81,7 +82,7 @@ function variableValueToVariableLoose(
     name: v.name,
     typ: v.typ,
     nullable: v.nullable,
-    value: v.defaultValue,
+    value: "",
   };
 }
 
@@ -116,8 +117,10 @@ export function getVariableValues() {
       </div>
       <VariableValueComp
         variable={variableValueToVariableLoose(variable)}
-        oninput={value => {
-          variable.value = value;
+        oninput={v => {
+          debounce.debounceAsync((value: string) => {
+            variable.value = value;
+          })(v);
         }}
       />
     </label>
@@ -145,8 +148,10 @@ export function getVariableValues() {
       </div>
       <VariableValueComp
         variable={variableValueToVariableLoose(variable)}
-        oninput={value => {
-          variable.value = value;
+        oninput={v => {
+          debounce.debounceAsync((value: string) => {
+            variable.value = value;
+          })(v);
         }}
       />
     </label>

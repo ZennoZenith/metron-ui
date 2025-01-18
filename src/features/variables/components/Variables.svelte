@@ -117,9 +117,11 @@ export function clearVariables() {
         onChange={state => variable.nullable = state}
       />
       <VariableValue
-        {variable}
+        variable={$state.snapshot(variable)}
         oninput={value => {
-          variable.value = value;
+          debounce.debounceAsync((value: string) => {
+            variable.value = value;
+          })(value);
         }}
       />
       <button

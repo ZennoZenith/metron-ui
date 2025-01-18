@@ -14,27 +14,21 @@ const variables: VariableArray = $state([
   },
   {
     name: "name2",
-    typ: "text",
+    typ: "image",
     nullable: false,
     defaultValue: undefined,
   },
   {
     name: "name3",
-    typ: "text",
-    nullable: true,
+    typ: "equation",
+    nullable: false,
     defaultValue: undefined,
   },
   {
     name: "name4",
-    typ: "text",
+    typ: "concept",
     nullable: true,
-    defaultValue: "some other default value",
-  },
-  {
-    name: "name5",
-    typ: "image",
-    nullable: false,
-    defaultValue: "some image id",
+    defaultValue: undefined,
   },
 ]);
 </script>

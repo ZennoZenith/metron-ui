@@ -43,7 +43,7 @@ const {
   states: { open },
 } = createDialog({
   forceVisible: true,
-  role: "alertdialog",
+  role: "dialog",
   defaultOpen: false,
 });
 
