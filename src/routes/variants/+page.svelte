@@ -8,25 +8,25 @@ let variablesRef = $state<Variables>();
 const variables: VariableArray = $state([
   {
     name: "name1",
-    typ: "string",
+    typ: "text",
     nullable: false,
     defaultValue: "some default vaue",
   },
   {
     name: "name2",
-    typ: "string",
+    typ: "text",
     nullable: false,
     defaultValue: undefined,
   },
   {
     name: "name3",
-    typ: "string",
+    typ: "text",
     nullable: true,
     defaultValue: undefined,
   },
   {
     name: "name4",
-    typ: "string",
+    typ: "text",
     nullable: true,
     defaultValue: "some other default value",
   },
@@ -41,7 +41,7 @@ const variables: VariableArray = $state([
 
 <Variables
   bind:this={variablesRef}
-  allowedValues={["string", "image", "equation", "concept", "problem"]}
+  allowedValues={["text", "image", "equation", "concept", "problem"]}
   defaultVariables={variables}
 />
 

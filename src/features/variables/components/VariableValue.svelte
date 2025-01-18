@@ -31,7 +31,7 @@ function onImageSelect(searchResult?: SearchResult) {
   onResponse={onImageSelect}
 />
 
-{#if variable.typ === "string"}
+{#if variable.typ === "text"}
   <input
     type="text"
     class="w-full h-10 outline-none"

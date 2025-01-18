@@ -28,7 +28,7 @@ const {
     "equation",
     "concept",
     "problem",
-    "string",
+    "text",
   ],
   onChange = () => {},
 }: Props = $props();
@@ -44,7 +44,7 @@ const options: Variable[] = [
   { value: "equation", label: "Equation", disabled: false },
   { value: "concept", label: "Concept", disabled: false },
   { value: "problem", label: "Problem", disabled: false },
-  { value: "string", label: "String", disabled: false },
+  { value: "text", label: "Text", disabled: false },
 ].filter(v => allowedValues.includes(v.value));
 
 const {

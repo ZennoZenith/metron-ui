@@ -7,7 +7,7 @@ export const schema = object(
   {
     name: title,
     typ: union(
-      [literal("image"), literal("equation"), literal("concept"), literal("problem"), literal("string")],
+      [literal("image"), literal("equation"), literal("concept"), literal("problem"), literal("text")],
       "image type must be image, equation, concept, problem or string",
     ),
     nullable: boolean("Should be boolean"),

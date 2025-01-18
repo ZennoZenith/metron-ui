@@ -30,7 +30,7 @@ const {
     "equation",
     "concept",
     "problem",
-    "string",
+    "text",
   ],
 }: Props = $props();
 
@@ -60,9 +60,9 @@ function removeVariable(index: number) {
 
 export function getVariables() {
   return $state.snapshot(variables.map(v => {
-    let typ: VariableType = "string";
+    let typ: VariableType = "text";
     if (
-      ["image", "equation", "concept", "problem", "string"].includes(
+      ["image", "equation", "concept", "problem", "text"].includes(
         v[1].typ ?? "",
       )
     ) {

@@ -180,7 +180,7 @@ async function onFormSubmit(
 
   <Variables
     bind:this={variablesRef}
-    allowedValues={["string", "image", "equation", "concept", "problem"]}
+    allowedValues={["text", "image", "equation", "concept", "problem"]}
   />
 
   <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />
