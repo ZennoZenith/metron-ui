@@ -1,28 +1,20 @@
 <script lang="ts">
 import { Switch } from "$components/melt";
-import { IdCard, MagnifyingGlass, PlusCircled, Trash } from "$icons";
-import type { VariableArray } from "$schemas/variable";
+import { PlusCircled, Trash } from "$icons";
+import type { VariableArray, VariableLoose } from "$schemas/variable";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
-import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 import VariableSelect from "./VariableSelect.svelte";
+import VariableValue from "./VariableValue.svelte";
 
-const debounce = new Debounce();
 let lastGreatestIndex = 0;
 
 interface Props {
-  defaultVariables?: Variable[];
+  defaultVariables?: VariableLoose[];
   disableNullable?: boolean;
   allowedValues?: (VariableType | {} & string)[];
 }
 
-interface Variable {
-  name: string;
-  typ?: VariableType | ({} & string);
-  nullable?: boolean;
-  defaultValue?: string | null;
-  defaultValueLabel?: string | null;
-}
 const DEFAULT_VARIABLE = {
   name: "",
   typ: undefined,
@@ -42,17 +34,12 @@ const {
   ],
 }: Props = $props();
 
-const variables = $state<[number, Variable][]>(
+const debounce = new Debounce();
+const variables = $state<[number, VariableLoose][]>(
   defaultVariables.map(v => {
     lastGreatestIndex += 1;
     return [lastGreatestIndex, v];
   }),
-);
-
-let variableImageSearchRef = $state<VariableSearch>();
-let currentSelectVariableIndex = $state<number>();
-const currentSelectedVariable = $derived(
-  variables.find(v => v[0] === currentSelectVariableIndex)?.[1],
 );
 
 function addVariable() {
@@ -71,17 +58,6 @@ function removeVariable(index: number) {
   variables.splice(indexToRemove, 1);
 }
 
-function onImageSelect(searchResult?: SearchResult) {
-  if (!searchResult) return;
-  const currentVariableIndex = variables.findIndex(v =>
-    v[0] === currentSelectVariableIndex
-  );
-  if (currentVariableIndex === -1) return;
-
-  variables[currentVariableIndex][1].defaultValue = searchResult.id;
-  variables[currentVariableIndex][1].defaultValueLabel = searchResult.title;
-}
-
 export function getVariables() {
   return $state.snapshot(variables.map(v => {
     let typ: VariableType = "string";
@@ -97,7 +73,7 @@ export function getVariables() {
       name: v[1].name,
       nullable: v[1].nullable ?? true,
       typ,
-      defaultValue: v[1].defaultValue,
+      defaultValue: v[1].value,
     };
   })) satisfies VariableArray as VariableArray;
 }
@@ -110,12 +86,6 @@ export function clearVariables() {
   );
 }
 </script>
-
-<VariableSearch
-  variableType={currentSelectedVariable?.typ}
-  bind:this={variableImageSearchRef}
-  onResponse={onImageSelect}
-/>
 
 <div class="grid grid-cols-1 gap-1 p-4">
   {#each variables as [indexId, variable] (indexId)}
@@ -136,9 +106,8 @@ export function clearVariables() {
         {allowedValues}
         onChange={({ next }) => {
           variable.typ = next?.value;
-          currentSelectVariableIndex = undefined;
-          variable.defaultValue = undefined;
-          variable.defaultValueLabel = undefined;
+          variable.value = undefined;
+          variable.label = undefined;
         }}
       />
       <Switch
@@ -147,43 +116,12 @@ export function clearVariables() {
         defaultChecked={variable.nullable}
         onChange={state => variable.nullable = state}
       />
-      {#if variable.typ === "string"}
-        <input
-          type="text"
-          class="w-full h-10 outline-none"
-          placeholder="Default value"
-          value={variable.defaultValue}
-          oninput={event => {
-            debounce.debounceAsync((value: string) => {
-              variable.defaultValue = value;
-            })(event.currentTarget.value);
-          }}
-        >
-      {:else if variable.typ !== undefined}
-        <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
-          <button
-            class="px-2 flex items-center gap-1 h-full grow"
-            type="button"
-          >
-            <IdCard class="text-warning shrink" />
-            <div class="grow text-left">
-              {variable.defaultValueLabel}
-            </div>
-          </button>
-          <button
-            type="button"
-            class="h-full text-success px-2"
-            onclick={() => {
-              currentSelectVariableIndex = indexId;
-              variableImageSearchRef?.setOpenState();
-            }}
-          >
-            <MagnifyingGlass />
-          </button>
-        </div>
-      {:else}
-        <div class="w-full h-10 outline-none"></div>
-      {/if}
+      <VariableValue
+        {variable}
+        oninput={value => {
+          variable.value = value;
+        }}
+      />
       <button
         class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
         onclick={() => removeVariable(indexId)}

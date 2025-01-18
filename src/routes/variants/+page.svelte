@@ -1,6 +1,10 @@
 <script lang="ts">
+import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
 import type { VariableArray } from "$schemas/variable";
+
+let variablesRef = $state<Variables>();
+
 const variables: VariableArray = $state([
   {
     name: "name1",
@@ -35,4 +39,10 @@ const variables: VariableArray = $state([
 ]);
 </script>
 
-<Variants {variables} />
+<Variables
+  bind:this={variablesRef}
+  allowedValues={["string", "image", "equation", "concept", "problem"]}
+  defaultVariables={variables}
+/>
+
+<Variants variables={variablesRef?.getVariables()} />

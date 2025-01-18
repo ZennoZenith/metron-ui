@@ -1,7 +1,12 @@
 <script lang="ts">
-import type { VariableArray, VariableValue } from "$schemas/variable";
+import type {
+  VariableArray,
+  VariableLoose,
+  VariableValue,
+} from "$schemas/variable";
 import { uniqByKeepLast } from "$utils";
 import { untrack } from "svelte";
+import VariableValueComp from "./VariableValue.svelte";
 
 interface Props {
   variables: VariableArray;
@@ -65,8 +70,25 @@ function mergeAsRightArrayUniq(
     });
 }
 
+function variableValueToVariableLoose(
+  variable?: VariableValue,
+): VariableLoose {
+  if (!variable) return { name: "undefined" };
+  const v = variables.find(v => v.name === variable.name);
+  if (!v) return { name: "undefined" };
+
+  return {
+    name: v.name,
+    typ: v.typ,
+    nullable: v.nullable,
+    value: v.defaultValue,
+  };
+}
+
 export function getVariableValues() {
-  return requiredVariableValues.concat(optionalVariableValues);
+  return requiredVariableValues.concat(optionalVariableValues).filter(v =>
+    v.value.trim().length >= 0
+  );
 }
 </script>
 <div>
@@ -92,13 +114,12 @@ export function getVariableValues() {
       <div>
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
-      <textarea
-        class="w-full h-11 min-h-11 p-2 rounded border border-solid border-base-content"
-        placeholder="Variable value"
-        name="varValue"
-        value={variable.value}
-        oninput={event => variable.value = event.currentTarget.value}
-      ></textarea>
+      <VariableValueComp
+        variable={variableValueToVariableLoose(variable)}
+        oninput={value => {
+          variable.value = value;
+        }}
+      />
     </label>
   </div>
 {/each}
@@ -122,15 +143,12 @@ export function getVariableValues() {
       <div>
         Value
       </div>
-      <textarea
-        class="w-full h-11 min-h-11 p-2 rounded border border-solid border-base-content"
-        placeholder="Variable value"
-        name="varValue"
-        value={variable.value}
-        oninput={event => {
-          variable.value = event.currentTarget.value;
+      <VariableValueComp
+        variable={variableValueToVariableLoose(variable)}
+        oninput={value => {
+          variable.value = value;
         }}
-      ></textarea>
+      />
     </label>
   </div>
 {/each}

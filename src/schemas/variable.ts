@@ -55,6 +55,13 @@ export type Variable = InferOutput<typeof schema>;
 export type VariableValue = InferOutput<typeof variableValueSchema>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableArray = InferOutput<typeof schemaArray>;
+export type VariableLoose = {
+  name: string;
+  typ?: VariableType | ({} & string);
+  nullable?: boolean;
+  value?: string | null;
+  label?: string | null;
+};
 
 export type VariableIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
 export type VariableArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];

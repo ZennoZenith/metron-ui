@@ -5,7 +5,7 @@ import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
 type Props = {
-  name?: string;
+  name: string;
   disabled?: boolean;
   required?: boolean;
   defaultValue?: QuestionType | ({} & string);
@@ -43,7 +43,7 @@ const options: QuestionTypeSelectValue[] = [
 
 const {
   elements: { trigger, menu, option },
-  states: { selectedLabel, open },
+  states: { selectedLabel, open, selected },
   helpers: { isSelected },
 } = createSelect<string>({
   forceVisible: true,
@@ -61,6 +61,10 @@ const {
     return state.next;
   },
 });
+
+export function getSelectedVariable() {
+  return selected.get()?.value;
+}
 </script>
 
 <div class="flex flex-col gap-1">

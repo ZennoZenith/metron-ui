@@ -15,13 +15,19 @@ const {
 
 let lastGreatestIndex = 1;
 
-const DEFAULT_VARIANT: VariantCreate = {
+interface LocalVariant {
+  correctAnswers: VariantCreate["correctAnswers"];
+  incorrectAnswers: VariantCreate["incorrectAnswers"];
+  variableValueSelectRef?: VariableValueSelect;
+}
+
+const DEFAULT_VARIANT: LocalVariant = {
   correctAnswers: [{ answer: "", explanation: "" }],
   incorrectAnswers: [],
-  variableValues: [],
+  variableValueSelectRef: undefined,
 };
 
-const variants = $state<[number, VariantCreate][]>(
+const variants = $state<[number, LocalVariant][]>(
   [[lastGreatestIndex, structuredClone(DEFAULT_VARIANT)]],
 );
 
@@ -41,6 +47,18 @@ function removeVariant(index: number): any {
   }
   variants.splice(indexToRemove, 1);
 }
+
+export function getVariants(): VariantCreate[] {
+  return $state.snapshot(
+    variants.map(v => {
+      return {
+        correctAnswers: v[1].correctAnswers,
+        incorrectAnswers: v[1].incorrectAnswers,
+        variableValues: v[1].variableValueSelectRef?.getVariableValues() ?? [],
+      };
+    }),
+  );
+}
 </script>
 
 <div class="grid grid-cols-1 gap-2 relative">
@@ -58,7 +76,10 @@ function removeVariant(index: number): any {
       </div>
       <div class="border rounded p-2 grid grid-cols-1 gap-2">
         <div>Variable value(s)</div>
-        <VariableValueSelect {variables} />
+        <VariableValueSelect
+          bind:this={variant.variableValueSelectRef}
+          {variables}
+        />
       </div>
       {#if variants.length !== 1}
         <button

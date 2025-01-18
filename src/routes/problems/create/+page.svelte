@@ -10,6 +10,9 @@ import { getToaster } from "$lib/toaster.svelte";
 
 let tagSearchRef = $state<TagSearch>();
 let variablesRef = $state<Variables>();
+let variantsRef = $state<Variants>();
+let questionTypeRef = $state<QuestionTypeSelect>();
+
 const toaster = getToaster();
 let failureResopnse = $state<CreateIssues & { message?: string }>();
 
@@ -40,40 +43,59 @@ async function onFormSubmit(
   const formElement = event.currentTarget;
   const formData = new FormData(formElement);
 
-  const title = formData.get("title")?.toString() ?? "";
-  const description = formData.get("description")?.toString() ?? "";
-  const content = formData.get("content")?.toString() ?? "";
-  const tags = tagSearchRef?.getTagIdStrings() ?? "";
-
   const variables = variablesRef?.getVariables();
   if (variables === undefined) {
     toaster.error("Variable ref not set");
     return;
   }
 
+  const problemStatement = formData.get("problemStatement")?.toString() ?? "";
+  const hint = formData.get("hint")?.toString() ?? "";
+  const explanation = formData.get("explanation")?.toString() ?? "";
+  const questionType = questionTypeRef?.getSelectedVariable() ?? "";
+  const tags = tagSearchRef?.getTagIdStrings() ?? "";
+  const equations = variables
+    .filter(v => v.typ === "equation").map(v => v.defaultValue)
+    .join(",");
   const images = variables.filter(v => v.typ === "image").map(v =>
     v.defaultValue
   ).join(",");
 
-  const equations = variables.filter(v => v.typ === "equation").map(v =>
-    v.defaultValue
-  )
+  const variants = variantsRef?.getVariants();
+  const concepts = variables
+    .filter(v => v.typ === "concept").map(v => v.defaultValue)
+    .join(",");
+  const problems = variables
+    .filter(v => v.typ === "problem").map(v => v.defaultValue)
     .join(",");
 
-  const concepts = variables.filter(v => v.typ === "concept").map(v =>
-    v.defaultValue
-  )
-    .join(",");
-
-  const maybeProblems = await createProblem({
-    title,
-    description: description.trim().length === 0 ? null : description,
-    content,
-    equations,
+  console.log(formData.values());
+  console.log({
+    problemStatement,
+    hint: hint.trim().length === 0 ? null : hint,
+    questionType,
     tags,
+    equations,
     images,
     concepts,
+    problems,
     variables,
+    variants,
+    explanation: explanation.trim().length === 0 ? null : explanation,
+  });
+  return;
+  const maybeProblems = await createProblem({
+    problemStatement,
+    hint: hint.trim().length === 0 ? null : hint,
+    questionType,
+    tags,
+    equations,
+    images,
+    concepts,
+    problems,
+    variables,
+    variants,
+    explanation: explanation.trim().length === 0 ? null : explanation,
   });
 
   if (maybeProblems.err) {
@@ -131,7 +153,7 @@ async function onFormSubmit(
     {/if}
   </label>
 
-  <QuestionTypeSelect />
+  <QuestionTypeSelect bind:this={questionTypeRef} name="questionType" />
 
   <TagSearch bind:this={tagSearchRef} />
   {#if failureResopnse?.tags}
@@ -140,12 +162,6 @@ async function onFormSubmit(
     </div>
   {/if}
 
-  <Variables
-    bind:this={variablesRef}
-    allowedValues={["string", "image", "equation", "concept", "problem"]}
-  />
-
-  <Variants variables={variablesRef?.getVariables()} />
   <label>
     <div>
       Explanation <span aria-label="optional"></span>
@@ -161,6 +177,13 @@ async function onFormSubmit(
       </div>
     {/if}
   </label>
+
+  <Variables
+    bind:this={variablesRef}
+    allowedValues={["string", "image", "equation", "concept", "problem"]}
+  />
+
+  <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
