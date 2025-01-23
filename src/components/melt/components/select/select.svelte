@@ -65,7 +65,7 @@ const {
   {/if}
 </div>
 
-<style lang="postcss">
+<style>
 .check {
   position: absolute;
   left: 0.5rem;
