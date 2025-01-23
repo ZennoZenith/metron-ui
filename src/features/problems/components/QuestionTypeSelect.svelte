@@ -23,7 +23,7 @@ const {
   name,
   required,
   defaultValue,
-  allowedValues = ["mcq", "mca", "binary", "fillblank", "matching"],
+  allowedValues = ["MCQ", "MCA", "Binary", "FillBlank", "Matching"],
   onChange = () => {},
 }: Props = $props();
 
@@ -34,11 +34,11 @@ interface QuestionTypeSelectValue {
 }
 
 const options: QuestionTypeSelectValue[] = [
-  { value: "mcq", label: "MCQ", disabled: false },
-  { value: "mca", label: "MCA", disabled: false },
-  { value: "binary", label: "Binary", disabled: false },
-  { value: "fillblank", label: "Fill in the blanks", disabled: false },
-  { value: "matching", label: "Matching", disabled: false },
+  { value: "MCQ", label: "MCQ", disabled: false },
+  { value: "MCA", label: "MCA", disabled: false },
+  { value: "Binary", label: "Binary", disabled: false },
+  { value: "FillBlank", label: "Fill in the blanks", disabled: false },
+  { value: "Matching", label: "Matching", disabled: false },
 ].filter(v => allowedValues.includes(v.value));
 
 const {

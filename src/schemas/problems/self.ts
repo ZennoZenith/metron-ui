@@ -10,8 +10,8 @@ import { schemaArray as varientSchemaArray } from "$schemas/variant";
 import { array, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
 
 export const questionTypeSchema = union(
-  [literal("mcq"), literal("mca"), literal("binary"), literal("fillblank"), literal("matching")],
-  "problem type must be mcq, mca, binary, fillblank or matching",
+  [literal("MCQ"), literal("MCA"), literal("Binary"), literal("FillBlank"), literal("Matching")],
+  "problem type must be MCQ, MCA, Binary, FillBlank or Matching",
 );
 
 export const schemaShort = object(

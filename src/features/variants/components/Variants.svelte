@@ -22,7 +22,7 @@ interface LocalVariant {
 }
 
 const DEFAULT_VARIANT: LocalVariant = {
-  correctAnswers: [{ answer: "", explanation: "" }],
+  correctAnswers: [{ answer: "", explanation: undefined }],
   incorrectAnswers: [],
   variableValueSelectRef: undefined,
 };

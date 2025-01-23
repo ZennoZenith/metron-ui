@@ -4,7 +4,7 @@ import { content } from "$schemas";
 import { questionTypeSchema } from "$schemas/problems/self";
 import { uuidArrayString } from "$schemas/uuid";
 import { schemaArray as variableSchemaArray } from "$schemas/variable";
-import { schemaArray as varientSchemaArray } from "$schemas/variant";
+import { schemaCreateArray as varientSchemaCreateArray } from "$schemas/variant";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
 
 // scalar type QuestionType extending enum<MCQ, MCA, Binary, FillBlank, Matching>;
@@ -21,7 +21,7 @@ export const createSchema = pipe(
       concepts: nullish(uuidArrayString, ""),
       problems: nullish(uuidArrayString, ""),
       variables: nullish(variableSchemaArray),
-      variants: varientSchemaArray,
+      variants: varientSchemaCreateArray(1),
       explanation: nullish(content),
     },
   ),

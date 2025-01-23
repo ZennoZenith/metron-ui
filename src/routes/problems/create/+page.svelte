@@ -7,6 +7,8 @@ import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
+import type { VariantCreate } from "$schemas/variant";
+import type { Variable, VariableType } from "$type/variables";
 
 let tagSearchRef = $state<TagSearch>();
 let variablesRef = $state<Variables>();
@@ -35,6 +37,25 @@ function resetForm(formElement: HTMLFormElement) {
   variablesRef?.clearVariables();
 }
 
+function extractVariableValueFromVariants(
+  variableType: VariableType,
+  variables: Variable[],
+  variants: VariantCreate[],
+) {
+  const variableNames = variables
+    .filter(v => v.typ === variableType)
+    .map(v => v.name);
+  const ret: string[] = [];
+  for (const variant of variants) {
+    for (const variableValue of variant.variableValues) {
+      if (variableNames.includes(variableValue.name)) {
+        ret.push(variableValue.value);
+      }
+    }
+  }
+  return ret;
+}
+
 async function onFormSubmit(
   event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
 ) {
@@ -54,45 +75,65 @@ async function onFormSubmit(
   const explanation = formData.get("explanation")?.toString() ?? "";
   const questionType = questionTypeRef?.getSelectedVariable() ?? "";
   const tags = tagSearchRef?.getTagIdStrings() ?? "";
-  const equations = variables
-    .filter(v => v.typ === "equation").map(v => v.defaultValue)
-    .join(",");
-  const images = variables.filter(v => v.typ === "image").map(v =>
-    v.defaultValue
-  ).join(",");
-
   const variants = variantsRef?.getVariants();
-  const concepts = variables
-    .filter(v => v.typ === "concept").map(v => v.defaultValue)
-    .join(",");
-  const problems = variables
-    .filter(v => v.typ === "problem").map(v => v.defaultValue)
-    .join(",");
+  let equations = variables
+    .filter(v =>
+      v.typ === "equation" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string);
+  let images = variables.filter(v =>
+    v.typ === "image" && v.defaultValue !== undefined
+    && v.defaultValue !== null
+  ).map(v => v.defaultValue as string);
+  let concepts = variables
+    .filter(v =>
+      v.typ === "concept" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string);
+  let problems = variables
+    .filter(v =>
+      v.typ === "problem" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string);
 
-  console.log(formData.values());
+  if (variants && variables) {
+    equations = equations.concat(
+      extractVariableValueFromVariants("equation", variables, variants),
+    );
+    images = images.concat(
+      extractVariableValueFromVariants("image", variables, variants),
+    );
+    concepts = concepts.concat(
+      extractVariableValueFromVariants("concept", variables, variants),
+    );
+    problems = problems.concat(
+      extractVariableValueFromVariants("problem", variables, variants),
+    );
+  }
+
   console.log({
     problemStatement,
     hint: hint.trim().length === 0 ? null : hint,
     questionType,
     tags,
-    equations,
-    images,
-    concepts,
-    problems,
+    equations: equations.join(","),
+    images: images.join(","),
+    concepts: concepts.join(","),
+    problems: problems.join(","),
     variables,
     variants,
     explanation: explanation.trim().length === 0 ? null : explanation,
   });
-  return;
+
   const maybeProblems = await createProblem({
     problemStatement,
     hint: hint.trim().length === 0 ? null : hint,
     questionType,
     tags,
-    equations,
-    images,
-    concepts,
-    problems,
+    equations: equations.join(","),
+    images: images.join(","),
+    concepts: concepts.join(","),
+    problems: problems.join(","),
     variables,
     variants,
     explanation: explanation.trim().length === 0 ? null : explanation,

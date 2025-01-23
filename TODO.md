@@ -1,3 +1,4 @@
+set empty string to undefined where possible
 move tagsearch component out from components to features
 rename tagsearch to tagselect
 remove variable value once selected

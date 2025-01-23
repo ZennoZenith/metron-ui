@@ -30,6 +30,9 @@ export const schemaArray = pipe(
   minLength(1, "Variant array length should be greater than 0"),
 );
 
+export const schemaCreateArray = (mLength: number = 0) =>
+  pipe(array(schemaCreate, "invalid 'Variant' array"), minLength(mLength));
+
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);
 

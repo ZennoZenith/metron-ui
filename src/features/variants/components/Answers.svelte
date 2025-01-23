@@ -1,5 +1,5 @@
 <script lang="ts">
-import { PlusCircled, Trash } from "$icons";
+import { Trash } from "$icons";
 import type { AnswerCreate } from "$schemas/answer";
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 
 const DEFAULT_ANSWER: AnswerCreate = {
   answer: "",
-  explanation: "",
+  explanation: undefined,
 };
 
 const {

@@ -88,7 +88,7 @@ function variableValueToVariableLoose(
 
 export function getVariableValues() {
   return requiredVariableValues.concat(optionalVariableValues).filter(v =>
-    v.value.trim().length >= 0
+    v.value.trim().length > 0
   );
 }
 </script>
