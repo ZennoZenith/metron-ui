@@ -1,13 +1,13 @@
 <script lang="ts">
-import { searchConcept } from "$features/concepts/api/client";
+import { searchProblem } from "$features/problems/api/client";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ConceptShortArray } from "$schemas/concepts/self";
+import type { ProblemShortArray } from "$schemas/problems/self";
 import { onMount } from "svelte";
 
 const toaster = getToaster();
 
 type Props = {
-  onSearch: (list: ConceptShortArray) => void;
+  onSearch: (list: ProblemShortArray) => void;
   loadListOnLoad?: boolean;
 };
 let { onSearch, loadListOnLoad = false }: Props = $props();
@@ -21,16 +21,16 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeConcepts = await searchConcept(formEntries);
+  const maybeProblems = await searchProblem(formEntries);
 
-  if (maybeConcepts.isErr()) {
-    const error = maybeConcepts.unwrapErr();
+  if (maybeProblems.isErr()) {
+    const error = maybeProblems.unwrapErr();
     console.error(error);
     toaster.error(error.message);
     return;
   }
-  if (maybeConcepts.isOk()) {
-    onSearch(maybeConcepts.unwrap());
+  if (maybeProblems.isOk()) {
+    onSearch(maybeProblems.unwrap());
   }
 }
 
@@ -51,7 +51,7 @@ onMount(() => {
       class="inline-flex h-10 w-full flex-1 items-center justify-center rounded border border-solid border-accent px-3 leading-none"
       id="name"
       name="search"
-      placeholder="Search concepts"
+      placeholder="Search problems"
     />
     <button
       type="submit"

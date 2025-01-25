@@ -19,6 +19,7 @@ export const schemaShort = object(
     id: uuidSchema,
     problemStatement: string("Should be string"),
     questionType: string("Should be string"),
+    tags: tagSchemaArray,
     createdAt: string("created at should be string"),
     updatedAt: string("updated at should be string"),
   },

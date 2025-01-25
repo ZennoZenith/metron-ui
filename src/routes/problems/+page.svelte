@@ -2,25 +2,26 @@
 import { applyAction, enhance } from "$app/forms";
 import { goto, invalidateAll } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
-import { ConceptCard, ConceptSearch } from "$features/concepts/components";
+import { ProblemCard, ProblemSearch } from "$features/problems/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ConceptShort, ConceptShortArray } from "$schemas/concepts/self";
+import type { ProblemShort, ProblemShortArray } from "$schemas/problems/self";
 import { validateUuid } from "$schemas/uuid";
 import type { SubmitFunction } from "./$types";
 
-let list = $state<ConceptShortArray>([]);
+let list = $state<ProblemShortArray>([]);
 let conformationDialog = $state<ConformationDialog>();
-let conceptToBeDeleted = $state<ConceptShort>();
+let problemToBeDeleted = $state<ProblemShort>();
 let deleteFormRef = $state<HTMLFormElement>();
 const toaster = getToaster();
 
-function onSearch(concepts: ConceptShortArray) {
-  list = concepts;
+function onSearch(problems: ProblemShortArray) {
+  list = problems;
+  console.log(problems);
 }
 
-function onClickDelete(concept: ConceptShort) {
-  conceptToBeDeleted = concept;
+function onClickDelete(problem: ProblemShort) {
+  problemToBeDeleted = problem;
   conformationDialog?.setOpenState();
 }
 
@@ -30,14 +31,14 @@ function onDeleteResponse(answer: boolean) {
   }
 }
 
-const submitDeleteConcept: SubmitFunction = (
+const submitDeleteProblem: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
   const { id } = Object.fromEntries(formData.entries());
   const isValidUuid = validateUuid(id.toString());
 
   if (!isValidUuid) {
-    toaster.error("Invalid concept id:uuid");
+    toaster.error("Invalid problem id:uuid");
     cancel();
     return;
   }
@@ -53,7 +54,7 @@ const submitDeleteConcept: SubmitFunction = (
       case "success":
         formElement.reset();
         toaster.success(
-          `Concept deleted successfully`,
+          `Problem deleted successfully`,
         );
         break;
       case "failure":
@@ -66,22 +67,22 @@ const submitDeleteConcept: SubmitFunction = (
 };
 </script>
 
-<a href="/concepts/create">
+<a href="/problems/create">
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full mb-4 flex gap-2"
     type="button"
   >
-    Create concept
+    Create problem
     <ArrowRight />
   </button>
 </a>
 
-<ConceptSearch {onSearch} loadListOnLoad />
+<ProblemSearch {onSearch} loadListOnLoad />
 <ConformationDialog
   bind:this={conformationDialog}
-  title="Delete Concept "
-  content="Are you sure you want to delete concept with title "
-  highlight={conceptToBeDeleted?.title}
+  title="Delete Problem "
+  content="Are you sure you want to delete problem with title "
+  highlight={problemToBeDeleted?.problemStatement}
   onResponse={onDeleteResponse}
 />
 
@@ -89,21 +90,21 @@ const submitDeleteConcept: SubmitFunction = (
   bind:this={deleteFormRef}
   method="POST"
   action="?/delete"
-  use:enhance={submitDeleteConcept}
+  use:enhance={submitDeleteProblem}
   hidden
   class="absolute w-0 h-0 overflow-hidden"
 >
   <input
     name="id"
     class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-    value={conceptToBeDeleted?.id}
+    value={problemToBeDeleted?.id}
     type="hidden"
     aria-disabled="true"
   />
 </form>
 
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
-  {#each list as concept}
-    <ConceptCard {concept} {onClickDelete} />
+  {#each list as problem}
+    <ProblemCard {problem} {onClickDelete} />
   {/each}
 </div>
