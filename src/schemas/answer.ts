@@ -21,10 +21,22 @@ export const schemaCreate = object(
   "Should be an object",
 );
 
+export const schemaUpdate = object(
+  {
+    id: nullish(uuidSchema),
+    answer: content,
+    explanation: nullish(content),
+  },
+  "Should be an object",
+);
+
 export const schemaArray = array(schema, "invalid 'Answer' array");
 
 export const schemaCreateArray = (mLength: number = 0) =>
   pipe(array(schemaCreate, "invalid 'Answer' array"), minLength(mLength));
+
+export const schemaUpdateArray = (mLength: number = 0) =>
+  pipe(array(schemaUpdate, "invalid 'AnswerUpdate' array"), minLength(mLength));
 
 export function validateSchema(data: unknown) {
   const d = safeParse(schema, data);

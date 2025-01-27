@@ -45,16 +45,6 @@ export async function createConcept(
 export async function updateConcept(
   concept: UpdateSchema,
 ) {
-  console.log(concept);
-  console.log(
-    {
-      ...concept,
-      tags: concept.tags?.split(",") ?? null,
-      equations: concept.equations?.split(",") ?? null,
-      concepts: concept.concepts?.split(",") ?? null,
-      images: concept.images?.split(",") ?? null,
-    },
-  );
   const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/concepts/id/${concept.id}`, {
     method: "PATCH",
     headers: {

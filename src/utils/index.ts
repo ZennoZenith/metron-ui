@@ -86,3 +86,7 @@ export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(d
     ).values(),
   ];
 }
+
+export function exhaustiveMatchingGuard(_: never, message?: string): never {
+  throw new Error(message ?? "Should not have reached here");
+}

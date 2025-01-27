@@ -49,7 +49,6 @@ export async function searchProblem(
 export async function createProblem(
   data: unknown,
 ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-  console.log(data);
   const parsed = validateCreateSchema(data);
   if (parsed.err) {
     return parsed;

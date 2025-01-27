@@ -17,7 +17,6 @@ const toaster = getToaster();
 
 function onSearch(problems: ProblemShortArray) {
   list = problems;
-  console.log(problems);
 }
 
 function onClickDelete(problem: ProblemShort) {

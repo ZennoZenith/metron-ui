@@ -1,8 +1,14 @@
 <script lang="ts">
 import { Switch } from "$components/melt";
 import { PlusCircled, Trash } from "$icons";
-import type { VariableArray, VariableLoose } from "$schemas/variable";
+import {
+  VARIABLE_TYPES,
+  type VariableArray,
+  type VariableLoose,
+  type VariableTypeLoose,
+} from "$schemas/variable";
 import type { VariableType } from "$type/variables";
+import { exhaustiveMatchingGuard } from "$utils";
 import { Debounce } from "$utils/debounce";
 import VariableSelect from "./VariableSelect.svelte";
 import VariableValue from "./VariableValue.svelte";
@@ -10,6 +16,7 @@ import VariableValue from "./VariableValue.svelte";
 let lastGreatestIndex = 0;
 
 interface Props {
+  disabled?: boolean;
   defaultVariables?: VariableLoose[];
   disableNullable?: boolean;
   allowedValues?: (VariableType | {} & string)[];
@@ -32,13 +39,43 @@ const {
     "problem",
     "text",
   ],
+  disabled = false,
 }: Props = $props();
 
+console.log(defaultVariables);
 const debounce = new Debounce();
+
+function getLabelFromId(
+  value?: string | null,
+  variableTyp?: VariableTypeLoose,
+) {
+  if (!VARIABLE_TYPES.includes(variableTyp as VariableType)) {
+    return value;
+  }
+  const typedVariableTyp = variableTyp as VariableType;
+  switch (typedVariableTyp) {
+    case "text":
+      return value;
+    case "image":
+      return value;
+    case "equation":
+      return value;
+    case "concept":
+      return value;
+    case "problem":
+      return value;
+    default:
+      exhaustiveMatchingGuard(typedVariableTyp);
+  }
+}
+
 const variables = $state<[number, VariableLoose][]>(
   defaultVariables.map(v => {
     lastGreatestIndex += 1;
-    return [lastGreatestIndex, v];
+    return [lastGreatestIndex, {
+      ...v,
+      label: v.label ? v.label : getLabelFromId(v.value, v.typ),
+    }];
   }),
 );
 

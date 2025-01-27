@@ -54,11 +54,12 @@ export function validateSchemaArray(data: unknown) {
 export type Variable = InferOutput<typeof schema>;
 export type VariableValue = InferOutput<typeof variableValueSchema>;
 export type VariableType = InferOutput<typeof schema>["typ"];
+export type VariableTypeLoose = VariableType | ({} & string);
 export const VARIABLE_TYPES: VariableType[] = ["image", "equation", "concept", "problem", "text"] as const;
 export type VariableArray = InferOutput<typeof schemaArray>;
 export type VariableLoose = {
   name: string;
-  typ?: VariableType | ({} & string);
+  typ?: VariableTypeLoose;
   nullable?: boolean;
   value?: string | null;
   label?: string | null;

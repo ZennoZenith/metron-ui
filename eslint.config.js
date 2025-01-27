@@ -97,4 +97,9 @@ export default ts.config(
       ],
     },
   },
+  {
+    rules: {
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
+    },
+  },
 );

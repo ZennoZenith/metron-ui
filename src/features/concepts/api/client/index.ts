@@ -50,7 +50,6 @@ export async function searchConcept(
 export async function createConcept(
   data: unknown,
 ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-  console.log(data);
   const parsed = validateCreateSchema(data);
   if (parsed.err) {
     return parsed;
@@ -91,7 +90,6 @@ export async function createConcept(
 export async function updateConcept(
   data: unknown,
 ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-  console.log(data);
   const parsed = validateUpdateSchema(data);
   if (parsed.err) {
     return parsed;

@@ -3,15 +3,17 @@ import { applyAction, enhance } from "$app/forms";
 import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import TagSearch from "$components/TagSearch.svelte";
-import { updateConcept } from "$features/concepts/api/client";
-import { type UpdateIssues } from "$features/concepts/schemas/update";
+import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect.svelte";
+import Variants from "$features/variants/components/Variants.svelte";
+// import { updateProblem } from "$features/problems/api/client";
+import { type UpdateIssues } from "$features/problems/schemas/update";
 import Variables from "$features/variables/components/Variables.svelte";
 import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
 import type { VariableType } from "$schemas/variable";
-import type { Concept } from "$type/concepts";
+import type { Problem } from "$type/problems";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
 
@@ -20,36 +22,38 @@ const toaster = getToaster();
 let deleteFormRef = $state<HTMLFormElement>();
 let tagSearchRef = $state<TagSearch>();
 let variablesRef = $state<Variables>();
+let variantsRef = $state<Variants>();
+let questionTypeRef = $state<QuestionTypeSelect>();
 let deleteConformationDialog = $state<ConformationDialog>();
 let failureResopnse = $state<UpdateIssues & { message?: string }>();
 
 const { data }: { data: PageData } = $props();
-const { concept } = data;
+const { problem } = data;
 let edit = $state(data.edit);
 
 function getDefaultLabel(
-  concept: Concept,
+  problem: Problem,
   typ: VariableType,
   value?: string | null,
 ) {
   if (value === undefined || value === null) return undefined;
   switch (typ) {
     case "image":
-      return concept.images.find(v => v.id === value)?.title;
+      return problem.images.find(v => v.id === value)?.title;
     case "equation":
-      return concept.equations.find(v => v.id === value)?.title;
-    case "concept":
-      return concept.concepts.find(v => v.id === value)?.title;
+      return problem.equations.find(v => v.id === value)?.title;
+    case "problem":
+      return problem.problems.find(v => v.id === value)?.problemStatement;
     case "problem":
       return undefined;
   }
   return undefined;
 }
 
-const defaultVariables = concept.variables.map(v => {
+const defaultVariables = problem.variables.map(v => {
   return {
     ...v,
-    defaultValueLabel: getDefaultLabel(concept, v.typ, v.defaultValue),
+    defaultValueLabel: getDefaultLabel(problem, v.typ, v.defaultValue),
   };
 });
 
@@ -72,14 +76,14 @@ function setFailureResponse(error?: ErrorObject) {
   }
 }
 
-const deleteConcept: SubmitFunction = (
+const deleteProblem: SubmitFunction = (
   { formData, formElement, cancel },
 ) => {
   const { id } = Object.fromEntries(formData.entries());
   const isValidUuid = validateUuid(id.toString());
 
   if (!isValidUuid) {
-    toaster.error("Invalid concept id:uuid");
+    toaster.error("Invalid problem id:uuid");
     cancel();
     return;
   }
@@ -95,9 +99,9 @@ const deleteConcept: SubmitFunction = (
       case "success":
         formElement.reset();
         toaster.success(
-          `Concept deleted successfully redirecting to /concepts in 5sec`,
+          `Problem deleted successfully redirecting to /problems in 5sec`,
         );
-        setTimeout(() => goto("/concepts"), 5000);
+        setTimeout(() => goto("/problems"), 5000);
         break;
       case "failure":
         toaster.error(result.data?.message ?? "");
@@ -136,61 +140,61 @@ async function onFormSubmit(
   )
     .join(",");
 
-  const concepts = variables.filter(v => v.typ === "concept").map(v =>
+  const problems = variables.filter(v => v.typ === "problem").map(v =>
     v.defaultValue
   )
     .join(",");
 
-  const maybeConcepts = await updateConcept({
-    id,
-    title,
-    description: description?.trim().length === 0 ? null : description,
-    content,
-    equations,
-    tags,
-    images,
-    concepts,
-    variables,
-  });
-
-  if (maybeConcepts.err) {
-    toaster.error(
-      maybeConcepts.unwrapErr().message ?? "Internal Server Error",
-    );
-    const errorObj = maybeConcepts.unwrapErr().error;
-    console.error(errorObj);
-    setFailureResponse(errorObj);
-    return;
-  }
-
-  if (maybeConcepts.isOk()) {
-    toaster.success("Concept updated");
-    setTimeout(
-      () => window.location.replace(`/concepts/${concept.id}`),
-      5000,
-    );
-  }
+  //  const maybeProblems = await updateProblem({
+  //    id,
+  //    title,
+  //    description: description?.trim().length === 0 ? null : description,
+  //    content,
+  //    equations,
+  //    tags,
+  //    images,
+  //    problems,
+  //    variables,
+  //  });
+  //
+  //  if (maybeProblems.err) {
+  //    toaster.error(
+  //      maybeProblems.unwrapErr().message ?? "Internal Server Error",
+  //    );
+  //    const errorObj = maybeProblems.unwrapErr().error;
+  //    console.error(errorObj);
+  //    setFailureResponse(errorObj);
+  //    return;
+  //  }
+  //
+  //  if (maybeProblems.isOk()) {
+  //    toaster.success("Problem updated");
+  //    setTimeout(
+  //      () => window.location.replace(`/problems/${problem.id}`),
+  //      5000,
+  //    );
+  //  }
 }
 </script>
 
 <ConformationDialog
   bind:this={deleteConformationDialog}
-  title="Delete Concept "
-  content="Are you sure you want to delete concept"
+  title="Delete Problem "
+  content="Are you sure you want to delete problem"
   onResponse={onDeleteResponse}
 />
 <form
   bind:this={deleteFormRef}
   method="POST"
-  action="/concepts?/delete"
-  use:enhance={deleteConcept}
+  action="/problems?/delete"
+  use:enhance={deleteProblem}
   hidden
   class="absolute w-0 h-0 overflow-hidden"
 >
   <input
     name="id"
     class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-    value={concept.id}
+    value={problem.id}
     type="hidden"
     aria-disabled="true"
   />
@@ -223,69 +227,57 @@ async function onFormSubmit(
   onsubmit={onFormSubmit}
   class="mx-auto grid grid-cols-1 gap-4"
 >
-  <input type="hidden" name="id" value={concept.id}>
+  <input type="hidden" name="id" value={problem.id}>
 
   <label>
     <div>
-      Title <span class="text-error" aria-label="required"> * </span>
+      Problem Statement
+      <span class="text-error" aria-label="required"> * </span>
     </div>
     <textarea
-      id="title"
+      class="w-full text-xl h-36 min-h-12 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="problemStatement"
+      required
+      value={problem.problemStatement}
+      disabled={!edit}
+    ></textarea>
+    {#if failureResopnse?.problemStatement}
+      <div class="text-error">
+        {failureResopnse.problemStatement[0]}
+      </div>
+    {/if}
+  </label>
+
+  <label>
+    <div>
+      Hint <span aria-label="optional"></span>
+    </div>
+    <textarea
       class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
       placeholder=""
-      name="title"
-      required
-      value={concept.title}
+      name="hint"
+      value={problem.hint}
       disabled={!edit}
     ></textarea>
-    {#if failureResopnse?.title}
+    {#if failureResopnse?.hint}
       <div class="text-error">
-        {failureResopnse.title[0]}
+        {failureResopnse.hint[0]}
       </div>
     {/if}
   </label>
 
-  <label class="">
-    <div class="label">
-      Description <span aria-label="optional"></span>
-    </div>
-    <textarea
-      id="description"
-      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="description"
-      value={concept.description}
+  {#key edit}
+    <QuestionTypeSelect
+      bind:this={questionTypeRef}
+      name="questionType"
+      defaultValue={problem.questionType}
       disabled={!edit}
-    ></textarea>
-    {#if failureResopnse?.description}
-      <div class="text-error">
-        {failureResopnse.description[0]}
-      </div>
-    {/if}
-  </label>
-
-  <label class="">
-    <div class="label">
-      Content <span class="text-error" aria-label="required"> * </span>
-    </div>
-    <textarea
-      id="content"
-      class="w-full text-xl min-h-12 h-96 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="content"
-      value={concept.content}
-      required
-      disabled={!edit}
-    ></textarea>
-    {#if failureResopnse?.content}
-      <div class="text-error">
-        {failureResopnse.content[0]}
-      </div>
-    {/if}
-  </label>
+    />
+  {/key}
 
   {#if edit}
-    <TagSearch bind:this={tagSearchRef} defaultSelectedTags={concept.tags} />
+    <TagSearch bind:this={tagSearchRef} defaultSelectedTags={problem.tags} />
     {#if failureResopnse?.tags}
       <div class="text-error">
         {failureResopnse.tags[0]}
@@ -295,7 +287,7 @@ async function onFormSubmit(
     <div
       class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
     >
-      {#each concept.tags as tag}
+      {#each problem.tags as tag}
         <span
           class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
         >
@@ -305,12 +297,39 @@ async function onFormSubmit(
     </div>
   {/if}
 
+  <label>
+    <div>
+      Explanation <span aria-label="optional"></span>
+    </div>
+    <textarea
+      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
+      placeholder=""
+      name="explanation"
+      value={problem.explanation}
+      disabled={!edit}
+    ></textarea>
+    {#if failureResopnse?.explanation}
+      <div class="text-error">
+        {failureResopnse.explanation[0]}
+      </div>
+    {/if}
+  </label>
+
   <Variables
     bind:this={variablesRef}
-    allowedVariableTypes={["image", "equation", "concept"]}
-    {defaultVariables}
-    disableNullable
+    allowedValues={["text", "image", "equation", "concept", "problem"]}
+    defaultVariables={problem.variables.map(v => {
+      return {
+        name: v.name,
+        typ: v.typ,
+        nullable: v.nullable,
+        value: v.defaultValue,
+      };
+    })}
+    disabled={!edit}
   />
+
+  <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

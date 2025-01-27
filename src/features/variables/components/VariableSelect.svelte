@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Check, ChevronDown } from "$icons/index.js";
-import type { VariableType } from "$type/variables";
+import type { VariableTypeLoose } from "$schemas/variable";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
@@ -8,8 +8,8 @@ type Props = {
   name?: string;
   disabled?: boolean;
   required?: boolean;
-  defaultValue?: VariableType | ({} & string);
-  allowedValues?: (VariableType | {} & string)[];
+  defaultValue?: VariableTypeLoose;
+  allowedValues?: VariableTypeLoose[];
   onChange?: (
     state: {
       curr?: { value: string; label?: string };
@@ -34,7 +34,7 @@ const {
 }: Props = $props();
 
 interface Variable {
-  value: VariableType | ({} & string);
+  value: VariableTypeLoose;
   label: string;
   disabled: boolean;
 }
