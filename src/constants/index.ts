@@ -7,3 +7,9 @@ export const API_BASE_ROUTE = env.PUBLIC_API_BASE_ROUTE ?? "http://localhost:101
 export const IMAGE_BASE_ROUTE = env.PUBLIC_IMAGE_BASE_ROUTE ?? "http://localhost:10109";
 export const DEFAULT_TOAST_DURATION_TIME = 5000; // in milliseconds
 export const isDevelopment = env.PUBLIC_NODE_ENV === "development";
+
+export const API_TIMEOUT = 15000;
+export const API_HOST = "127.0.0.1";
+export const API_PORT = "";
+export const API_VRSION = "";
+export const API_PROTOCOL = "http";
