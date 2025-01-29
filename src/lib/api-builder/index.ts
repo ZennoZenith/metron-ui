@@ -1,5 +1,4 @@
 import { API_HOST, API_PORT, API_PROTOCOL, API_VRSION } from "$constants";
-import HealthCheck from "./health-check";
 
 // type FetchOptions = {
 //   url: string;
@@ -24,15 +23,12 @@ export type RequiredOptions = {
   headers: HeadersInit;
 };
 
-export class ApiClient {
+export class ApiClientOptions {
   private apiCalls = 0;
-  // readonly trains: Trains;
-  readonly healthCheck: HealthCheck;
-  readonly headers: HeadersInit;
-  private readonly options: RequiredOptions;
+  readonly options: RequiredOptions;
 
   constructor(options: Options = {}) {
-    this.headers = {};
+    const headers: HeadersInit = {};
 
     const url = new URL(
       options.API_VERSION || API_VRSION,
@@ -41,23 +37,19 @@ export class ApiClient {
     url.port = options.API_PORT || API_PORT;
 
     if (options.API_KEY !== "") {
-      this.headers["x-api-key"] = options.API_KEY ?? "";
+      headers["x-api-key"] = options.API_KEY ?? "";
     }
 
     this.options = Object.freeze({
       API_KEY: options.API_KEY?.trim() || "",
       url,
-      headers: this.headers,
+      headers,
     });
-    this.healthCheck = new HealthCheck(this.options);
-    // this.trains = new Trains(this);
   }
 
   get getApiCalls() {
     return this.apiCalls;
   }
-
-  // log() {
-  //   console.log(this.options);
-  // }
 }
+
+export const apiClientOptions = new ApiClientOptions({ API_PORT: "10105" });
