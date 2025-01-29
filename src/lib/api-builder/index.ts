@@ -17,7 +17,7 @@ type Options = {
   API_TIMEOUT?: number;
 };
 
-export type RequiredOptions = {
+type RequiredOptions = {
   API_KEY: string;
   url: URL;
   headers: HeadersInit;

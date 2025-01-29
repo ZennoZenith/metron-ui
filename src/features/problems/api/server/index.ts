@@ -62,31 +62,6 @@ export async function searchProblemsByQueryTitle(query: string) {
 /**
  * Call from serverside only
  */
-export async function searchProblemById(id: string) {
-  const isValidUuid = validateUuid(id);
-  if (!isValidUuid) {
-    return Err(new ValidationError({}, ["Invalid problem id:uuid"]));
-  }
-
-  const errorOrJson = await fetchJson(`${API_BASE_ROUTE}/problems/id/${id}`, {
-    method: "GET",
-  });
-
-  if (errorOrJson.err) {
-    return errorOrJson as Result<never, typeof errorOrJson.err>;
-  }
-
-  const maybeParseJson = validateSchema(errorOrJson.unwrap());
-  if (maybeParseJson.err) {
-    return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
-  }
-
-  return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
-}
-
-/**
- * Call from serverside only
- */
 export async function deleteProblem(id: string) {
   const isValidUuid = validateUuid(id);
   if (!isValidUuid) {

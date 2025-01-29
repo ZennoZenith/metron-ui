@@ -1,7 +1,7 @@
 import type { ApiClientOptions } from "$lib/api-builder";
 import { ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type Image, validateSchema } from "$schemas/images/self";
+import { type Problem, validateSchema } from "$schemas/problems/self";
 import { validateUuid } from "$schemas/uuid";
 import { fetchJson } from "$utils";
 
@@ -14,11 +14,11 @@ export default class ApiClient {
     this.url = options.options.url;
   }
 
-  async getImageById(id: unknown) {
+  async getProblemById(id: unknown) {
     if (!validateUuid(id)) {
       return Err(new ValidationError({ id: ["Invalid uuid"] }, ["Invalid uuid"]));
     }
-    const url = new URL(`images/id/${id}`, this.url);
+    const url = new URL(`problems/id/${id}`, this.url);
     const errorOrJson = await fetchJson(url, {
       method: "GET",
       headers: {
@@ -35,6 +35,6 @@ export default class ApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Image, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
   }
 }

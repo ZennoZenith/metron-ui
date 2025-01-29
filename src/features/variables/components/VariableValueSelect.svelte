@@ -1,5 +1,8 @@
 <script lang="ts">
+import ImageApiClient from "$features/images/api";
+import { apiClientOptions } from "$lib/api-builder";
 import type {
+  Variable,
   VariableArray,
   VariableLoose,
   VariableValue,
@@ -8,6 +11,8 @@ import { uniqByKeepLast } from "$utils";
 import { Debounce } from "$utils/debounce";
 import { untrack } from "svelte";
 import VariableValueComp from "./VariableValue.svelte";
+
+const imageClient = new ImageApiClient(apiClientOptions);
 
 interface Props {
   variables: VariableArray;
@@ -71,9 +76,27 @@ function mergeAsRightArrayUniq(
     });
 }
 
-function variableValueToVariableLoose(
+async function getLabelFromVariable(variable: Variable) {
+  switch (variable.typ) {
+    case "text":
+      return variable.defaultValue;
+    case "image":
+      const image = (await imageClient.getImageById(variable.defaultValue))
+        .unwrapOr(() => "");
+    case "equation":
+      return problem.equations.find(v => v.id === value)?.title;
+    case "problem":
+      return problem.problems.find(v => v.id === value)?.problemStatement;
+    case "concept":
+      return problem.concepts.find(v => v.id === value)?.title;
+    default:
+      return exhaustiveMatchingGuard(typ);
+  }
+}
+
+async function variableValueToVariableLoose(
   variable?: VariableValue,
-): VariableLoose {
+): Promise<VariableLoose> {
   if (!variable) return { name: "undefined" };
   const v = variables.find(v => v.name === variable.name);
   if (!v) return { name: "undefined" };
@@ -82,7 +105,8 @@ function variableValueToVariableLoose(
     name: v.name,
     typ: v.typ,
     nullable: v.nullable,
-    value: "",
+    value: v.defaultValue,
+    label: undefined,
   };
 }
 

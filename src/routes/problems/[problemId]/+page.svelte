@@ -12,8 +12,9 @@ import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
-import type { VariableType } from "$schemas/variable";
+import type { VariableLoose, VariableType } from "$schemas/variable";
 import type { Problem } from "$type/problems";
+import { exhaustiveMatchingGuard } from "$utils";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
 
@@ -38,25 +39,32 @@ function getDefaultLabel(
 ) {
   if (value === undefined || value === null) return undefined;
   switch (typ) {
+    case "text":
+      return value;
     case "image":
       return problem.images.find(v => v.id === value)?.title;
     case "equation":
       return problem.equations.find(v => v.id === value)?.title;
     case "problem":
       return problem.problems.find(v => v.id === value)?.problemStatement;
-    case "problem":
-      return undefined;
+    case "concept":
+      return problem.concepts.find(v => v.id === value)?.title;
+    default:
+      return exhaustiveMatchingGuard(typ);
   }
-  return undefined;
 }
 
 const defaultVariables = problem.variables.map(v => {
   return {
-    ...v,
-    defaultValueLabel: getDefaultLabel(problem, v.typ, v.defaultValue),
-  };
+    name: v.name,
+    typ: v.typ,
+    nullable: v.nullable,
+    value: v.defaultValue,
+    label: getDefaultLabel(problem, v.typ, v.defaultValue),
+  } as VariableLoose;
 });
 
+console.log(defaultVariables);
 function onDeleteResponse(answer: boolean) {
   if (answer) {
     deleteFormRef?.requestSubmit();
@@ -318,14 +326,7 @@ async function onFormSubmit(
   <Variables
     bind:this={variablesRef}
     allowedValues={["text", "image", "equation", "concept", "problem"]}
-    defaultVariables={problem.variables.map(v => {
-      return {
-        name: v.name,
-        typ: v.typ,
-        nullable: v.nullable,
-        value: v.defaultValue,
-      };
-    })}
+    {defaultVariables}
     disabled={!edit}
   />
 

@@ -2,7 +2,7 @@ import { custom, type InferOutput, pipe, safeParse, string, uuid } from "valibot
 
 export const uuidSchema = pipe(string("Uuid must be stirng"), uuid("The Uuid is badly formatted."));
 
-export function validateUuid(value: string) {
+export function validateUuid(value: unknown) {
   return safeParse(uuidSchema, value).success;
 }
 
