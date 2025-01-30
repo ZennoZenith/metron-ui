@@ -1,42 +1,44 @@
 <script lang="ts">
-import { VariableLoose, type VariableValue } from "$schemas/variable";
+import {
+  InternalVariable,
+  type VariableValue as VariableValueType,
+} from "$schemas/variable.svelte";
 import { uniqByKeepLast } from "$utils";
 import { Debounce } from "$utils/debounce";
 import { untrack } from "svelte";
-import VariableValueComp from "./VariableValue.svelte";
+import VariableValue from "./VariableValue.svelte";
 
 interface Props {
-  variables: VariableLoose[];
+  internalVariables: InternalVariable[];
 }
 
-const { variables }: Props = $props();
+const { internalVariables }: Props = $props();
 
 const debounce = new Debounce();
 
 const requiredVariables = $derived(
-  variables.filter(v => v.required === true),
+  internalVariables.filter(v => v.required === true),
 );
 const optionalVariables = $derived(
-  variables.filter(v => v.required === false),
+  internalVariables.filter(v => v.required === false),
 );
 
-let requiredVariableValues = $state<VariableValue[]>([]);
-let optionalVariableValues = $state<VariableValue[]>([]);
+let requiredVariableValues = $state<VariableValueType[]>([]);
+let optionalVariableValues = $state<VariableValueType[]>([]);
 $effect(() => {
-  variables;
-  console.log(variables);
+  internalVariables;
   untrack(() => {
     const temp1 = requiredVariables.map(v => {
       return {
         name: v.name,
         value: "",
-      } satisfies VariableValue as VariableValue;
+      } satisfies VariableValueType as VariableValueType;
     });
     const temp2 = optionalVariables.map(v => {
       return {
         name: v.name,
         value: "",
-      } satisfies VariableValue as VariableValue;
+      } satisfies VariableValueType as VariableValueType;
     });
     requiredVariableValues = mergeAsRightArrayUniq(
       requiredVariableValues,
@@ -50,9 +52,9 @@ $effect(() => {
 });
 
 function mergeAsRightArrayUniq(
-  arr1: VariableValue[],
-  arr2: VariableValue[],
-): VariableValue[] {
+  arr1: VariableValueType[],
+  arr2: VariableValueType[],
+): VariableValueType[] {
   return uniqByKeepLast(arr2, v => v.name)
     .map(v => {
       return {
@@ -91,8 +93,8 @@ export function getVariableValues() {
       <div>
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
-      <VariableValueComp
-        variable={variables.find(v => variable.name === v.name) as VariableLoose}
+      <VariableValue
+        internalVariable={internalVariables.find(v => variable.name === v.name) as InternalVariable}
         oninput={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;
@@ -122,8 +124,8 @@ export function getVariableValues() {
       <div>
         Value
       </div>
-      <VariableValueComp
-        variable={variables.find(v => variable.name === v.name) as VariableLoose}
+      <VariableValue
+        internalVariable={internalVariables.find(v => variable.name === v.name) as InternalVariable}
         oninput={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;

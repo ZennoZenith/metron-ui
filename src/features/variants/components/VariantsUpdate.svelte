@@ -1,7 +1,7 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { type VariableArray, VariableLoose } from "$schemas/variable";
+import { InternalVariable, type VariableArray } from "$schemas/variable.svelte";
 import type { VariantUpdate } from "$schemas/variant";
 import type { Problem } from "$type/problems";
 import Answers from "./Answers.svelte";
@@ -99,9 +99,9 @@ export function getVariants(): VariantUpdate[] {
         <div>Variable value(s)</div>
         <VariableValueSelect
           bind:this={variant.variableValueSelectRef}
-          variables={defaultProblem
-          ? VariableLoose.fromProblemVariantToArray(defaultProblem, variant.id)
-          : VariableLoose.fromVariablesToArray(variables)}
+          internalVariables={defaultProblem
+          ? InternalVariable.fromProblemVariantToArray(defaultProblem, variant.id)
+          : InternalVariable.fromVariablesToArray(variables)}
         />
       </div>
       {#if variants.length !== 1}

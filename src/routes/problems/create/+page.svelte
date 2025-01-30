@@ -7,7 +7,7 @@ import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
-import { VARIABLE_TYPES } from "$schemas/variable";
+import { VARIABLE_TYPES } from "$schemas/variable.svelte";
 import type { VariantCreate } from "$schemas/variant";
 import type { Variable, VariableType } from "$type/variables";
 
@@ -225,7 +225,10 @@ async function onFormSubmit(
     allowedValues={structuredClone(VARIABLE_TYPES)}
   />
 
-  <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />
+  <Variants
+    bind:this={variantsRef}
+    internalVariables={variablesRef?.getInternalVariables()}
+  />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

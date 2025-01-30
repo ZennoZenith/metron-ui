@@ -2,10 +2,10 @@
 import { Switch } from "$components/melt";
 import { PlusCircled, Trash } from "$icons";
 import {
+  InternalVariable,
   VARIABLE_TYPES,
   type VariableArray,
-  VariableLoose,
-} from "$schemas/variable";
+} from "$schemas/variable.svelte";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
 import VariableSelect from "./VariableSelect.svelte";
@@ -15,53 +15,49 @@ let lastGreatestIndex = 0;
 
 interface Props {
   disabled?: boolean;
-  defaultVariables?: VariableLoose[];
+  defaultInternalVariables?: InternalVariable[];
   disableNullable?: boolean;
   allowedValues?: (VariableType | {} & string)[];
 }
 
-const DEFAULT_VARIABLE = {
-  name: "",
-  typ: undefined,
-  nullable: false,
-  defaultValue: null,
-  defaultValueLabel: undefined,
-  required: true,
-};
 const {
   disableNullable = false,
-  defaultVariables = [],
+  defaultInternalVariables: defaultVariables = [],
   allowedValues = structuredClone(VARIABLE_TYPES),
   disabled = false,
 }: Props = $props();
 
 const debounce = new Debounce();
 
-const variables = $state<[number, VariableLoose][]>(
+const internalVariables = $state<[number, InternalVariable][]>(
   defaultVariables.map(v => {
     lastGreatestIndex += 1;
     return [lastGreatestIndex, v];
   }),
 );
 
-function addVariable() {
+$inspect(internalVariables);
+
+function addInternalVariable() {
   lastGreatestIndex += 1;
-  variables.push([
+  internalVariables.push([
     lastGreatestIndex,
-    structuredClone(DEFAULT_VARIABLE),
+    InternalVariable.default(),
   ]);
 }
 
-function removeVariable(index: number) {
-  const indexToRemove = variables.findIndex(value => value[0] === index);
+function removeInternalVariable(index: number) {
+  const indexToRemove = internalVariables.findIndex(value =>
+    value[0] === index
+  );
   if (indexToRemove < 0) {
     return;
   }
-  variables.splice(indexToRemove, 1);
+  internalVariables.splice(indexToRemove, 1);
 }
 
 export function getVariables() {
-  return $state.snapshot(variables.map(v => {
+  return $state.snapshot(internalVariables.map(v => {
     let typ: VariableType = "text";
     if (
       (VARIABLE_TYPES as string[]).includes(
@@ -80,55 +76,59 @@ export function getVariables() {
   })) satisfies VariableArray as VariableArray;
 }
 
+export function getInternalVariables(): InternalVariable[] {
+  return internalVariables.map(internalVariable => internalVariable[1]);
+}
+
 export function clearVariables() {
-  variables.length = 0;
+  internalVariables.length = 0;
   lastGreatestIndex = 1;
-  variables.push(
-    [lastGreatestIndex, structuredClone(DEFAULT_VARIABLE)],
+  internalVariables.push(
+    [lastGreatestIndex, InternalVariable.default()],
   );
 }
 </script>
 
 <div class="grid grid-cols-1 gap-1 p-4">
-  {#each variables as [indexId, variable] (indexId)}
+  {#each internalVariables as [indexId, internalVariable] (indexId)}
     <div class="relative grid grid-cols-1 sm:grid-cols-2 border-2 gap-2 p-2">
       <input
         type="text"
         class="w-full h-10 outline-none"
-        value={variable?.name}
+        value={internalVariable.name}
         placeholder="Variable name*"
         oninput={event => {
           debounce.debounceAsync((value: string) => {
-            variable.name = value;
+            internalVariable.name = value;
           })(event.currentTarget.value);
         }}
       >
       <VariableSelect
-        defaultValue={variable.typ}
+        defaultValue={internalVariable.typ}
         {allowedValues}
         onChange={({ next }) => {
-          variable.typ = next?.value;
-          variable.value = undefined;
-          variable.label = undefined;
+          internalVariable.typ = next?.value;
+          internalVariable.value = undefined;
+          internalVariable.label = undefined;
         }}
       />
       <Switch
         label="Is nullable? "
         disabled={disableNullable}
-        defaultChecked={variable.nullable}
-        onChange={state => variable.nullable = state}
+        defaultChecked={internalVariable.nullable}
+        onChange={state => internalVariable.nullable = state}
       />
       <VariableValue
-        variable={$state.snapshot(variable)}
+        internalVariable={internalVariable}
         oninput={value => {
           debounce.debounceAsync((value: string) => {
-            variable.value = value;
+            internalVariable.value = value;
           })(value);
         }}
       />
       <button
         class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
-        onclick={() => removeVariable(indexId)}
+        onclick={() => removeInternalVariable(indexId)}
         type="button"
       >
         <Trash class="text-sm" />
@@ -138,7 +138,7 @@ export function clearVariables() {
   <div>
     <button
       class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
-      onclick={addVariable}
+      onclick={addInternalVariable}
       type="button"
     >
       Add variable <PlusCircled />

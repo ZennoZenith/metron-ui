@@ -59,58 +59,82 @@ export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableTypeLoose = VariableType | ({} & string);
 export const VARIABLE_TYPES: VariableType[] = ["text", "equation", "concept", "problem", "image"] as const;
 export type VariableArray = InferOutput<typeof schemaArray>;
-export class VariableLoose {
-  name: string;
-  typ?: VariableTypeLoose;
-  nullable?: boolean;
-  value?: string | null;
+export class InternalVariable {
+  readonly _tag = "InternalVariable" as const;
+  name: string = $state("");
+  typ?: VariableTypeLoose = $state();
+  nullable?: boolean = $state();
+  value?: string | null = $state();
   label?: string | null;
-  required: boolean;
+  required: boolean = $derived(
+    this?.nullable === false
+      && (this?.value === undefined || this?.value === null),
+  );
+  // name: string;
+  // typ?: VariableTypeLoose;
+  // nullable?: boolean;
+  // value?: string | null;
+  // label?: string | null;
+  // required: boolean = true;
   constructor(values: {
     name: string;
     typ?: VariableTypeLoose;
     nullable?: boolean;
     value?: string | null;
     label?: string | null;
-    required: boolean;
   }) {
     this.name = values.name;
     this.typ = values.typ;
     this.nullable = values.nullable;
     this.value = values.value;
     this.label = values.label;
-    this.required = values.required;
   }
 
-  public static fromProblem(problem: Problem, variableName: string): Result<VariableLoose, GenericError> {
+  public log() {
+    console.log({
+      name: this.name,
+      typ: this.typ,
+      nullable: this.nullable,
+      value: this.value,
+      label: this.label,
+      requred: this.required,
+    });
+  }
+
+  public static default() {
+    return new InternalVariable({
+      name: "",
+      typ: undefined,
+      nullable: false,
+      value: null,
+      label: null,
+    });
+  }
+  public static fromProblem(problem: Problem, variableName: string): Result<InternalVariable, GenericError> {
     const variable = problem.variables.find(v => v.name === variableName);
     if (!variable) {
       return Err(new GenericError({}, [`variable with variable name: ${variableName} does not exist in Problem`]));
     }
 
     return Ok(
-      new VariableLoose({
+      new InternalVariable({
         name: variable.name,
         typ: variable.typ,
         nullable: variable.nullable,
         value: variable.defaultValue,
-        label: VariableLoose.getDefaultLabel(problem, variable),
-        required: variable.nullable === false
-          && (variable.defaultValue === undefined || variable.defaultValue === null),
+        label: InternalVariable.getDefaultLabel(problem, variable),
       }),
     );
   }
 
-  public static fromProblemToArray(problem: Problem): VariableLoose[] {
+  public static fromProblemToArray(problem: Problem): InternalVariable[] {
     return problem.variables.map(variable => {
-      return new VariableLoose({
+      return new InternalVariable({
         name: variable.name,
         typ: variable.typ,
         nullable: variable.nullable,
         value: variable.defaultValue,
-        label: VariableLoose.getDefaultLabel(problem, variable),
-        required: variable.nullable === false
-          && (variable.defaultValue === undefined || variable.defaultValue === null),
+        label: InternalVariable.getDefaultLabel(problem, variable),
       });
     });
   }
@@ -118,7 +142,7 @@ export class VariableLoose {
   static fromProblemVariantToArray(
     problem: Problem,
     id: string | null | undefined,
-  ): VariableLoose[] {
+  ): InternalVariable[] {
     const variant = problem.variants.find(v => v.id === id);
     if (!variant) {
       console.error("Not a variant");
@@ -126,28 +150,24 @@ export class VariableLoose {
     }
     const ret = variant.variableValues.map(v => {
       const variable = problem.variables.find(p => p.name === v.name)!;
-      return new VariableLoose({
+      return new InternalVariable({
         name: variable.name,
         typ: variable.typ,
         nullable: variable.nullable,
         value: v.value,
-        label: VariableLoose.getLabelFromVariableNameValue(problem, variable, v.value),
-        required: variable.nullable === false
-          && (variable.defaultValue === undefined || variable.defaultValue === null),
+        label: InternalVariable.getLabelFromVariableNameValue(problem, variable, v.value),
       });
     });
 
     problem.variables.forEach(variable => {
       if (ret.findIndex(t => t.name === variable.name) === -1) {
         ret.push(
-          new VariableLoose({
+          new InternalVariable({
             name: variable.name,
             typ: variable.typ,
             nullable: variable.nullable,
             value: undefined,
             label: undefined,
-            required: variable.nullable === false
-              && (variable.defaultValue === undefined || variable.defaultValue === null),
           }),
         );
       }
@@ -156,19 +176,17 @@ export class VariableLoose {
   }
 
   public static fromVariable(variable: Variable) {
-    return new VariableLoose({
+    return new InternalVariable({
       name: variable.name,
       typ: variable.typ,
       nullable: variable.nullable,
       value: variable.defaultValue,
       label: undefined,
-      required: variable.nullable === false
-        && (variable.defaultValue === undefined || variable.defaultValue === null),
     });
   }
 
   public static fromVariablesToArray(variables: Variable[]) {
-    return variables.map(v => VariableLoose.fromVariable(v));
+    return variables.map(v => InternalVariable.fromVariable(v));
   }
 
   private static getDefaultLabel(

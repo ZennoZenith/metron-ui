@@ -3,7 +3,7 @@ import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";
 import { questionTypeSchema } from "$schemas/problems/self";
 import { uuidArrayString } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable";
+import { schemaArray as variableSchemaArray } from "$schemas/variable.svelte";
 import { schemaCreateArray as varientSchemaCreateArray } from "$schemas/variant";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
 

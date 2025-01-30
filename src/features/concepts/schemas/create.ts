@@ -2,7 +2,7 @@ import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content, title } from "$schemas";
 import { uuidArrayString } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable";
+import { schemaArray as variableSchemaArray } from "$schemas/variable.svelte";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
 
 export const createSchema = pipe(

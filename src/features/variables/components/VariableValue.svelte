@@ -1,49 +1,51 @@
 <script lang="ts">
 import { IdCard, MagnifyingGlass } from "$icons";
 import {
+  InternalVariable,
   VARIABLE_TYPES,
-  VariableLoose,
   type VariableType,
-} from "$schemas/variable";
+} from "$schemas/variable.svelte";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
-  variable: VariableLoose;
+  internalVariable: InternalVariable;
   oninput?: (value: string) => void;
 }
-const { variable, oninput = () => {} }: Props = $props();
+const { internalVariable, oninput = () => {} }: Props = $props();
 let variableImageSearchRef = $state<VariableSearch>();
 
-const reactiveVariable = $state(variable);
+// const reactiveVariable = $state(internalVariable);
 
 function onVariableSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
-  reactiveVariable.value = searchResult.id;
-  reactiveVariable.label = searchResult.title;
+  // reactiveVariable.value = searchResult.id;
+  // reactiveVariable.label = searchResult.title;
+  internalVariable.value = searchResult.id;
+  internalVariable.label = searchResult.title;
 
   oninput(searchResult.id);
 }
 </script>
 
 <VariableSearch
-  variableType={variable?.typ}
+  variableType={internalVariable?.typ}
   bind:this={variableImageSearchRef}
   onResponse={onVariableSelect}
 />
 
-{#if variable.typ === "text"}
+{#if internalVariable?.typ === "text"}
   <input
     type="text"
     class="w-full h-10 outline-none"
     placeholder="Default value"
-    value={reactiveVariable.value}
+    value={internalVariable.value}
     oninput={event => {
-      reactiveVariable.value = event.currentTarget.value;
+      internalVariable.value = event.currentTarget.value;
       oninput(event.currentTarget.value);
     }}
   >
-{:else if VARIABLE_TYPES.includes(variable.typ as VariableType)}
+{:else if VARIABLE_TYPES.includes(internalVariable?.typ as VariableType)}
   <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
     <button
       class="px-2 flex items-center gap-1 h-full grow"
@@ -51,7 +53,7 @@ function onVariableSelect(searchResult?: SearchResult) {
     >
       <IdCard class="text-warning shrink" />
       <div class="grow text-left">
-        {reactiveVariable.label}
+        {internalVariable.label}
       </div>
     </button>
     <button

@@ -1,6 +1,6 @@
 <script lang="ts">
 import Variables from "$features/variables/components/Variables.svelte";
-import type { VariableArray } from "$schemas/variable";
+import type { VariableArray } from "$schemas/variable.svelte";
 const variables: VariableArray = $state([
   {
     name: "name1",
@@ -35,4 +35,4 @@ const variables: VariableArray = $state([
 ]);
 </script>
 
-<Variables defaultVariables={variables} />
+<Variables defaultInternalVariables={variables} />

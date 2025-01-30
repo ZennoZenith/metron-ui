@@ -8,7 +8,7 @@ import {
 import type { Prettify } from "$type";
 import { array, flatten, type InferOutput, minLength, nullish, object, pipe, safeParse } from "valibot";
 import { uuidSchema } from "./uuid";
-import { variableValueSchemaArray } from "./variable";
+import { variableValueSchemaArray } from "./variable.svelte";
 
 export const schemaCreate = object(
   {

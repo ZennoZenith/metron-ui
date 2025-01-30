@@ -1,16 +1,16 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { VariableLoose } from "$schemas/variable";
+import { InternalVariable } from "$schemas/variable.svelte";
 import type { VariantCreate } from "$schemas/variant";
 import Answers from "./Answers.svelte";
 
 interface Props {
-  variables: VariableLoose[];
+  internalVariables: InternalVariable[];
 }
 
 const {
-  variables = [],
+  internalVariables = [],
 }: Props = $props();
 
 let lastGreatestIndex = 1;
@@ -78,7 +78,7 @@ export function getVariants(): VariantCreate[] {
         <div>Variable value(s)</div>
         <VariableValueSelect
           bind:this={variant.variableValueSelectRef}
-          variables={variables}
+          internalVariables={internalVariables}
         />
       </div>
       {#if variants.length !== 1}

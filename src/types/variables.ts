@@ -1,1 +1,1 @@
-export type { Variable, VariableType, VariableValue } from "$schemas/variable";
+export type { Variable, VariableType, VariableValue } from "$schemas/variable.svelte";
