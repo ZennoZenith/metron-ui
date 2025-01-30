@@ -65,6 +65,7 @@ export function validateSchema(data: unknown) {
 export type Answer = InferOutput<typeof schema>;
 export type AnswerArray = InferOutput<typeof schemaArray>;
 export type AnswerCreate = InferOutput<typeof schemaCreate>;
+export type AnswerUpdate = InferOutput<typeof schemaUpdate>;
 
 export type AnswerIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
 export type AnswerArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];

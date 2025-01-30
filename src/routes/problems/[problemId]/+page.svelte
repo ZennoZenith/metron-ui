@@ -4,17 +4,15 @@ import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import TagSearch from "$components/TagSearch.svelte";
 import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect.svelte";
-import Variants from "$features/variants/components/Variants.svelte";
 // import { updateProblem } from "$features/problems/api/client";
 import { type UpdateIssues } from "$features/problems/schemas/update";
 import Variables from "$features/variables/components/Variables.svelte";
+import VariantsUpdate from "$features/variants/components/VariantsUpdate.svelte";
 import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
-import type { VariableLoose, VariableType } from "$schemas/variable";
-import type { Problem } from "$type/problems";
-import { exhaustiveMatchingGuard } from "$utils";
+import { VARIABLE_TYPES, VariableLoose } from "$schemas/variable";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
 
@@ -23,7 +21,7 @@ const toaster = getToaster();
 let deleteFormRef = $state<HTMLFormElement>();
 let tagSearchRef = $state<TagSearch>();
 let variablesRef = $state<Variables>();
-let variantsRef = $state<Variants>();
+let variantsUpdateRef = $state<VariantsUpdate>();
 let questionTypeRef = $state<QuestionTypeSelect>();
 let deleteConformationDialog = $state<ConformationDialog>();
 let failureResopnse = $state<UpdateIssues & { message?: string }>();
@@ -32,39 +30,8 @@ const { data }: { data: PageData } = $props();
 const { problem } = data;
 let edit = $state(data.edit);
 
-function getDefaultLabel(
-  problem: Problem,
-  typ: VariableType,
-  value?: string | null,
-) {
-  if (value === undefined || value === null) return undefined;
-  switch (typ) {
-    case "text":
-      return value;
-    case "image":
-      return problem.images.find(v => v.id === value)?.title;
-    case "equation":
-      return problem.equations.find(v => v.id === value)?.title;
-    case "problem":
-      return problem.problems.find(v => v.id === value)?.problemStatement;
-    case "concept":
-      return problem.concepts.find(v => v.id === value)?.title;
-    default:
-      return exhaustiveMatchingGuard(typ);
-  }
-}
+const defaultVariables = VariableLoose.fromProblemToArray(problem);
 
-const defaultVariables = problem.variables.map(v => {
-  return {
-    name: v.name,
-    typ: v.typ,
-    nullable: v.nullable,
-    value: v.defaultValue,
-    label: getDefaultLabel(problem, v.typ, v.defaultValue),
-  } as VariableLoose;
-});
-
-console.log(defaultVariables);
 function onDeleteResponse(answer: boolean) {
   if (answer) {
     deleteFormRef?.requestSubmit();
@@ -325,12 +292,16 @@ async function onFormSubmit(
 
   <Variables
     bind:this={variablesRef}
-    allowedValues={["text", "image", "equation", "concept", "problem"]}
+    allowedValues={structuredClone(VARIABLE_TYPES)}
     {defaultVariables}
     disabled={!edit}
   />
 
-  <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />
+  <VariantsUpdate
+    bind:this={variantsUpdateRef}
+    variables={variablesRef?.getVariables()}
+    defaultProblem={problem}
+  />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

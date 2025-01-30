@@ -1,14 +1,15 @@
 <script lang="ts">
 import { Trash } from "$icons";
-import type { AnswerCreate } from "$schemas/answer";
+import type { AnswerUpdate } from "$schemas/answer";
 
 interface Props {
-  answers: AnswerCreate[];
+  answers: AnswerUpdate[];
   defaultAnswer?: boolean;
   atleastOne?: boolean;
 }
 
-const DEFAULT_ANSWER: AnswerCreate = {
+const DEFAULT_ANSWER: AnswerUpdate = {
+  id: undefined,
   answer: "",
   explanation: undefined,
 };
@@ -35,6 +36,14 @@ function removeAnswer(indexToRemove: number): any {
 </script>
 {#each answers as answer, index}
   <div class="border rounded p-2 relative">
+    <input
+      class="hidden"
+      hidden
+      disabled
+      required
+      name="id"
+      value={answer.id}
+    />
     <label>
       <div>
         Answer <span class="text-error md:" aria-label="required"> * </span>

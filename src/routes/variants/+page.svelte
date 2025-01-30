@@ -1,7 +1,7 @@
 <script lang="ts">
 import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
-import type { VariableArray } from "$schemas/variable";
+import { VARIABLE_TYPES, type VariableArray } from "$schemas/variable";
 
 let variablesRef = $state<Variables>();
 
@@ -35,7 +35,7 @@ const variables: VariableArray = $state([
 
 <Variables
   bind:this={variablesRef}
-  allowedValues={["text", "image", "equation", "concept", "problem"]}
+  allowedValues={structuredClone(VARIABLE_TYPES)}
   defaultVariables={variables}
 />
 

@@ -1,21 +1,12 @@
 <script lang="ts">
-import ImageApiClient from "$features/images/api";
-import { apiClientOptions } from "$lib/api-builder";
-import type {
-  Variable,
-  VariableArray,
-  VariableLoose,
-  VariableValue,
-} from "$schemas/variable";
+import { VariableLoose, type VariableValue } from "$schemas/variable";
 import { uniqByKeepLast } from "$utils";
 import { Debounce } from "$utils/debounce";
 import { untrack } from "svelte";
 import VariableValueComp from "./VariableValue.svelte";
 
-const imageClient = new ImageApiClient(apiClientOptions);
-
 interface Props {
-  variables: VariableArray;
+  variables: VariableLoose[];
 }
 
 const { variables }: Props = $props();
@@ -23,22 +14,17 @@ const { variables }: Props = $props();
 const debounce = new Debounce();
 
 const requiredVariables = $derived(
-  variables.filter(v =>
-    v.nullable === false
-    && (v.defaultValue === undefined || v.defaultValue === null)
-  ),
+  variables.filter(v => v.required === true),
 );
 const optionalVariables = $derived(
-  variables.filter(v =>
-    v.nullable === true
-    || (v.defaultValue !== undefined && v.defaultValue !== null)
-  ),
+  variables.filter(v => v.required === false),
 );
 
 let requiredVariableValues = $state<VariableValue[]>([]);
 let optionalVariableValues = $state<VariableValue[]>([]);
 $effect(() => {
   variables;
+  console.log(variables);
   untrack(() => {
     const temp1 = requiredVariables.map(v => {
       return {
@@ -76,40 +62,6 @@ function mergeAsRightArrayUniq(
     });
 }
 
-async function getLabelFromVariable(variable: Variable) {
-  switch (variable.typ) {
-    case "text":
-      return variable.defaultValue;
-    case "image":
-      const image = (await imageClient.getImageById(variable.defaultValue))
-        .unwrapOr(() => "");
-    case "equation":
-      return problem.equations.find(v => v.id === value)?.title;
-    case "problem":
-      return problem.problems.find(v => v.id === value)?.problemStatement;
-    case "concept":
-      return problem.concepts.find(v => v.id === value)?.title;
-    default:
-      return exhaustiveMatchingGuard(typ);
-  }
-}
-
-async function variableValueToVariableLoose(
-  variable?: VariableValue,
-): Promise<VariableLoose> {
-  if (!variable) return { name: "undefined" };
-  const v = variables.find(v => v.name === variable.name);
-  if (!v) return { name: "undefined" };
-
-  return {
-    name: v.name,
-    typ: v.typ,
-    nullable: v.nullable,
-    value: v.defaultValue,
-    label: undefined,
-  };
-}
-
 export function getVariableValues() {
   return requiredVariableValues.concat(optionalVariableValues).filter(v =>
     v.value.trim().length > 0
@@ -140,7 +92,7 @@ export function getVariableValues() {
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
       <VariableValueComp
-        variable={variableValueToVariableLoose(variable)}
+        variable={variables.find(v => variable.name === v.name) as VariableLoose}
         oninput={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;
@@ -171,7 +123,7 @@ export function getVariableValues() {
         Value
       </div>
       <VariableValueComp
-        variable={variableValueToVariableLoose(variable)}
+        variable={variables.find(v => variable.name === v.name) as VariableLoose}
         oninput={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;

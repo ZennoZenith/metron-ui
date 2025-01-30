@@ -76,6 +76,7 @@ export function validateSchemaArray(data: unknown) {
 
 export type Variant = InferOutput<typeof schema>;
 export type VariantCreate = InferOutput<typeof schemaCreate>;
+export type VariantUpdate = InferOutput<typeof schemaUpdate>;
 export type VariantArray = Prettify<[Variant, ...Variant[]]>;
 
 export type VariantIssues = ReturnType<typeof flatten<typeof schema>>["nested"];

@@ -1,7 +1,11 @@
 <script lang="ts">
 import { Switch } from "$components/melt";
 import { PlusCircled, Trash } from "$icons";
-import { type VariableArray, type VariableLoose } from "$schemas/variable";
+import {
+  VARIABLE_TYPES,
+  type VariableArray,
+  VariableLoose,
+} from "$schemas/variable";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
 import VariableSelect from "./VariableSelect.svelte";
@@ -22,17 +26,12 @@ const DEFAULT_VARIABLE = {
   nullable: false,
   defaultValue: null,
   defaultValueLabel: undefined,
+  required: true,
 };
 const {
   disableNullable = false,
   defaultVariables = [],
-  allowedValues = [
-    "image",
-    "equation",
-    "concept",
-    "problem",
-    "text",
-  ],
+  allowedValues = structuredClone(VARIABLE_TYPES),
   disabled = false,
 }: Props = $props();
 
@@ -65,7 +64,7 @@ export function getVariables() {
   return $state.snapshot(variables.map(v => {
     let typ: VariableType = "text";
     if (
-      ["image", "equation", "concept", "problem", "text"].includes(
+      (VARIABLE_TYPES as string[]).includes(
         v[1].typ ?? "",
       )
     ) {

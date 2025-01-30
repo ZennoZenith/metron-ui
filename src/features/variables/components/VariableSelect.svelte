@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Check, ChevronDown } from "$icons/index.js";
-import type { VariableTypeLoose } from "$schemas/variable";
+import { VARIABLE_TYPES, type VariableTypeLoose } from "$schemas/variable";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
@@ -23,13 +23,7 @@ const {
   name,
   required,
   defaultValue,
-  allowedValues = [
-    "image",
-    "equation",
-    "concept",
-    "problem",
-    "text",
-  ],
+  allowedValues = structuredClone(VARIABLE_TYPES),
   onChange = () => {},
 }: Props = $props();
 
@@ -40,11 +34,11 @@ interface Variable {
 }
 
 const options: Variable[] = [
+  { value: "text", label: "Text", disabled: false },
   { value: "image", label: "Image", disabled: false },
   { value: "equation", label: "Equation", disabled: false },
   { value: "concept", label: "Concept", disabled: false },
   { value: "problem", label: "Problem", disabled: false },
-  { value: "text", label: "Text", disabled: false },
 ].filter(v => allowedValues.includes(v.value));
 
 const {

@@ -1,34 +1,54 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { VariableLoose } from "$schemas/variable";
-import type { VariantCreate } from "$schemas/variant";
+import { type VariableArray, VariableLoose } from "$schemas/variable";
+import type { VariantUpdate } from "$schemas/variant";
+import type { Problem } from "$type/problems";
 import Answers from "./Answers.svelte";
 
 interface Props {
-  variables: VariableLoose[];
+  variables: VariableArray;
+  defaultProblem?: Problem;
 }
 
 const {
   variables = [],
+  defaultProblem,
 }: Props = $props();
 
 let lastGreatestIndex = 1;
 
 interface LocalVariant {
-  correctAnswers: VariantCreate["correctAnswers"];
-  incorrectAnswers: VariantCreate["incorrectAnswers"];
+  id: VariantUpdate["id"];
+  correctAnswers: VariantUpdate["correctAnswers"];
+  incorrectAnswers: VariantUpdate["incorrectAnswers"];
   variableValueSelectRef?: VariableValueSelect;
 }
 
 const DEFAULT_VARIANT: LocalVariant = {
+  id: undefined,
   correctAnswers: [{ answer: "", explanation: undefined }],
   incorrectAnswers: [],
   variableValueSelectRef: undefined,
 };
 
 const variants = $state<[number, LocalVariant][]>(
-  [[lastGreatestIndex, structuredClone(DEFAULT_VARIANT)]],
+  (() => {
+    if (defaultProblem) {
+      const temp: [number, LocalVariant][] = [];
+      defaultProblem.variants.forEach(v => {
+        temp.push([lastGreatestIndex, {
+          id: v.id,
+          correctAnswers: v.correctAnswers,
+          incorrectAnswers: v.incorrectAnswers,
+          variableValueSelectRef: undefined,
+        }]);
+        lastGreatestIndex += 1;
+      });
+      return temp;
+    }
+    return [[lastGreatestIndex, structuredClone(DEFAULT_VARIANT)]];
+  })(),
 );
 
 function addVariant() {
@@ -48,10 +68,11 @@ function removeVariant(index: number): any {
   variants.splice(indexToRemove, 1);
 }
 
-export function getVariants(): VariantCreate[] {
+export function getVariants(): VariantUpdate[] {
   return $state.snapshot(
     variants.map(v => {
       return {
+        id: v[1].id,
         correctAnswers: v[1].correctAnswers,
         incorrectAnswers: v[1].incorrectAnswers,
         variableValues: v[1].variableValueSelectRef?.getVariableValues() ?? [],
@@ -78,7 +99,9 @@ export function getVariants(): VariantCreate[] {
         <div>Variable value(s)</div>
         <VariableValueSelect
           bind:this={variant.variableValueSelectRef}
-          variables={variables}
+          variables={defaultProblem
+          ? VariableLoose.fromProblemVariantToArray(defaultProblem, variant.id)
+          : VariableLoose.fromVariablesToArray(variables)}
         />
       </div>
       {#if variants.length !== 1}

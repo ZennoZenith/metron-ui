@@ -7,6 +7,7 @@ import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
+import { VARIABLE_TYPES } from "$schemas/variable";
 import type { VariantCreate } from "$schemas/variant";
 import type { Variable, VariableType } from "$type/variables";
 
@@ -221,7 +222,7 @@ async function onFormSubmit(
 
   <Variables
     bind:this={variablesRef}
-    allowedValues={["text", "image", "equation", "concept", "problem"]}
+    allowedValues={structuredClone(VARIABLE_TYPES)}
   />
 
   <Variants bind:this={variantsRef} variables={variablesRef?.getVariables()} />

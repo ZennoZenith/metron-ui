@@ -2,7 +2,7 @@
 import { IdCard, MagnifyingGlass } from "$icons";
 import {
   VARIABLE_TYPES,
-  type VariableLoose,
+  VariableLoose,
   type VariableType,
 } from "$schemas/variable";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
