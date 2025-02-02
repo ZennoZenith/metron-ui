@@ -1,4 +1,4 @@
-import { schemaCreateArray as varientSchemaCreateArray } from "$features/variants/schema/create";
+import { schemaCreateArray as varientSchemaCreateArray } from "$features/variants/schemas/create";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";

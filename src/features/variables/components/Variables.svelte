@@ -4,9 +4,9 @@ import { DEBOUNCE_OVERIDE_TIME_MSEC } from "$constants";
 import { PlusCircled, Trash } from "$icons";
 import {
   InternalVariable,
+  InternalVariables,
   type InternalVariableValue,
   VARIABLE_TYPES,
-  type VariableArray,
 } from "$schemas/variable.svelte";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
@@ -15,61 +15,54 @@ import VariableValue from "./VariableValue.svelte";
 
 interface Props {
   disabled?: boolean;
-  defaultInternalVariables?: Readonly<InternalVariable[]>;
+  // defaultInternalVariables?: Readonly<InternalVariable[]>;
+  internalVariables?: Readonly<InternalVariables>;
   disableNullable?: boolean;
   allowedValues?: VariableType[];
-  onChange?: (value: InternalVariable[]) => void;
+  // onChange?: (value: InternalVariable[]) => void;
 }
 
 const {
   disableNullable = false,
-  defaultInternalVariables = [],
+  // defaultInternalVariables = [],
+  internalVariables = new InternalVariables(),
   allowedValues = structuredClone(VARIABLE_TYPES),
-  onChange = () => {},
+  // onChange = () => {},
   disabled = false,
 }: Props = $props();
 
 const debounce = new Debounce();
 
-const internalVariables = $state<InternalVariable[]>(
-  defaultInternalVariables.map(v => v.clone()),
-);
+// const internalVariables = $state<InternalVariable[]>(
+//   defaultInternalVariables.map(v => v.clone()),
+// );
 
 function addInternalVariable() {
-  internalVariables.push(InternalVariable.default());
-  onChange(internalVariables);
+  internalVariables.addInternalVariable();
 }
 
-function removeInternalVariable(id: InternalVariable["psudoId"]) {
-  const indexToRemove = internalVariables.findIndex(value =>
-    value.psudoId === id
-  );
-  if (indexToRemove < 0) {
-    return;
-  }
-  internalVariables.splice(indexToRemove, 1);
-  onChange(internalVariables);
+function removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
+  internalVariables.removeInternalVariable(psudoId);
 }
 
-export function getVariables() {
-  return internalVariables.map(v =>
-    v.toVariable()
-  ) satisfies VariableArray as VariableArray;
-}
+// export function getVariables() {
+//   return internalVariables.toVariables();
+// }
 
-export function getInternalVariables(): InternalVariable[] {
-  return internalVariables;
-}
+// export function getInternalVariables(): InternalVariable[] {
+//   return internalVariables.internalVariables;
+// }
 
-export function clearVariables() {
-  internalVariables.length = 0;
-  // internalVariables.push(InternalVariable.default());
-  onChange(internalVariables);
-}
+// export function clearVariables() {
+//   internalVariables.clearVariables();
+// }
 </script>
 
 <div class="grid grid-cols-1 gap-1 p-4">
-  {#each internalVariables as internalVariable (internalVariable.psudoId)}
+  {#each internalVariables.internalVariables as
+    internalVariable
+    (internalVariable.psudoId)
+  }
     <div class="relative grid grid-cols-1 sm:grid-cols-2 border-2 gap-2 p-2">
       <input
         type="text"
@@ -79,7 +72,6 @@ export function clearVariables() {
         oninput={event => {
           debounce.debounceAsync((value: string) => {
             internalVariable.name = value;
-            onChange(internalVariables);
           }, DEBOUNCE_OVERIDE_TIME_MSEC)(event.currentTarget.value);
         }}
       >
@@ -90,7 +82,6 @@ export function clearVariables() {
           internalVariable.typ = value;
           internalVariable.value = undefined;
           internalVariable.label = undefined;
-          onChange(internalVariables);
         }}
       />
       <Switch
@@ -99,7 +90,6 @@ export function clearVariables() {
         defaultChecked={internalVariable.nullable}
         onChange={state => {
           internalVariable.nullable = state;
-          onChange(internalVariables);
         }}
       />
       <VariableValue
@@ -107,7 +97,6 @@ export function clearVariables() {
         onChange={value => {
           debounce.debounceAsync((value: InternalVariableValue) => {
             internalVariable.value = value.value;
-            onChange(internalVariables);
           }, DEBOUNCE_OVERIDE_TIME_MSEC)(value);
         }}
       />

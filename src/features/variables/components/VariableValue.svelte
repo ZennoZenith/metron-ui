@@ -1,53 +1,43 @@
 <script lang="ts">
 import { IdCard, MagnifyingGlass } from "$icons";
-import {
-  InternalVariable,
-  type InternalVariableValue,
-  VARIABLE_TYPES,
-  type VariableType,
-} from "$schemas/variable.svelte";
+import { VARIABLE_TYPES, type VariableType } from "$schemas/variable.svelte";
+import { InternalVariableValue } from "../schemas/variable-values.svelte";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
-  internalVariable: Readonly<InternalVariable>;
-  onChange?: (variableValue: InternalVariableValue) => void;
+  internalVariableValue: InternalVariableValue;
 }
 
-const { internalVariable, onChange = () => {} }: Props = $props();
-let variableImageSearchRef = $state<VariableSearch>();
+const { internalVariableValue = new InternalVariableValue() }: Props = $props();
+
+let variableSearchRef = $state<VariableSearch>();
 
 function onVariableSearchSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
-  onChange({
-    name: $state.snapshot(internalVariable.name),
-    value: searchResult.id,
-    label: searchResult.title,
-  });
+  internalVariableValue.value = searchResult.id;
+  internalVariableValue.label = searchResult.title;
 }
 </script>
 
 <VariableSearch
-  variableType={internalVariable.typ}
-  bind:this={variableImageSearchRef}
+  variableType={internalVariableValue.typ}
+  bind:this={variableSearchRef}
   onResponse={onVariableSearchSelect}
 />
 
-{#if internalVariable?.typ === "text"}
+{#if internalVariableValue?.typ === "text"}
   <input
     type="text"
     class="w-full h-10 outline-none"
     placeholder="Default value"
-    value={internalVariable.value}
+    value={internalVariableValue.value}
     oninput={event => {
-      onChange({
-        name: $state.snapshot(internalVariable.name),
-        value: event.currentTarget.value,
-        label: event.currentTarget.value,
-      });
+      internalVariableValue.value = event.currentTarget.value;
+      internalVariableValue.label = event.currentTarget.value;
     }}
   >
-{:else if VARIABLE_TYPES.includes(internalVariable?.typ as VariableType)}
+{:else if VARIABLE_TYPES.includes(internalVariableValue?.typ as VariableType)}
   <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
     <button
       class="px-2 flex items-center gap-1 h-full grow"
@@ -55,13 +45,13 @@ function onVariableSearchSelect(searchResult?: SearchResult) {
     >
       <IdCard class="text-warning shrink" />
       <div class="grow text-left">
-        {internalVariable.label}
+        {internalVariableValue.label}
       </div>
     </button>
     <button
       type="button"
       class="h-full text-success px-2"
-      onclick={() => variableImageSearchRef?.setOpenState()}
+      onclick={() => variableSearchRef?.setOpenState()}
     >
       <MagnifyingGlass />
     </button>

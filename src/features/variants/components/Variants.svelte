@@ -1,57 +1,31 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { InternalVariable } from "$schemas/variable.svelte";
-import { InternalVariant } from "../schema/InternalVariant";
+import { InternalVariants } from "../schemas/InternalVariant.svelte";
 import Answers from "./Answers.svelte";
 
 interface Props {
-  internalVariables: Readonly<InternalVariable[]>;
-  onChange?: (internalVariant: InternalVariant[]) => void;
+  internalVariants: Readonly<InternalVariants>;
 }
 
 const {
-  internalVariables = [],
-  onChange = () => {},
+  internalVariants,
 }: Props = $props();
 
-$inspect(internalVariables);
-
-const internalVariants = $state<InternalVariant[]>([InternalVariant.default()]);
-
 function addVariant() {
-  internalVariants.push(InternalVariant.default());
-  onChange(internalVariants);
+  internalVariants.addInternalVariant();
 }
 
-function removeVariant(id: string): any {
-  if (internalVariants.length === 1) return;
-  const indexToRemove = internalVariants.findIndex(value =>
-    value.psudoId === id
-  );
-  if (indexToRemove < 0) {
-    return;
-  }
-  internalVariants.splice(indexToRemove, 1);
-  onChange(internalVariants);
+function removeVariant(psudoId: string): any {
+  internalVariants.removeInternalVariant(psudoId);
 }
-
-// export function getVariants(): VariantCreate[] {
-//   return $state.snapshot(
-//     variants.map(localVariant => {
-//       return {
-//         correctAnswers: localVariant.correctAnswers,
-//         incorrectAnswers: localVariant.incorrectAnswers,
-//         variableValues: localVariant.variableValueSelectRef?.getVariableValues()
-//           ?? [],
-//       };
-//     }),
-//   );
-// }
 </script>
 
 <div class="grid grid-cols-1 gap-2 relative">
-  {#each internalVariants as internalVariant (internalVariant.psudoId)}
+  {#each internalVariants.internalVariants as
+    internalVariant
+    (internalVariant.psudoId)
+  }
     <div
       class="relative grid grid-cols-1 gap-1 p-2 border rounded hover:bg-neutral"
     >
@@ -62,7 +36,6 @@ function removeVariant(id: string): any {
           atleastOne
           onChange={v => {
             internalVariant.correctAnswers = v;
-            onChange(internalVariants);
           }}
         />
       </div>
@@ -72,21 +45,17 @@ function removeVariant(id: string): any {
           defaultAnswers={internalVariant.incorrectAnswers}
           onChange={v => {
             internalVariant.incorrectAnswers = v;
-            onChange(internalVariants);
           }}
         />
       </div>
       <div class="border rounded p-2 grid grid-cols-1 gap-2">
         <div>Variable value(s)</div>
         <VariableValueSelect
-          internalVariables={internalVariables}
-          onChange={variableValues => {
-            internalVariant.variableValues = variableValues;
-            onChange(internalVariants);
-          }}
+          requiredInternalVariableValues={internalVariant.requiredInternalVariableValues}
+          optionalInternalVariableValues={internalVariant.optionalInternalVariableValues}
         />
       </div>
-      {#if internalVariants.length !== 1}
+      {#if internalVariants.internalVariants.length !== 1}
         <button
           class="absolute -right-3 -top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
           onclick={() => removeVariant(internalVariant.psudoId)}

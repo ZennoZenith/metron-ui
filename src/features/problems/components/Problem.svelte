@@ -2,7 +2,8 @@
 import TagSearch from "$components/TagSearch.svelte";
 import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
-import type { InternalVariable } from "$schemas/variable.svelte";
+import { InternalVariants } from "$features/variants/schemas/InternalVariant.svelte";
+import { InternalVariables } from "$schemas/variable.svelte";
 
 import type { Problem, QuestionTypeLoose } from "$type/problems";
 import QuestionTypeSelect from "./QuestionTypeSelect.svelte";
@@ -13,7 +14,7 @@ type Props = {
 
 const { defaultProblem }: Props = $props();
 
-class ProblemManager {
+class InternalProblem {
   id: string = $state("");
   problemStatement: string = $state("");
   hint: string = $state("");
@@ -23,36 +24,47 @@ class ProblemManager {
   images: string = $state("");
   concepts: string = $state("");
   problems: string = $state("");
-  #internalVariable: InternalVariable[] = $state([]);
-  #variants: string = $state("");
-  // #internalVariables: InternalVariables = new InternalVariables();
+  // #internalVariable: InternalVariable[] = $state([]);
+  readonly #internalVariables: InternalVariables;
+  readonly #internalVariants: InternalVariants;
   explanation: string = $state("");
   createdAt: string = $state("");
   updatedAt: string = $state("");
 
   constructor(problem?: Problem) {
+    this.#internalVariables = new InternalVariables();
+    this.#internalVariants = new InternalVariants(this.internalVariables);
+    // this.internalVariables.onChange(v => {});
     if (!problem) {
       return;
     }
     this.id = problem.id;
   }
 
-  log() {
-    $inspect(this.#internalVariable);
+  public log() {
+    this.#internalVariables.log();
   }
 
-  internalVariableSet(value: InternalVariable[]) {
-    this.#internalVariable = [...value];
-    console.log(this.#internalVariable.map(v => v.value));
+  // internalVariableSet(value: InternalVariable[]) {
+  //   this.#internalVariable = [...value];
+  //   console.log(this.#internalVariable.map(v => v.value));
+  // }
+
+  // get internalVariable() {
+  //   return this.#internalVariable;
+  // }
+
+  get internalVariables() {
+    return this.#internalVariables;
   }
 
-  get internalVariable() {
-    return this.#internalVariable;
+  get internalVariants() {
+    return this.#internalVariants;
   }
 }
 
-const problemManager = new ProblemManager(defaultProblem);
-// problemManager.log();
+const problemManager = new InternalProblem(defaultProblem);
+problemManager.log();
 </script>
 
 <form class="mx-auto grid grid-cols-1 gap-4">
@@ -103,9 +115,9 @@ const problemManager = new ProblemManager(defaultProblem);
     ></textarea>
   </label>
 
-  <Variables onChange={value => problemManager.internalVariableSet(value)} />
+  <Variables internalVariables={problemManager.internalVariables} />
 
-  <Variants internalVariables={problemManager.internalVariable} />
+  <Variants internalVariants={problemManager.internalVariants} />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

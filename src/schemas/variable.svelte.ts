@@ -69,7 +69,6 @@ export function validateVariableType(data: unknown) {
 
 export type Variable = InferOutput<typeof schema>;
 export type VariableValue = InferOutput<typeof variableValueSchema>;
-export type InternalVariableValue = Prettify<VariableValue & { label: string }>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableTypeLoose = VariableType | ({} & string);
 export const VARIABLE_TYPES: VariableType[] = ["text", "equation", "concept", "problem", "image"] as const;
@@ -326,8 +325,45 @@ export class InternalVariable {
 }
 
 export class InternalVariables {
-  readonly _tag = "InternalVariable" as const;
+  readonly _tag = "InternalVariables" as const;
   #internalVariables = $state<InternalVariable[]>([]);
 
   constructor() {}
+
+  public log() {
+    $inspect(this.#internalVariables);
+  }
+
+  public addInternalVariable(internalVariable?: InternalVariable) {
+    if (internalVariable) {
+      this.#internalVariables.push(internalVariable);
+      return;
+    }
+    this.#internalVariables.push(InternalVariable.default());
+  }
+
+  public removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
+    const indexToRemove = this.#internalVariables.findIndex(value => value.psudoId === psudoId);
+
+    if (indexToRemove < 0) {
+      return;
+    }
+    this.#internalVariables.splice(indexToRemove, 1);
+  }
+
+  public clearVariables() {
+    this.#internalVariables.length = 0;
+  }
+
+  public toVariables() {
+    return this.#internalVariables.map(v => v.toVariable()) satisfies VariableArray as VariableArray;
+  }
+
+  get internalVariables() {
+    return this.#internalVariables as readonly InternalVariable[];
+  }
+
+  // public onChange(fn: (arg: InternalVariable[]) => void) {
+  //   fn(this.#internalVariables);
+  // }
 }

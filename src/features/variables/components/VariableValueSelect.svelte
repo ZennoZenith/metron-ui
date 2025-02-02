@@ -1,50 +1,49 @@
 <script lang="ts">
-import {
-  InternalVariable,
-  type VariableValue as VariableValueType,
-} from "$schemas/variable.svelte";
 import { uniqByKeepLast } from "$utils";
 import { Debounce } from "$utils/debounce";
 import { isEmptyString } from "$utils/helpers";
 import { untrack } from "svelte";
+import { InternalVariableValues } from "../schemas/variable-values.svelte";
 import VariableValue from "./VariableValue.svelte";
 
 interface Props {
-  internalVariables: Readonly<InternalVariable[]>;
-  onChange?: (variableValues: VariableValueType[]) => void;
+  requiredInternalVariableValues: Readonly<InternalVariableValues>;
+  optionalInternalVariableValues: Readonly<InternalVariableValues>;
 }
 
 const {
-  internalVariables,
-  onChange = () => {},
+  requiredInternalVariableValues = new InternalVariableValues(),
+  optionalInternalVariableValues = new InternalVariableValues(),
 }: Props = $props();
 
 const debounce = new Debounce();
 
-let internalVariableWithoutValue = $state(
-  internalVariables.map(v => {
-    const clone = v.clone();
-    clone.value = undefined;
-    clone.label = "";
-    return clone;
-  }),
-);
+// let internalVariableWithoutValue = $state(
+//   internalVariables.map(v => {
+//     const clone = v.clone();
+//     clone.value = undefined;
+//     clone.label = "";
+//     return clone;
+//   }),
+// );
 
-$effect(() => {
-  internalVariables;
-  untrack(() => {
-    internalVariableWithoutValue = internalVariables.map(v => {
-      const clone = v.clone();
-      if (!isEmptyString(v.value)) {
-        v.nullable = true; // HACK: to make internalVariable optional
-      }
-      clone.value = undefined;
-      clone.label = "";
-      return clone;
-    });
-    internalVariableWithoutValue.forEach(v => v.log());
-  });
-});
+// $effect(() => {
+//   internalVariables;
+//   untrack(() => {
+//     internalVariableWithoutValue = internalVariables.map(v => {
+//       const clone = v.clone();
+//       if (!isEmptyString(v.value)) {
+//         v.nullable = true; // HACK: to make internalVariable optional
+//       }
+//       clone.value = undefined;
+//       clone.label = "";
+//       return clone;
+//     });
+//     internalVariableWithoutValue.forEach(v => v.log());
+//   });
+// });
+// ===========================================================================
+//
 // $inspect(internalVariables);
 
 // const requiredVariables = $derived(
@@ -109,7 +108,7 @@ export function getVariableValues() {
   Required variables
   <span class="text-error md:" aria-label="required"> * </span>
 </div>
-{#each internalVariableWithoutValue.filter(v => v.required === true) as
+{#each requiredInternalVariableValues.internalVariableValues as
   variable
   (variable.name)
 }
@@ -131,22 +130,13 @@ export function getVariableValues() {
       <div>
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
-      <VariableValue
-        internalVariable={internalVariableWithoutValue.find(v =>
-          variable.name === v.name
-        ) as InternalVariable}
-        onChange={v => {
-          debounce.debounceAsync((value: string) => {
-            variable.value = value;
-            onChange(getVariableValues());
-          })(v);
-        }}
-      />
+      <VariableValue internalVariableValue={variable} />
     </label>
   </div>
 {/each}
+
 <div>Optional variables</div>
-{#each internalVariableWithoutValue.filter(v => v.required === false) as
+{#each optionalInternalVariableValues.internalVariableValues as
   variable
   (variable.name)
 }
@@ -168,17 +158,7 @@ export function getVariableValues() {
       <div>
         Value
       </div>
-      <VariableValue
-        internalVariable={internalVariableWithoutValue.find(v =>
-          variable.name === v.name
-        ) as InternalVariable}
-        onChange={v => {
-          debounce.debounceAsync((value: string) => {
-            variable.value = value;
-            onChange(getVariableValues());
-          })(v);
-        }}
-      />
+      <VariableValue internalVariableValue={variable} />
     </label>
   </div>
 {/each}

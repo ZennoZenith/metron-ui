@@ -1,4 +1,4 @@
-import { schemaUpdateArray as varientSchemaUpdateArray } from "$features/variants/schema/update";
+import { schemaUpdateArray as varientSchemaUpdateArray } from "$features/variants/schemas/update";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";
