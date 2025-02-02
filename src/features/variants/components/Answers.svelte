@@ -3,35 +3,40 @@ import { Trash } from "$icons";
 import type { AnswerUpdate } from "$schemas/answer";
 
 interface Props {
-  answers: AnswerUpdate[];
-  defaultAnswer?: boolean;
+  defaultAnswers: AnswerUpdate[];
   atleastOne?: boolean;
+  onChange?: (answers: AnswerUpdate[]) => void;
 }
 
-const DEFAULT_ANSWER: AnswerUpdate = {
-  id: undefined,
-  answer: "",
-  explanation: undefined,
-};
-
 const {
-  answers = $bindable([]),
-  defaultAnswer = false,
+  defaultAnswers = [],
   atleastOne = false,
+  onChange = () => {},
 }: Props = $props();
 
-if (defaultAnswer) {
-  answers.push(structuredClone(DEFAULT_ANSWER));
+const DEFAULT_ANSWER = () => {
+  return {
+    id: undefined,
+    answer: "",
+    explanation: "",
+  };
+};
+
+const answers = $state($state.snapshot(defaultAnswers));
+
+if (atleastOne && answers.length < 1) {
+  answers.push(DEFAULT_ANSWER());
 }
 
 function addAnswer() {
-  answers.push(DEFAULT_ANSWER);
+  answers.push(DEFAULT_ANSWER());
+  onChange(answers);
 }
 
 function removeAnswer(indexToRemove: number): any {
   if (atleastOne && answers.length === 1) return;
-
   answers.splice(indexToRemove, 1);
+  onChange(answers);
 }
 </script>
 {#each answers as answer, index}
@@ -53,7 +58,11 @@ function removeAnswer(indexToRemove: number): any {
         placeholder="Answer"
         name="answer"
         required
-        bind:value={answer.answer}
+        value={answer.answer}
+        oninput={event => {
+          answer.answer = event.currentTarget.value;
+          onChange(answers);
+        }}
       ></textarea>
     </label>
     <label>
@@ -62,7 +71,11 @@ function removeAnswer(indexToRemove: number): any {
         class="w-full h-11 min-h-11 p-2 rounded border border-solid border-base-content"
         placeholder="Explanation"
         name="explanation"
-        bind:value={answer.explanation}
+        value={answer.explanation}
+        oninput={event => {
+          answer.explanation = event.currentTarget.value;
+          onChange(answers);
+        }}
       ></textarea>
     </label>
     {#if !atleastOne || answers.length !== 1}

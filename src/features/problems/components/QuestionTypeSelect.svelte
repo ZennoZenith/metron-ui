@@ -1,6 +1,6 @@
 <script lang="ts">
 import { Check, ChevronDown } from "$icons/index.js";
-import type { QuestionType } from "$type/problems";
+import type { QuestionType, QuestionTypeLoose } from "$type/problems";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
@@ -8,17 +8,13 @@ type Props = {
   name: string;
   disabled?: boolean;
   required?: boolean;
-  defaultValue?: QuestionType | ({} & string);
-  allowedValues?: (QuestionType | {} & string)[];
-  onChange?: (
-    state: {
-      curr?: { value: string; label?: string };
-      next?: { value: string; label?: string };
-    },
-  ) => void;
+  value?: QuestionTypeLoose;
+  defaultValue?: QuestionTypeLoose;
+  allowedValues?: (QuestionTypeLoose)[];
+  onChange?: (value: QuestionTypeLoose) => void;
 };
 
-const {
+let {
   disabled = false,
   name,
   required,
@@ -57,7 +53,10 @@ const {
   required,
   defaultSelected: options.find(value => value.value === defaultValue),
   onSelectedChange: (state) => {
-    onChange(state);
+    const val = allowedValues.find(v => v === state.next?.value) ?? "MCQ";
+
+    onChange(val);
+
     return state.next;
   },
 });

@@ -5,76 +5,114 @@ import {
 } from "$schemas/variable.svelte";
 import { uniqByKeepLast } from "$utils";
 import { Debounce } from "$utils/debounce";
+import { isEmptyString } from "$utils/helpers";
 import { untrack } from "svelte";
 import VariableValue from "./VariableValue.svelte";
 
 interface Props {
-  internalVariables: InternalVariable[];
+  internalVariables: Readonly<InternalVariable[]>;
+  onChange?: (variableValues: VariableValueType[]) => void;
 }
 
-const { internalVariables }: Props = $props();
+const {
+  internalVariables,
+  onChange = () => {},
+}: Props = $props();
 
 const debounce = new Debounce();
 
-const requiredVariables = $derived(
-  internalVariables.filter(v => v.required === true),
-);
-const optionalVariables = $derived(
-  internalVariables.filter(v => v.required === false),
+let internalVariableWithoutValue = $state(
+  internalVariables.map(v => {
+    const clone = v.clone();
+    clone.value = undefined;
+    clone.label = "";
+    return clone;
+  }),
 );
 
-let requiredVariableValues = $state<VariableValueType[]>([]);
-let optionalVariableValues = $state<VariableValueType[]>([]);
 $effect(() => {
   internalVariables;
   untrack(() => {
-    const temp1 = requiredVariables.map(v => {
-      return {
-        name: v.name,
-        value: "",
-      } satisfies VariableValueType as VariableValueType;
+    internalVariableWithoutValue = internalVariables.map(v => {
+      const clone = v.clone();
+      if (!isEmptyString(v.value)) {
+        v.nullable = true; // HACK: to make internalVariable optional
+      }
+      clone.value = undefined;
+      clone.label = "";
+      return clone;
     });
-    const temp2 = optionalVariables.map(v => {
-      return {
-        name: v.name,
-        value: "",
-      } satisfies VariableValueType as VariableValueType;
-    });
-    requiredVariableValues = mergeAsRightArrayUniq(
-      requiredVariableValues,
-      temp1,
-    );
-    optionalVariableValues = mergeAsRightArrayUniq(
-      optionalVariableValues,
-      temp2,
-    );
+    internalVariableWithoutValue.forEach(v => v.log());
   });
 });
+// $inspect(internalVariables);
 
-function mergeAsRightArrayUniq(
-  arr1: VariableValueType[],
-  arr2: VariableValueType[],
-): VariableValueType[] {
-  return uniqByKeepLast(arr2, v => v.name)
-    .map(v => {
-      return {
-        name: v.name,
-        value: arr1.find(v2 => v.name === v2.name)?.value ?? "",
-      };
-    });
-}
+// const requiredVariables = $derived(
+//   internalVariableWithoutValue.filter(v => v.required === true),
+// );
+// const optionalVariables = $derived(
+//   internalVariableWithoutValue.filter(v => v.required === false),
+// );
+
+// let requiredVariableValues = $state<VariableValueType[]>([]);
+// let optionalVariableValues = $state<VariableValueType[]>([]);
+
+// $effect(() => {
+//   internalVariables;
+//   untrack(() => {
+//     const temp1 = requiredVariables.map(v => {
+//       return {
+//         name: v.name,
+//         value: "",
+//       } satisfies VariableValueType as VariableValueType;
+//     });
+//     const temp2 = optionalVariables.map(v => {
+//       return {
+//         name: v.name,
+//         value: "",
+//       } satisfies VariableValueType as VariableValueType;
+//     });
+//     requiredVariableValues = mergeAsRightArrayUniq(
+//       requiredVariableValues,
+//       temp1,
+//     );
+//     optionalVariableValues = mergeAsRightArrayUniq(
+//       optionalVariableValues,
+//       temp2,
+//     );
+//   });
+// });
+
+// function mergeAsRightArrayUniq(
+//   arr1: VariableValueType[],
+//   arr2: VariableValueType[],
+// ): VariableValueType[] {
+//   return uniqByKeepLast(arr2, v => v.name)
+//     .map(v => {
+//       return {
+//         name: v.name,
+//         value: arr1.find(v2 => v.name === v2.name)?.value ?? "",
+//       };
+//     });
+// }
 
 export function getVariableValues() {
-  return requiredVariableValues.concat(optionalVariableValues).filter(v =>
-    v.value.trim().length > 0
-  );
+  // return $state.snapshot(requiredVariableValues).concat(
+  //   $state.snapshot(optionalVariableValues),
+  // )
+  //   .filter(v => v.value.trim().length > 0);
+
+  return [];
 }
 </script>
 <div>
   Required variables
   <span class="text-error md:" aria-label="required"> * </span>
 </div>
-{#each requiredVariableValues as variable (variable.name)}
+{#each internalVariableWithoutValue.filter(v => v.required === true) as
+  variable
+  (variable.name)
+}
   <div class="border rounded p-2">
     <label>
       <div>
@@ -94,10 +132,13 @@ export function getVariableValues() {
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
       <VariableValue
-        internalVariable={internalVariables.find(v => variable.name === v.name) as InternalVariable}
-        oninput={v => {
+        internalVariable={internalVariableWithoutValue.find(v =>
+          variable.name === v.name
+        ) as InternalVariable}
+        onChange={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;
+            onChange(getVariableValues());
           })(v);
         }}
       />
@@ -105,7 +146,10 @@ export function getVariableValues() {
   </div>
 {/each}
 <div>Optional variables</div>
-{#each optionalVariableValues as variable (variable.name)}
+{#each internalVariableWithoutValue.filter(v => v.required === false) as
+  variable
+  (variable.name)
+}
   <div class="border rounded p-2">
     <label>
       <div>
@@ -125,10 +169,13 @@ export function getVariableValues() {
         Value
       </div>
       <VariableValue
-        internalVariable={internalVariables.find(v => variable.name === v.name) as InternalVariable}
-        oninput={v => {
+        internalVariable={internalVariableWithoutValue.find(v =>
+          variable.name === v.name
+        ) as InternalVariable}
+        onChange={v => {
           debounce.debounceAsync((value: string) => {
             variable.value = value;
+            onChange(getVariableValues());
           })(v);
         }}
       />

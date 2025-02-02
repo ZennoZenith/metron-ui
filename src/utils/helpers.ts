@@ -18,3 +18,11 @@ export const clamp = (num: number, min: number, max: number) => Math.min(Math.ma
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export function isEmptyString(str?: string | null) {
+  if (!str) return true;
+
+  if (str.trim().length === 0) return true;
+
+  return false;
+}

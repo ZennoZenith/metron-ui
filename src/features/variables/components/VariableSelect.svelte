@@ -2,10 +2,12 @@
 import { Check, ChevronDown } from "$icons/index.js";
 import {
   VARIABLE_TYPES,
+  type VariableType,
   type VariableTypeLoose,
 } from "$schemas/variable.svelte";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
+import VariableValue from "./VariableValue.svelte";
 
 type Props = {
   name?: string;
@@ -13,12 +15,7 @@ type Props = {
   required?: boolean;
   defaultValue?: VariableTypeLoose;
   allowedValues?: VariableTypeLoose[];
-  onChange?: (
-    state: {
-      curr?: { value: string; label?: string };
-      next?: { value: string; label?: string };
-    },
-  ) => void;
+  onChange?: (value: VariableType) => void;
 };
 
 const {
@@ -60,7 +57,11 @@ const {
   required,
   defaultSelected: options.find(value => value.value === defaultValue),
   onSelectedChange: (state) => {
-    onChange(state);
+    if (!(VARIABLE_TYPES as string[]).includes(state.next?.value ?? "")) {
+      onChange("text");
+    } else {
+      onChange(state.next?.value as VariableType ?? "text");
+    }
     return state.next;
   },
 });

@@ -108,3 +108,4 @@ export type ProblemShortIssues = ReturnType<typeof flatten<typeof schemaShort>>[
 export type ProblemShortArrayIssues = ReturnType<typeof flatten<typeof schemaShortArray>>["nested"];
 
 export type QuestionType = InferOutput<typeof questionTypeSchema>;
+export type QuestionTypeLoose = QuestionType | ({} & string);

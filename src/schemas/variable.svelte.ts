@@ -1,17 +1,21 @@
 import { GenericError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { title } from "$schemas";
+import type { Prettify } from "$type";
 import type { Problem } from "$type/problems";
 import { exhaustiveMatchingGuard } from "$utils";
+import { isEmptyString, uuidv4 } from "$utils/helpers";
 import { array, boolean, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
+
+const variableTypeSchema = union(
+  [literal("image"), literal("equation"), literal("concept"), literal("problem"), literal("text")],
+  "image type must be image, equation, concept, problem or string",
+);
 
 export const schema = object(
   {
     name: title,
-    typ: union(
-      [literal("image"), literal("equation"), literal("concept"), literal("problem"), literal("text")],
-      "image type must be image, equation, concept, problem or string",
-    ),
+    typ: variableTypeSchema,
     nullable: boolean("Should be boolean"),
     defaultValue: nullish(string("Should be string or null")),
   },
@@ -53,58 +57,139 @@ export function validateSchemaArray(data: unknown) {
   return Err(new ValidationError(issues));
 }
 
+export function validateVariableType(data: unknown) {
+  const d = safeParse(variableTypeSchema, data);
+
+  if (d.success) {
+    return Ok(d.output);
+  }
+
+  return Err(new ValidationError({}, [`Invalid variable type: ${data}`]));
+}
+
 export type Variable = InferOutput<typeof schema>;
 export type VariableValue = InferOutput<typeof variableValueSchema>;
+export type InternalVariableValue = Prettify<VariableValue & { label: string }>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableTypeLoose = VariableType | ({} & string);
 export const VARIABLE_TYPES: VariableType[] = ["text", "equation", "concept", "problem", "image"] as const;
 export type VariableArray = InferOutput<typeof schemaArray>;
+
+export type VariableIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
+export type VariableArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
+
 export class InternalVariable {
   readonly _tag = "InternalVariable" as const;
-  name: string = $state("");
-  typ?: VariableTypeLoose = $state();
-  nullable?: boolean = $state();
-  value?: string | null = $state();
-  label?: string | null;
-  required: boolean = $derived(
-    this?.nullable === false
-      && (this?.value === undefined || this?.value === null),
-  );
-  // name: string;
-  // typ?: VariableTypeLoose;
-  // nullable?: boolean;
-  // value?: string | null;
+  // name: string = $state("");
+  // typ?: VariableTypeLoose = $state();
+  // nullable?: boolean = $state();
+  // value?: string | null = $state();
   // label?: string | null;
-  // required: boolean = true;
+  // required: boolean = $derived(
+  //   this?.nullable === false
+  //     && (this?.value === undefined || this?.value === null),
+  // );
+  #psudoId: string;
+  #name: string = $state("");
+  #typ: VariableType = $state("text");
+  #nullable: boolean = $state(false);
+  #value: string = $state("");
+  #label: string = $state("");
+  #required: boolean = $state(false);
+
   constructor(values: {
     name: string;
-    typ?: VariableTypeLoose;
+    typ: VariableType;
     nullable?: boolean;
     value?: string | null;
     label?: string | null;
   }) {
-    this.name = values.name;
-    this.typ = values.typ;
-    this.nullable = values.nullable;
-    this.value = values.value;
-    this.label = values.label;
+    this.#psudoId = uuidv4();
+    this.#name = values.name;
+    this.#typ = values.typ;
+    this.#nullable = values.nullable ?? false;
+    this.#value = values.value ?? "";
+    this.#label = values.label ?? "";
+  }
+
+  get psudoId() {
+    return this.#psudoId;
+  }
+  get name() {
+    return this.#name;
+  }
+  get typ() {
+    return this.#typ;
+  }
+  get nullable() {
+    return this.#nullable;
+  }
+  get value() {
+    if (isEmptyString(this.#value)) return null;
+    return this.#value;
+  }
+  get label() {
+    if (isEmptyString(this.#label)) return null;
+    return this.#label;
+  }
+  get required() {
+    return this.#required;
+  }
+
+  set name(value: string) {
+    this.#name = value;
+  }
+  set typ(value: VariableType) {
+    this.#typ = value;
+  }
+  set nullable(value: boolean | undefined) {
+    if (value === true || !isEmptyString(this.#value)) {
+      this.#required = false;
+    } else {
+      this.#required = true;
+    }
+
+    this.#nullable = value ?? false;
+  }
+  set value(value: string | null | undefined) {
+    if (this.#nullable === true || !isEmptyString(value)) {
+      this.#required = false;
+    } else {
+      this.#required = true;
+    }
+
+    this.#value = value ?? "";
+  }
+  set label(value: string | null | undefined) {
+    this.#label = value ?? "";
+  }
+
+  public clone() {
+    return new InternalVariable({
+      name: this.#name,
+      typ: this.#typ,
+      nullable: this.#nullable,
+      value: this.#value,
+      label: this.#label,
+    });
   }
 
   public log() {
     console.log({
-      name: this.name,
-      typ: this.typ,
-      nullable: this.nullable,
-      value: this.value,
-      label: this.label,
-      requred: this.required,
+      psudoId: this.#psudoId,
+      name: this.#name,
+      typ: this.#typ,
+      nullable: this.#nullable,
+      value: this.#value,
+      label: this.#label,
+      required: this.#required,
     });
   }
 
   public static default() {
     return new InternalVariable({
       name: "",
-      typ: undefined,
+      typ: "text",
       nullable: false,
       value: null,
       label: null,
@@ -160,7 +245,7 @@ export class InternalVariable {
     });
 
     problem.variables.forEach(variable => {
-      if (ret.findIndex(t => t.name === variable.name) === -1) {
+      if (ret.findIndex(t => t.#name === variable.name) === -1) {
         ret.push(
           new InternalVariable({
             name: variable.name,
@@ -187,6 +272,15 @@ export class InternalVariable {
 
   public static fromVariablesToArray(variables: Variable[]) {
     return variables.map(v => InternalVariable.fromVariable(v));
+  }
+
+  public toVariable(): Variable {
+    return {
+      name: this.#name,
+      typ: this.#typ as VariableType,
+      nullable: this.#nullable,
+      defaultValue: this.#value,
+    };
   }
 
   private static getDefaultLabel(
@@ -231,5 +325,9 @@ export class InternalVariable {
   }
 }
 
-export type VariableIssues = ReturnType<typeof flatten<typeof schema>>["nested"];
-export type VariableArrayIssues = ReturnType<typeof flatten<typeof schemaArray>>["nested"];
+export class InternalVariables {
+  readonly _tag = "InternalVariable" as const;
+  #internalVariables = $state<InternalVariable[]>([]);
+
+  constructor() {}
+}

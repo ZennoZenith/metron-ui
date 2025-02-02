@@ -3,6 +3,7 @@
 */
 import { env } from "$env/dynamic/public";
 
+export const DEBOUNCE_OVERIDE_TIME_MSEC = parseInt(env.PUBLIC_DEBOUNCE_OVERIDE_TIME_MSEC ?? "1000");
 export const API_BASE_ROUTE = env.PUBLIC_API_BASE_ROUTE ?? "http://localhost:10105/api";
 export const IMAGE_BASE_ROUTE = env.PUBLIC_IMAGE_BASE_ROUTE ?? "http://localhost:10109";
 export const DEFAULT_TOAST_DURATION_TIME = 5000; // in milliseconds

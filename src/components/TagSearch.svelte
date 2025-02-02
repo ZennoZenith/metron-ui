@@ -10,9 +10,13 @@ import { setMySet } from "$utils/set.svelte";
 
 type Props = {
   defaultSelectedTags?: Tag[];
+  onChange?: (value: string) => void;
 };
 
-const { defaultSelectedTags = [] }: Props = $props();
+let {
+  defaultSelectedTags = [],
+  onChange = () => {},
+}: Props = $props();
 
 const tagSearchable = new Searchable(100);
 const debounce = new Debounce();
@@ -20,8 +24,7 @@ const debounce = new Debounce();
 const SET_KEY = Symbol("SET");
 const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
 defaultSelectedTags.forEach(v => selectedTags.add(v));
-let tagIdsString = $derived(selectedTags.values.map(v => v.id).join(","));
-
+let tagIdsString = $state("");
 let tagSearchQuery = $state("");
 const knownTags = new Map<Tag["id"], Tag>();
 let inputRef = $state<HTMLInputElement>();
@@ -71,6 +74,10 @@ function onTagSelect(selectedItem: DropDownListItem) {
   } else {
     selectedTags.deleteByKey(tag.id);
   }
+
+  tagIdsString = selectedTags.values.map(v => v.id).join(",");
+  onChange(getTagIdStrings());
+
   inputRef?.focus();
 }
 
@@ -80,6 +87,10 @@ function removeTag(tagId: Tag["id"]) {
   const item = list.find(v => v.key === tagId);
   if (!item) return;
   item.selected = false;
+
+  tagIdsString = selectedTags.values.map(v => v.id).join(",");
+  onChange(getTagIdStrings());
+
   inputRef?.focus();
 }
 

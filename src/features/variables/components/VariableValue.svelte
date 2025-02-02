@@ -2,36 +2,35 @@
 import { IdCard, MagnifyingGlass } from "$icons";
 import {
   InternalVariable,
+  type InternalVariableValue,
   VARIABLE_TYPES,
   type VariableType,
 } from "$schemas/variable.svelte";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
-  internalVariable: InternalVariable;
-  oninput?: (value: string) => void;
+  internalVariable: Readonly<InternalVariable>;
+  onChange?: (variableValue: InternalVariableValue) => void;
 }
-const { internalVariable, oninput = () => {} }: Props = $props();
+
+const { internalVariable, onChange = () => {} }: Props = $props();
 let variableImageSearchRef = $state<VariableSearch>();
 
-// const reactiveVariable = $state(internalVariable);
-
-function onVariableSelect(searchResult?: SearchResult) {
+function onVariableSearchSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
-  // reactiveVariable.value = searchResult.id;
-  // reactiveVariable.label = searchResult.title;
-  internalVariable.value = searchResult.id;
-  internalVariable.label = searchResult.title;
-
-  oninput(searchResult.id);
+  onChange({
+    name: $state.snapshot(internalVariable.name),
+    value: searchResult.id,
+    label: searchResult.title,
+  });
 }
 </script>
 
 <VariableSearch
-  variableType={internalVariable?.typ}
+  variableType={internalVariable.typ}
   bind:this={variableImageSearchRef}
-  onResponse={onVariableSelect}
+  onResponse={onVariableSearchSelect}
 />
 
 {#if internalVariable?.typ === "text"}
@@ -41,8 +40,11 @@ function onVariableSelect(searchResult?: SearchResult) {
     placeholder="Default value"
     value={internalVariable.value}
     oninput={event => {
-      internalVariable.value = event.currentTarget.value;
-      oninput(event.currentTarget.value);
+      onChange({
+        name: $state.snapshot(internalVariable.name),
+        value: event.currentTarget.value,
+        label: event.currentTarget.value,
+      });
     }}
   >
 {:else if VARIABLE_TYPES.includes(internalVariable?.typ as VariableType)}
