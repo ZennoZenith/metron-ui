@@ -1,26 +1,38 @@
 <script lang="ts">
 import TagSearch from "$components/TagSearch.svelte";
 import Variables from "$features/variables/components/Variables.svelte";
-import { setProblemContext } from "$schemas/internal-problem.svelte";
+import {
+  InternalProblem,
+  setProblemContext,
+} from "$schemas/internal-problem.svelte";
 import {
   InternalVariable,
+  InternalVariables,
   setInternalVariablesContext,
 } from "$schemas/internal-variable.svelte";
 import { Debounce } from "$utils/debounce";
 
 import { DEBOUNCE_OVERIDE_TIME_MSEC } from "$constants";
 import Variants from "$features/variants/components/Variants.svelte";
-import { setInternalVariantsContext } from "$schemas/internal-variant.svelte";
+import {
+  InternalVariants,
+  setInternalVariantsContext,
+} from "$schemas/internal-variant.svelte";
 import type { SubscribeAction } from "$type";
 import type { Problem } from "$type/problems";
 import QuestionTypeSelect from "./QuestionTypeSelect.svelte";
 
 type Props = {
   defaultProblem?: Problem;
+  disabled?: boolean;
+  onSubmit?: (
+    a: InternalProblem,
+    b: InternalVariables,
+    c: InternalVariants,
+  ) => void;
 };
 
-const { defaultProblem }: Props = $props();
-
+const { defaultProblem, onSubmit = () => {} }: Props = $props();
 const PROBLEM_KEY = Symbol("PROBLEM");
 const VARIABLE_KEY = Symbol("VARIABLE");
 const VARIANT_KEY = Symbol("VARIANT");
@@ -28,7 +40,10 @@ const debounce = new Debounce();
 
 const internalProblem = setProblemContext(PROBLEM_KEY, defaultProblem);
 const internalVariables = setInternalVariablesContext(VARIABLE_KEY);
-const internalVariants = setInternalVariantsContext(VARIANT_KEY);
+const internalVariants = setInternalVariantsContext(
+  VARIANT_KEY,
+  internalVariables,
+);
 internalVariables.subscribe((internalVariable, action) => {
   debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
     // console.log(`Action: ${act}`);
@@ -38,7 +53,13 @@ internalVariables.subscribe((internalVariable, action) => {
 });
 </script>
 
-<form class="mx-auto grid grid-cols-1 gap-4">
+<form
+  onsubmit={event => {
+    event.preventDefault();
+    onSubmit(internalProblem, internalVariables, internalVariants);
+  }}
+  class="mx-auto grid grid-cols-1 gap-4"
+>
   <input type="hidden" name="id" bind:value={internalProblem.id}>
   <label>
     <div>

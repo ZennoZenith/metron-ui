@@ -1,5 +1,5 @@
 import type { SubscribeAction } from "$type";
-import type { VariableType } from "$type/variables";
+import type { Variable, VariableType } from "$type/variables";
 import { isEmptyString, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 
@@ -116,6 +116,15 @@ export class InternalVariable {
     });
   }
 
+  public toVariable(): Variable {
+    return {
+      name: $state.snapshot(this.#name),
+      nullable: $state.snapshot(this.#nullable),
+      typ: $state.snapshot(this.#typ),
+      defaultValue: $state.snapshot(this.#value),
+    };
+  }
+
   public subscribe(fn?: SubscribeFn) {
     if (!fn) return;
     this.#subscribers.push(fn);
@@ -143,6 +152,10 @@ export class InternalVariables {
   #subscribers: (SubscribeFn | undefined)[] = [];
 
   constructor() {
+  }
+
+  get internalVariables() {
+    return this.#internalVariables as readonly InternalVariable[];
   }
 
   public log() {
@@ -186,8 +199,8 @@ export class InternalVariables {
     this.#internalVariables.length = 0;
   }
 
-  get internalVariables() {
-    return this.#internalVariables as readonly InternalVariable[];
+  public toVariables() {
+    return this.#internalVariables.map(v => v.toVariable());
   }
 }
 

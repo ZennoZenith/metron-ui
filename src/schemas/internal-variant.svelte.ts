@@ -3,26 +3,27 @@ import type { SubscribeAction } from "$type";
 import { exhaustiveMatchingGuard } from "$utils";
 import { uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
-import type { AnswerUpdate } from "./answer";
-import type { InternalVariable } from "./internal-variable.svelte";
+import type { Answer } from "./answer";
+import type { InternalVariable, InternalVariables } from "./internal-variable.svelte";
+import type { Variant } from "./variant";
 
 export class InternalVariant {
   readonly _tag = "InternalVariant" as const;
   #psudoId: string;
   #id: string;
-  #correctAnswers: AnswerUpdate[];
-  #incorrectAnswers: AnswerUpdate[];
+  #correctAnswers: Answer[];
+  #incorrectAnswers: Answer[];
   #internalVariableValues: InternalVariableValue[] = $state([]);
 
   constructor(value: {
     id?: string;
-    correctAnswers?: AnswerUpdate[];
-    incorrectAnswers?: AnswerUpdate[];
+    correctAnswers?: Answer[];
+    incorrectAnswers?: Answer[];
     internalVariables?: InternalVariable[];
   }) {
     this.#psudoId = uuidv4();
     this.#id = value?.id ?? "";
-    this.#correctAnswers = value?.correctAnswers ?? [{ id: undefined, answer: "", explanation: "" }];
+    this.#correctAnswers = value?.correctAnswers ?? [{ id: uuidv4(), answer: "", explanation: "" }];
     this.#incorrectAnswers = value?.incorrectAnswers ?? [];
     this.#internalVariableValues = value?.internalVariables?.map(v => InternalVariableValue.fromInternalVariable(v))
       ?? [];
@@ -47,11 +48,47 @@ export class InternalVariant {
   set id(value: string) {
     this.#id = value;
   }
-  set correctAnswers(value: AnswerUpdate[]) {
+  set correctAnswers(value: Answer[]) {
     this.#correctAnswers = value;
   }
-  set incorrectAnswers(value: AnswerUpdate[]) {
+  set incorrectAnswers(value: Answer[]) {
     this.#incorrectAnswers = value;
+  }
+
+  private createInternalVariableValue(internalVariable: InternalVariable) {
+    if (this.#internalVariableValues.findIndex(v => v.internalVariablePsudoId === internalVariable.psudoId) !== -1) {
+      console.error(`CannotCreate: Internal VariableValue already exist with id: ${internalVariable.psudoId}`);
+      return;
+    }
+    console.log("hello");
+    this.#internalVariableValues.push(
+      InternalVariableValue.fromInternalVariable(internalVariable),
+    );
+  }
+
+  private deleteInternalVariableValue(internalVariable: InternalVariable) {
+    const indexToRemove = this.#internalVariableValues.findIndex(v =>
+      v.internalVariablePsudoId === internalVariable.psudoId
+    );
+
+    if (indexToRemove === -1) {
+      console.error(`CannotDelete: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
+      return;
+    }
+    this.#internalVariableValues.splice(indexToRemove, 1);
+  }
+
+  private updateInternalVariableValue(internalVariable: InternalVariable) {
+    const indexToUpdate = this.#internalVariableValues.findIndex(v =>
+      v.internalVariablePsudoId === internalVariable.psudoId
+    );
+
+    if (indexToUpdate === -1) {
+      console.error(`CannotUpdate: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
+      return;
+    }
+
+    this.#internalVariableValues[indexToUpdate] = InternalVariableValue.fromInternalVariable(internalVariable);
   }
 
   public log() {
@@ -80,50 +117,24 @@ export class InternalVariant {
     }
   }
 
-  private createInternalVariableValue(internalVariable: InternalVariable) {
-    if (this.#internalVariableValues.findIndex(v => v.internalVariablePsudoId === internalVariable.psudoId) !== -1) {
-      console.error(`Internal VariableValue already exist with id: ${internalVariable.psudoId}`);
-      return;
-    }
-    this.#internalVariableValues.push(
-      InternalVariableValue.fromInternalVariable(internalVariable),
-    );
-  }
-
-  private deleteInternalVariableValue(internalVariable: InternalVariable) {
-    const indexToRemove = this.#internalVariableValues.findIndex(v =>
-      v.internalVariablePsudoId === internalVariable.psudoId
-    );
-
-    if (indexToRemove === -1) {
-      console.error(`Internal VariableValue not found with id: ${internalVariable.psudoId}`);
-      return;
-    }
-    this.#internalVariableValues.splice(indexToRemove, 1);
-  }
-
-  private updateInternalVariableValue(internalVariable: InternalVariable) {
-    const indexToUpdate = this.#internalVariableValues.findIndex(v =>
-      v.internalVariablePsudoId === internalVariable.psudoId
-    );
-
-    if (indexToUpdate === -1) {
-      console.error(`Internal VariableValue not found with id: ${internalVariable.psudoId}`);
-      return;
-    }
-
-    this.#internalVariableValues[indexToUpdate] = InternalVariableValue.fromInternalVariable(internalVariable);
-  }
-
   public static default(internalVaribles?: InternalVariable[]) {
     return new InternalVariant(
       {
         id: "",
-        correctAnswers: [{ id: undefined, answer: "", explanation: "" }],
+        correctAnswers: [{ id: uuidv4(), answer: "", explanation: "" }],
         incorrectAnswers: [],
         internalVariables: internalVaribles ?? [],
       },
     );
+  }
+
+  public toVariant(): Variant {
+    return {
+      id: this.#id,
+      correctAnswers: this.#correctAnswers,
+      incorrectAnswers: this.#incorrectAnswers,
+      variableValues: this.#internalVariableValues.map(v => v.toVariableValue()),
+    };
   }
 }
 
@@ -131,11 +142,15 @@ export class InternalVariants {
   readonly _tag = "InternalVariants" as const;
 
   readonly #internalVariants: InternalVariant[] = $state<InternalVariant[]>([]);
-  readonly #internalVariables: InternalVariable[];
+  readonly #internalVariables: readonly InternalVariable[];
 
-  constructor() {
-    this.#internalVariables = [];
+  constructor(internalVariables: InternalVariables) {
+    this.#internalVariables = internalVariables.internalVariables;
     this.#internalVariants = [InternalVariant.default()];
+  }
+
+  get internalVariants() {
+    return this.#internalVariants as readonly InternalVariant[];
   }
 
   public log() {
@@ -143,7 +158,7 @@ export class InternalVariants {
   }
 
   public addInternalVariant(internalVariant?: InternalVariant) {
-    this.#internalVariants.push(internalVariant ?? InternalVariant.default(this.#internalVariables));
+    this.#internalVariants.push(internalVariant ?? InternalVariant.default([...this.#internalVariables]));
   }
 
   public removeInternalVariant(psudoId: InternalVariant["psudoId"]) {
@@ -160,52 +175,10 @@ export class InternalVariants {
     this.#internalVariants.forEach(internalVariant =>
       internalVariant.updateInternalVariableValues(internalVariable, action)
     );
-    switch (action) {
-      case "CREATE":
-        this.createInternalVariable(internalVariable);
-        break;
-      case "UPDATE":
-        this.updateInternalVariable(internalVariable);
-        break;
-      case "DELETE":
-        this.deleteInternalVariable(internalVariable);
-        break;
-      default:
-        return exhaustiveMatchingGuard(action);
-    }
   }
 
-  private createInternalVariable(internalVariable: InternalVariable) {
-    if (this.#internalVariables.findIndex(v => v.psudoId === internalVariable.psudoId) !== -1) {
-      console.error(`Internal Variable already exist with id: ${internalVariable.psudoId}`);
-      return;
-    }
-    this.#internalVariables.push(internalVariable);
-  }
-
-  private deleteInternalVariable(internalVariable: InternalVariable) {
-    const indexToRemove = this.#internalVariables.findIndex(v => v.psudoId === internalVariable.psudoId);
-
-    if (indexToRemove === -1) {
-      console.error(`Internal Variable not found with id: ${internalVariable.psudoId}`);
-      return;
-    }
-    this.#internalVariables.splice(indexToRemove, 1);
-  }
-
-  private updateInternalVariable(internalVariable: InternalVariable) {
-    const indexToUpdate = this.#internalVariables.findIndex(v => v.psudoId === internalVariable.psudoId);
-
-    if (indexToUpdate === -1) {
-      console.error(`Internal Variable not found with id: ${internalVariable.psudoId}`);
-      return;
-    }
-
-    this.#internalVariables[indexToUpdate] = internalVariable;
-  }
-
-  get internalVariants() {
-    return this.#internalVariants as readonly InternalVariant[];
+  public toVariants(): Variant[] {
+    return this.#internalVariants.map(v => v.toVariant());
   }
 }
 

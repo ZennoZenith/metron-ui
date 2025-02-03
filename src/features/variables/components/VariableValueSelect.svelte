@@ -43,7 +43,7 @@ export function getInternalVariableValues() {
         <VariableValue
           internalVariablePsudoId={variable.internalVariablePsudoId}
           defaultLabel={variable.label}
-          defaultValue={variable.value}
+          defaultValue=""
           typ={variable.typ}
           onChange={(value, label) => {
             variable.value = value;
@@ -83,7 +83,7 @@ export function getInternalVariableValues() {
         <VariableValue
           internalVariablePsudoId={variable.internalVariablePsudoId}
           defaultLabel={variable.label}
-          defaultValue={variable.value}
+          defaultValue=""
           typ={variable.typ}
           onChange={(value, label) => {
             variable.value = value;

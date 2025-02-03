@@ -1,5 +1,3 @@
-in internal variant class when constructing InternalVariants instead of taking count of InternalVariables[], you can pass reference of InternalVariables
-
 set empty string to undefined where possible
 move tagsearch component out from components to features
 rename tagsearch to tagselect

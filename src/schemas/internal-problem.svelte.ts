@@ -2,7 +2,7 @@ import type { Problem, QuestionTypeLoose } from "$type/problems";
 import { uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 
-class InternalProblem {
+export class InternalProblem {
   readonly _tag = "InternalProblem" as const;
   id: string = $state("");
   #psudoId: string;
@@ -10,11 +10,11 @@ class InternalProblem {
   hint: string = $state("");
   questionType: QuestionTypeLoose = $state("MCQ");
   tags: string = $state("");
+  explanation: string = $state("");
   equations: string = $state("");
   images: string = $state("");
   concepts: string = $state("");
   problems: string = $state("");
-  explanation: string = $state("");
   createdAt: string = $state("");
   updatedAt: string = $state("");
 
@@ -27,6 +27,10 @@ class InternalProblem {
     this.id = problem.id ?? "";
   }
 
+  get psudoId() {
+    return this.#psudoId;
+  }
+
   public log() {
     console.log({
       id: $state.snapshot(this.id),
@@ -35,18 +39,25 @@ class InternalProblem {
       hint: $state.snapshot(this.hint),
       questionType: $state.snapshot(this.questionType),
       tags: $state.snapshot(this.tags),
+      explanation: $state.snapshot(this.explanation),
       equations: $state.snapshot(this.equations),
       images: $state.snapshot(this.images),
       concepts: $state.snapshot(this.concepts),
       problems: $state.snapshot(this.problems),
-      explanation: $state.snapshot(this.explanation),
       createdAt: $state.snapshot(this.createdAt),
       updatedAt: $state.snapshot(this.updatedAt),
     });
   }
 
-  get psudoId() {
-    return this.#psudoId;
+  public toProblem() {
+    return {
+      id: $state.snapshot(this.id),
+      problemStatement: $state.snapshot(this.problemStatement),
+      hint: $state.snapshot(this.hint),
+      questionType: $state.snapshot(this.questionType),
+      tags: $state.snapshot(this.tags),
+      explanation: $state.snapshot(this.explanation),
+    };
   }
 }
 
@@ -66,5 +77,4 @@ export function getProblemContext(problemContextKey: symbol) {
     );
   }
   return context;
-  return getContext<ReturnType<typeof setProblemContext> | undefined>(problemContextKey);
 }

@@ -1,4 +1,4 @@
-import type { VariableType } from "$schemas/variable";
+import type { VariableType, VariableValue } from "$schemas/variable";
 import { uuidv4 } from "$utils/helpers";
 import type { InternalVariable } from "./internal-variable.svelte";
 
@@ -70,7 +70,7 @@ export class InternalVariableValue {
     );
   }
 
-  static fromInternalVariable(internalVariable: InternalVariable) {
+  public static fromInternalVariable(internalVariable: InternalVariable) {
     return new InternalVariableValue({
       internalVariablePsudoId: internalVariable.psudoId,
       name: internalVariable.name,
@@ -79,5 +79,12 @@ export class InternalVariableValue {
       label: internalVariable.label,
       requried: internalVariable.required,
     });
+  }
+
+  public toVariableValue(): VariableValue {
+    return {
+      name: this.#name,
+      value: this.#value,
+    };
   }
 }

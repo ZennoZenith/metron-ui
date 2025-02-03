@@ -26,3 +26,8 @@ export function isEmptyString(str?: string | null) {
 
   return false;
 }
+
+export function setEmptyStringAsUndefined(value?: string | null) {
+  if (isEmptyString(value)) undefined;
+  else return value as string;
+}
