@@ -45,11 +45,15 @@ const internalVariants = setInternalVariantsContext(
   internalVariables,
 );
 internalVariables.subscribe((internalVariable, action) => {
-  debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
-    // console.log(`Action: ${act}`);
-    // value.log();
-    internalVariants.internalVariableAction(value, act);
-  }, DEBOUNCE_OVERIDE_TIME_MSEC)(internalVariable, action);
+  if (action === "UPDATE") {
+    debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
+      // console.log(`Action: ${act}`);
+      // value.log();
+      internalVariants.internalVariableAction(value, act);
+    }, DEBOUNCE_OVERIDE_TIME_MSEC)(internalVariable, action);
+  } else {
+    internalVariants.internalVariableAction(internalVariable, action);
+  }
 });
 </script>
 
