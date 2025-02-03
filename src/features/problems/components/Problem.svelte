@@ -31,8 +31,8 @@ const internalVariables = setInternalVariablesContext(VARIABLE_KEY);
 const internalVariants = setInternalVariantsContext(VARIANT_KEY);
 internalVariables.subscribe((internalVariable, action) => {
   debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
-    console.log(`Action: ${act}`);
-    value.log();
+    // console.log(`Action: ${act}`);
+    // value.log();
     internalVariants.internalVariableAction(value, act);
   }, DEBOUNCE_OVERIDE_TIME_MSEC)(internalVariable, action);
 });

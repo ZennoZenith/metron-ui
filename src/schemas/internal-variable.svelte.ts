@@ -13,10 +13,10 @@ export class InternalVariable {
   #nullable: boolean = $state(false);
   #value: string = $state("");
   #label: string = $state("");
-  #required: boolean = $state(false);
+  #required: boolean = $state(true);
   #subscribers: (SubscribeFn | undefined)[] = [];
 
-  constructor(values: {
+  constructor(value: {
     name: string;
     typ: VariableType;
     nullable?: boolean;
@@ -24,11 +24,17 @@ export class InternalVariable {
     label?: string | null;
   }) {
     this.#psudoId = uuidv4();
-    this.#name = values.name;
-    this.#typ = values.typ;
-    this.#nullable = values.nullable ?? false;
-    this.#value = values.value ?? "";
-    this.#label = values.label ?? "";
+    this.#name = value.name;
+    this.#typ = value.typ;
+    this.#nullable = value.nullable ?? false;
+    this.#value = value.value ?? "";
+    this.#label = value.label ?? "";
+
+    if (this.#nullable === true || !isEmptyString(this.#value)) {
+      this.#required = false;
+    } else {
+      this.#required = true;
+    }
   }
 
   get psudoId() {

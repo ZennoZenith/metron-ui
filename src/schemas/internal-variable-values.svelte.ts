@@ -9,7 +9,7 @@ export class InternalVariableValue {
   #typ: VariableType = $state("text");
   #value: string = $state("");
   #label: string = $state("");
-  #required: boolean = $state(false);
+  #required: boolean = $state(true);
 
   constructor(value?: {
     internalVariablePsudoId: string;
@@ -17,6 +17,7 @@ export class InternalVariableValue {
     typ: VariableType;
     value: string | null | undefined;
     label: string | null | undefined;
+    requried: boolean;
   }) {
     if (!value) {
       this.#internalVariablePsudoId = uuidv4();
@@ -28,6 +29,7 @@ export class InternalVariableValue {
     this.#typ = value.typ;
     this.#value = value.value ?? "";
     this.#label = value.label ?? "";
+    this.#required = value.requried;
   }
 
   get internalVariablePsudoId() {
@@ -49,12 +51,12 @@ export class InternalVariableValue {
     return this.#label;
   }
 
-  set typ(value: VariableType) {
-    this.#typ = value;
-  }
-  set required(value: boolean) {
-    this.#required = value;
-  }
+  // set typ(value: VariableType) {
+  //   this.#typ = value;
+  // }
+  // set required(value: boolean) {
+  //   this.#required = value;
+  // }
   set value(value: string | null | undefined) {
     this.#value = value ?? "";
   }
@@ -75,6 +77,7 @@ export class InternalVariableValue {
       typ: internalVariable.typ,
       value: internalVariable.value,
       label: internalVariable.label,
+      requried: internalVariable.required,
     });
   }
 }
