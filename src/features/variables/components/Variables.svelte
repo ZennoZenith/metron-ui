@@ -50,9 +50,9 @@ function removeInternalVariable(psudoId: string) {
         defaultValue={internalVariable.typ}
         {allowedValues}
         onChange={value => {
+          internalVariable.value = "";
+          internalVariable.label = "";
           internalVariable.typ = value;
-          internalVariable.value = undefined;
-          internalVariable.label = undefined;
         }}
       />
       <Switch
@@ -63,16 +63,19 @@ function removeInternalVariable(psudoId: string) {
           internalVariable.nullable = state;
         }}
       />
-      <VariableValue
-        internalVariablePsudoId={internalVariable.psudoId}
-        defaultLabel={internalVariable.label}
-        defaultValue={internalVariable.value}
-        typ={internalVariable.typ}
-        onChange={(value, label) => {
-          internalVariable.value = value;
-          internalVariable.label = label;
-        }}
-      />
+      <!-- HACK: Refresh VariableValue when type changes -->
+      {#key internalVariable.typ}
+        <VariableValue
+          internalVariablePsudoId={internalVariable.psudoId}
+          defaultLabel={internalVariable.label}
+          defaultValue={internalVariable.value}
+          typ={internalVariable.typ}
+          onChange={(value, label) => {
+            internalVariable.value = value;
+            internalVariable.label = label;
+          }}
+        />
+      {/key}
       <button
         class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
         onclick={() => removeInternalVariable(internalVariable.psudoId)}

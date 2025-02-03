@@ -1,4 +1,4 @@
-import { InternalVariableValue } from "$schemas/variable-values.svelte";
+import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import type { SubscribeAction } from "$type";
 import { exhaustiveMatchingGuard } from "$utils";
 import { uuidv4 } from "$utils/helpers";

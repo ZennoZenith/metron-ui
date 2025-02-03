@@ -28,6 +28,8 @@ let variableSearchRef = $state<VariableSearch>();
 function onVariableSearchSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
+  value = searchResult.id;
+  label = searchResult.title;
   onChange(searchResult.id, searchResult.title);
 }
 </script>

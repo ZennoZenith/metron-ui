@@ -1,5 +1,5 @@
 <script lang="ts">
-import { InternalVariableValue } from "$schemas/variable-values.svelte";
+import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import VariableValue from "./VariableValue.svelte";
 
 interface Props {
@@ -38,16 +38,19 @@ export function getInternalVariableValues() {
       <div>
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
-      <VariableValue
-        internalVariablePsudoId={variable.internalVariablePsudoId}
-        defaultLabel={variable.label}
-        defaultValue={variable.value}
-        typ={variable.typ}
-        onChange={(value, label) => {
-          variable.value = value;
-          variable.label = label;
-        }}
-      />
+      <!-- HACK: Refresh VariableValue when type changes -->
+      {#key variable.typ}
+        <VariableValue
+          internalVariablePsudoId={variable.internalVariablePsudoId}
+          defaultLabel={variable.label}
+          defaultValue={variable.value}
+          typ={variable.typ}
+          onChange={(value, label) => {
+            variable.value = value;
+            variable.label = label;
+          }}
+        />
+      {/key}
     </label>
   </div>
 {/each}
@@ -75,16 +78,19 @@ export function getInternalVariableValues() {
       <div>
         Value
       </div>
-      <VariableValue
-        internalVariablePsudoId={variable.internalVariablePsudoId}
-        defaultLabel={variable.label}
-        defaultValue={variable.value}
-        typ={variable.typ}
-        onChange={(value, label) => {
-          variable.value = value;
-          variable.label = label;
-        }}
-      />
+      <!-- HACK: Refresh VariableValue when type changes -->
+      {#key variable.typ}
+        <VariableValue
+          internalVariablePsudoId={variable.internalVariablePsudoId}
+          defaultLabel={variable.label}
+          defaultValue={variable.value}
+          typ={variable.typ}
+          onChange={(value, label) => {
+            variable.value = value;
+            variable.label = label;
+          }}
+        />
+      {/key}
     </label>
   </div>
 {/each}
