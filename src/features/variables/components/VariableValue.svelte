@@ -1,43 +1,55 @@
 <script lang="ts">
 import { IdCard, MagnifyingGlass } from "$icons";
-import { VARIABLE_TYPES, type VariableType } from "$schemas/variable.svelte";
-import { InternalVariableValue } from "../schemas/variable-values.svelte";
+import { VARIABLE_TYPES, type VariableType } from "$schemas/variable";
+import { uuidv4 } from "$utils/helpers";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
-  internalVariableValue: InternalVariableValue;
+  internalVariablePsudoId: Readonly<string>;
+  typ: VariableType;
+  defaultLabel?: string;
+  defaultValue?: string;
+  onChange?: (value: string, label: string) => void;
 }
 
-const { internalVariableValue = new InternalVariableValue() }: Props = $props();
+const {
+  internalVariablePsudoId: _internalVariablePsudoId = uuidv4(),
+  defaultValue,
+  defaultLabel,
+  typ,
+  onChange = () => {},
+}: Props = $props();
+
+let label = $state($state.snapshot(defaultLabel) ?? "");
+let value = $state($state.snapshot(defaultValue) ?? "");
 
 let variableSearchRef = $state<VariableSearch>();
 
 function onVariableSearchSelect(searchResult?: SearchResult) {
   if (!searchResult) return;
 
-  internalVariableValue.value = searchResult.id;
-  internalVariableValue.label = searchResult.title;
+  onChange(searchResult.id, searchResult.title);
 }
 </script>
 
 <VariableSearch
-  variableType={internalVariableValue.typ}
+  variableType={typ}
   bind:this={variableSearchRef}
   onResponse={onVariableSearchSelect}
 />
 
-{#if internalVariableValue?.typ === "text"}
+{#if typ === "text"}
   <input
     type="text"
     class="w-full h-10 outline-none"
     placeholder="Default value"
-    value={internalVariableValue.value}
+    {value}
     oninput={event => {
-      internalVariableValue.value = event.currentTarget.value;
-      internalVariableValue.label = event.currentTarget.value;
+      value = event.currentTarget.value;
+      onChange(event.currentTarget.value, event.currentTarget.value);
     }}
   >
-{:else if VARIABLE_TYPES.includes(internalVariableValue?.typ as VariableType)}
+{:else if VARIABLE_TYPES.includes(typ)}
   <div class="w-full h-10 outline-none border-1 flex items-center gap-1">
     <button
       class="px-2 flex items-center gap-1 h-full grow"
@@ -45,7 +57,7 @@ function onVariableSearchSelect(searchResult?: SearchResult) {
     >
       <IdCard class="text-warning shrink" />
       <div class="grow text-left">
-        {internalVariableValue.label}
+        {label}
       </div>
     </button>
     <button

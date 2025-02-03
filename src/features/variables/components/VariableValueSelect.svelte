@@ -1,116 +1,24 @@
 <script lang="ts">
-import { uniqByKeepLast } from "$utils";
-import { Debounce } from "$utils/debounce";
-import { isEmptyString } from "$utils/helpers";
-import { untrack } from "svelte";
-import { InternalVariableValues } from "../schemas/variable-values.svelte";
+import { InternalVariableValue } from "$schemas/variable-values.svelte";
 import VariableValue from "./VariableValue.svelte";
 
 interface Props {
-  requiredInternalVariableValues: Readonly<InternalVariableValues>;
-  optionalInternalVariableValues: Readonly<InternalVariableValues>;
+  internalVariableValues: Readonly<InternalVariableValue[]>;
 }
 
-const {
-  requiredInternalVariableValues = new InternalVariableValues(),
-  optionalInternalVariableValues = new InternalVariableValues(),
-}: Props = $props();
+const { internalVariableValues }: Props = $props();
 
-const debounce = new Debounce();
-
-// let internalVariableWithoutValue = $state(
-//   internalVariables.map(v => {
-//     const clone = v.clone();
-//     clone.value = undefined;
-//     clone.label = "";
-//     return clone;
-//   }),
-// );
-
-// $effect(() => {
-//   internalVariables;
-//   untrack(() => {
-//     internalVariableWithoutValue = internalVariables.map(v => {
-//       const clone = v.clone();
-//       if (!isEmptyString(v.value)) {
-//         v.nullable = true; // HACK: to make internalVariable optional
-//       }
-//       clone.value = undefined;
-//       clone.label = "";
-//       return clone;
-//     });
-//     internalVariableWithoutValue.forEach(v => v.log());
-//   });
-// });
-// ===========================================================================
-//
-// $inspect(internalVariables);
-
-// const requiredVariables = $derived(
-//   internalVariableWithoutValue.filter(v => v.required === true),
-// );
-// const optionalVariables = $derived(
-//   internalVariableWithoutValue.filter(v => v.required === false),
-// );
-
-// let requiredVariableValues = $state<VariableValueType[]>([]);
-// let optionalVariableValues = $state<VariableValueType[]>([]);
-
-// $effect(() => {
-//   internalVariables;
-//   untrack(() => {
-//     const temp1 = requiredVariables.map(v => {
-//       return {
-//         name: v.name,
-//         value: "",
-//       } satisfies VariableValueType as VariableValueType;
-//     });
-//     const temp2 = optionalVariables.map(v => {
-//       return {
-//         name: v.name,
-//         value: "",
-//       } satisfies VariableValueType as VariableValueType;
-//     });
-//     requiredVariableValues = mergeAsRightArrayUniq(
-//       requiredVariableValues,
-//       temp1,
-//     );
-//     optionalVariableValues = mergeAsRightArrayUniq(
-//       optionalVariableValues,
-//       temp2,
-//     );
-//   });
-// });
-
-// function mergeAsRightArrayUniq(
-//   arr1: VariableValueType[],
-//   arr2: VariableValueType[],
-// ): VariableValueType[] {
-//   return uniqByKeepLast(arr2, v => v.name)
-//     .map(v => {
-//       return {
-//         name: v.name,
-//         value: arr1.find(v2 => v.name === v2.name)?.value ?? "",
-//       };
-//     });
-// }
-
-export function getVariableValues() {
-  // return $state.snapshot(requiredVariableValues).concat(
-  //   $state.snapshot(optionalVariableValues),
-  // )
-  //   .filter(v => v.value.trim().length > 0);
-
-  return [];
+export function getInternalVariableValues() {
+  return internalVariableValues;
 }
 </script>
 <div>
   Required variables
   <span class="text-error md:" aria-label="required"> * </span>
 </div>
-{#each requiredInternalVariableValues.internalVariableValues as
+{#each internalVariableValues.filter(v => v.required === true) as
   variable
-  (variable.name)
+  (variable.internalVariablePsudoId)
 }
   <div class="border rounded p-2">
     <label>
@@ -130,15 +38,24 @@ export function getVariableValues() {
       <div>
         Value<span class="text-error md:" aria-label="required"> * </span>
       </div>
-      <VariableValue internalVariableValue={variable} />
+      <VariableValue
+        internalVariablePsudoId={variable.internalVariablePsudoId}
+        defaultLabel={variable.label}
+        defaultValue={variable.value}
+        typ={variable.typ}
+        onChange={(value, label) => {
+          variable.value = value;
+          variable.label = label;
+        }}
+      />
     </label>
   </div>
 {/each}
 
 <div>Optional variables</div>
-{#each optionalInternalVariableValues.internalVariableValues as
+{#each internalVariableValues.filter(v => v.required === false) as
   variable
-  (variable.name)
+  (variable.internalVariablePsudoId)
 }
   <div class="border rounded p-2">
     <label>
@@ -158,7 +75,16 @@ export function getVariableValues() {
       <div>
         Value
       </div>
-      <VariableValue internalVariableValue={variable} />
+      <VariableValue
+        internalVariablePsudoId={variable.internalVariablePsudoId}
+        defaultLabel={variable.label}
+        defaultValue={variable.value}
+        typ={variable.typ}
+        onChange={(value, label) => {
+          variable.value = value;
+          variable.label = label;
+        }}
+      />
     </label>
   </div>
 {/each}

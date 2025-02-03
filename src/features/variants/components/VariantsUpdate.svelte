@@ -1,7 +1,7 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { InternalVariable, type VariableArray } from "$schemas/variable.svelte";
+import { InternalVariable, type VariableArray } from "$schemas/variable";
 import type { VariantUpdate } from "$schemas/variant";
 import type { Problem } from "$type/problems";
 import Answers from "./Answers.svelte";

@@ -1,6 +1,6 @@
 <script lang="ts">
 import Variables from "$features/variables/components/Variables.svelte";
-import type { VariableArray } from "$schemas/variable.svelte";
+import type { VariableArray } from "$schemas/variable";
 const variables: VariableArray = $state([
   {
     name: "name1",

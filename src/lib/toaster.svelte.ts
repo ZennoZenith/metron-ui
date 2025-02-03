@@ -171,6 +171,7 @@ const TOAST_KEY = Symbol("TOAST");
 export function setToaster(options?: ConstructorParameters<typeof Toaster>[0]) {
   return setContext(TOAST_KEY, new Toaster(options));
 }
+
 export function getToaster() {
   return getContext<ReturnType<typeof setToaster>>(TOAST_KEY);
 }

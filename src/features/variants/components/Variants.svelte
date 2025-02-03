@@ -1,22 +1,22 @@
 <script lang="ts">
 import VariableValueSelect from "$features/variables/components/VariableValueSelect.svelte";
 import { PlusCircled, Trash } from "$icons";
-import { InternalVariants } from "../schemas/InternalVariant.svelte";
+import { getInternalVariantsContext } from "$schemas/internal-variant.svelte";
 import Answers from "./Answers.svelte";
 
 interface Props {
-  internalVariants: Readonly<InternalVariants>;
+  variantsContextKey: symbol;
 }
 
-const {
-  internalVariants,
-}: Props = $props();
+const { variantsContextKey }: Props = $props();
 
-function addVariant() {
+const internalVariants = getInternalVariantsContext(variantsContextKey);
+
+function addInternalVariant() {
   internalVariants.addInternalVariant();
 }
 
-function removeVariant(psudoId: string): any {
+function removeInternalVariant(psudoId: string) {
   internalVariants.removeInternalVariant(psudoId);
 }
 </script>
@@ -51,14 +51,13 @@ function removeVariant(psudoId: string): any {
       <div class="border rounded p-2 grid grid-cols-1 gap-2">
         <div>Variable value(s)</div>
         <VariableValueSelect
-          requiredInternalVariableValues={internalVariant.requiredInternalVariableValues}
-          optionalInternalVariableValues={internalVariant.optionalInternalVariableValues}
+          internalVariableValues={internalVariant.internalVariableValues}
         />
       </div>
       {#if internalVariants.internalVariants.length !== 1}
         <button
           class="absolute -right-3 -top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
-          onclick={() => removeVariant(internalVariant.psudoId)}
+          onclick={() => removeInternalVariant(internalVariant.psudoId)}
           type="button"
         >
           <Trash class="text-sm" />
@@ -71,7 +70,7 @@ function removeVariant(psudoId: string): any {
 <div>
   <button
     class="mt-2 flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
-    onclick={addVariant}
+    onclick={addInternalVariant}
     type="button"
   >
     Add variant <PlusCircled />

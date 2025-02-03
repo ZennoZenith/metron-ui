@@ -5,10 +5,10 @@ import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect
 import { type CreateIssues } from "$features/problems/schemas/create";
 import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
+import type { VariantCreate } from "$features/variants/schemas/create";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
-import { VARIABLE_TYPES } from "$schemas/variable.svelte";
-import type { VariantCreate } from "$schemas/variant";
+import { VARIABLE_TYPES } from "$schemas/variable";
 import type { Variable, VariableType } from "$type/variables";
 
 let tagSearchRef = $state<TagSearch>();

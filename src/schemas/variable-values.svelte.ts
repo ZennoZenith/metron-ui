@@ -1,47 +1,65 @@
-import type { InternalVariable, VariableType } from "$schemas/variable.svelte";
+import type { VariableType } from "$schemas/variable";
+import { uuidv4 } from "$utils/helpers";
+import type { InternalVariable } from "./internal-variable.svelte";
 
 export class InternalVariableValue {
   readonly _tag = "InternalVariableValue" as const;
+  readonly #internalVariablePsudoId: string;
   #name: string = $state("");
   #typ: VariableType = $state("text");
-  #value: string | null | undefined = $state();
-  #label: string | null | undefined = $state();
+  #value: string = $state("");
+  #label: string = $state("");
+  #required: boolean = $state(false);
 
   constructor(value?: {
+    internalVariablePsudoId: string;
     name: string;
     typ: VariableType;
     value: string | null | undefined;
     label: string | null | undefined;
   }) {
-    if (!value) return;
+    if (!value) {
+      this.#internalVariablePsudoId = uuidv4();
+      return;
+    }
 
+    this.#internalVariablePsudoId = value.internalVariablePsudoId;
     this.#name = value.name;
     this.#typ = value.typ;
-    this.#value = value.value;
-    this.#label = value.label;
+    this.#value = value.value ?? "";
+    this.#label = value.label ?? "";
   }
 
+  get internalVariablePsudoId() {
+    return this.#internalVariablePsudoId;
+  }
   get name() {
     return this.#name;
   }
   get typ() {
     return this.#typ;
   }
-  get value() {
+  get value(): string {
     return this.#value;
   }
-  get label() {
+  get required() {
+    return this.#required;
+  }
+  get label(): string {
     return this.#label;
   }
 
-  // set typ(value: VariableType) {
-  //   this.#typ = value;
-  // }
+  set typ(value: VariableType) {
+    this.#typ = value;
+  }
+  set required(value: boolean) {
+    this.#required = value;
+  }
   set value(value: string | null | undefined) {
-    this.#value = value;
+    this.#value = value ?? "";
   }
   set label(value: string | null | undefined) {
-    this.#label = value;
+    this.#label = value ?? "";
   }
 
   public log() {
@@ -52,29 +70,11 @@ export class InternalVariableValue {
 
   static fromInternalVariable(internalVariable: InternalVariable) {
     return new InternalVariableValue({
+      internalVariablePsudoId: internalVariable.psudoId,
       name: internalVariable.name,
       typ: internalVariable.typ,
       value: internalVariable.value,
       label: internalVariable.label,
     });
-  }
-}
-
-export class InternalVariableValues {
-  readonly _tag = "InternalVariableValues" as const;
-
-  #internalVariableValues: InternalVariableValue[] = $state([]);
-
-  constructor(internalVariableValues?: InternalVariableValue[]) {
-    if (!internalVariableValues) return;
-    this.#internalVariableValues = internalVariableValues;
-  }
-
-  get internalVariableValues() {
-    return this.#internalVariableValues;
-  }
-
-  public log() {
-    this.#internalVariableValues.forEach(v => v.log());
   }
 }

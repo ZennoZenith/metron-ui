@@ -5,7 +5,7 @@ import { schemaArray as equationSchemaArray } from "$schemas/equations/self";
 import { schemaArray as imagesSchemaArary } from "$schemas/images/self";
 import { schemaArray as tagSchemaArray } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable.svelte";
+import { schemaArray as variableSchemaArray } from "$schemas/variable";
 import { schemaArray as varientSchemaArray } from "$schemas/variant";
 import { array, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
 

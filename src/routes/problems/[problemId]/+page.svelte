@@ -12,7 +12,7 @@ import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
-import { InternalVariable, VARIABLE_TYPES } from "$schemas/variable.svelte";
+import { InternalVariable, VARIABLE_TYPES } from "$schemas/variable";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";
 

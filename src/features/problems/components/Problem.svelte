@@ -1,11 +1,18 @@
 <script lang="ts">
 import TagSearch from "$components/TagSearch.svelte";
 import Variables from "$features/variables/components/Variables.svelte";
-import Variants from "$features/variants/components/Variants.svelte";
-import { InternalVariants } from "$features/variants/schemas/InternalVariant.svelte";
-import { InternalVariables } from "$schemas/variable.svelte";
+import { setProblemContext } from "$schemas/internal-problem.svelte";
+import {
+  InternalVariable,
+  setInternalVariablesContext,
+} from "$schemas/internal-variable.svelte";
+import { Debounce } from "$utils/debounce";
 
-import type { Problem, QuestionTypeLoose } from "$type/problems";
+import { DEBOUNCE_OVERIDE_TIME_MSEC } from "$constants";
+import Variants from "$features/variants/components/Variants.svelte";
+import { setInternalVariantsContext } from "$schemas/internal-variant.svelte";
+import type { SubscribeAction } from "$type";
+import type { Problem } from "$type/problems";
 import QuestionTypeSelect from "./QuestionTypeSelect.svelte";
 
 type Props = {
@@ -14,61 +21,25 @@ type Props = {
 
 const { defaultProblem }: Props = $props();
 
-class InternalProblem {
-  id: string = $state("");
-  problemStatement: string = $state("");
-  hint: string = $state("");
-  questionType: QuestionTypeLoose = $state("MCQ");
-  tags: string = $state("");
-  equations: string = $state("");
-  images: string = $state("");
-  concepts: string = $state("");
-  problems: string = $state("");
-  // #internalVariable: InternalVariable[] = $state([]);
-  readonly #internalVariables: InternalVariables;
-  readonly #internalVariants: InternalVariants;
-  explanation: string = $state("");
-  createdAt: string = $state("");
-  updatedAt: string = $state("");
+const PROBLEM_KEY = Symbol("PROBLEM");
+const VARIABLE_KEY = Symbol("VARIABLE");
+const VARIANT_KEY = Symbol("VARIANT");
+const debounce = new Debounce();
 
-  constructor(problem?: Problem) {
-    this.#internalVariables = new InternalVariables();
-    this.#internalVariants = new InternalVariants(this.internalVariables);
-    // this.internalVariables.onChange(v => {});
-    if (!problem) {
-      return;
-    }
-    this.id = problem.id;
-  }
-
-  public log() {
-    this.#internalVariables.log();
-  }
-
-  // internalVariableSet(value: InternalVariable[]) {
-  //   this.#internalVariable = [...value];
-  //   console.log(this.#internalVariable.map(v => v.value));
-  // }
-
-  // get internalVariable() {
-  //   return this.#internalVariable;
-  // }
-
-  get internalVariables() {
-    return this.#internalVariables;
-  }
-
-  get internalVariants() {
-    return this.#internalVariants;
-  }
-}
-
-const problemManager = new InternalProblem(defaultProblem);
-problemManager.log();
+const internalProblem = setProblemContext(PROBLEM_KEY, defaultProblem);
+const internalVariables = setInternalVariablesContext(VARIABLE_KEY);
+const internalVariants = setInternalVariantsContext(VARIANT_KEY);
+internalVariables.subscribe((internalVariable, action) => {
+  debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
+    console.log(`Action: ${act}`);
+    value.log();
+    internalVariants.internalVariableAction(value, act);
+  }, DEBOUNCE_OVERIDE_TIME_MSEC)(internalVariable, action);
+});
 </script>
 
 <form class="mx-auto grid grid-cols-1 gap-4">
-  <input type="hidden" name="id" bind:value={problemManager.id}>
+  <input type="hidden" name="id" bind:value={internalProblem.id}>
   <label>
     <div>
       Problem Statement
@@ -79,7 +50,7 @@ problemManager.log();
       placeholder=""
       name="problemStatement"
       required
-      bind:value={problemManager.problemStatement}
+      bind:value={internalProblem.problemStatement}
     ></textarea>
   </label>
 
@@ -91,17 +62,17 @@ problemManager.log();
       class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
       placeholder=""
       name="hint"
-      bind:value={problemManager.hint}
+      bind:value={internalProblem.hint}
     ></textarea>
   </label>
 
   <QuestionTypeSelect
     name="questionType"
     defaultValue="MCQ"
-    onChange={value => problemManager.questionType = value}
+    onChange={value => internalProblem.questionType = value}
   />
 
-  <TagSearch onChange={value => problemManager.tags = value} />
+  <TagSearch onChange={value => internalProblem.tags = value} />
 
   <label>
     <div>
@@ -111,13 +82,13 @@ problemManager.log();
       class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
       placeholder=""
       name="explanation"
-      bind:value={problemManager.explanation}
+      bind:value={internalProblem.explanation}
     ></textarea>
   </label>
 
-  <Variables internalVariables={problemManager.internalVariables} />
+  <Variables variablesContextKey={VARIABLE_KEY} />
 
-  <Variants internalVariants={problemManager.internalVariants} />
+  <Variants variantsContextKey={VARIANT_KEY} />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

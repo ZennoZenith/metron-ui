@@ -2,7 +2,7 @@ import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { schemaCreateArray as answerSchemaCreateArary } from "$schemas/answer";
 
-import { variableValueSchemaArray } from "$schemas/variable.svelte";
+import { variableValueSchemaArray } from "$schemas/variable";
 import { array, flatten, type InferOutput, minLength, object, pipe, safeParse } from "valibot";
 
 export const createSchema = object(

@@ -10,7 +10,7 @@ import { Edit, Trash } from "$icons";
 import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
 import { validateUuid } from "$schemas/uuid";
-import type { VariableType } from "$schemas/variable.svelte";
+import type { VariableType } from "$schemas/variable";
 import type { Concept } from "$type/concepts";
 import type { SubmitFunction } from "../$types";
 import type { PageData } from "./$types";

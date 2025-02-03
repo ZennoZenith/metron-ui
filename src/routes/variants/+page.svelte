@@ -1,7 +1,7 @@
 <script lang="ts">
 import Variables from "$features/variables/components/Variables.svelte";
 import Variants from "$features/variants/components/Variants.svelte";
-import { VARIABLE_TYPES, type VariableArray } from "$schemas/variable.svelte";
+import { VARIABLE_TYPES, type VariableArray } from "$schemas/variable";
 
 let variablesRef = $state<Variables>();
 

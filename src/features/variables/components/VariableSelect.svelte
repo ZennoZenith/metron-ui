@@ -4,7 +4,7 @@ import {
   VARIABLE_TYPES,
   type VariableType,
   type VariableTypeLoose,
-} from "$schemas/variable.svelte";
+} from "$schemas/variable";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 import VariableValue from "./VariableValue.svelte";

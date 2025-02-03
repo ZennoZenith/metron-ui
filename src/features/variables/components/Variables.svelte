@@ -2,60 +2,35 @@
 import { Switch } from "$components/melt";
 import { DEBOUNCE_OVERIDE_TIME_MSEC } from "$constants";
 import { PlusCircled, Trash } from "$icons";
-import {
-  InternalVariable,
-  InternalVariables,
-  type InternalVariableValue,
-  VARIABLE_TYPES,
-} from "$schemas/variable.svelte";
+import { getInternalVariablesContext } from "$schemas/internal-variable.svelte";
+import { VARIABLE_TYPES } from "$schemas/variable";
 import type { VariableType } from "$type/variables";
-import { Debounce } from "$utils/debounce";
 import VariableSelect from "./VariableSelect.svelte";
 import VariableValue from "./VariableValue.svelte";
 
 interface Props {
   disabled?: boolean;
-  // defaultInternalVariables?: Readonly<InternalVariable[]>;
-  internalVariables?: Readonly<InternalVariables>;
   disableNullable?: boolean;
   allowedValues?: VariableType[];
-  // onChange?: (value: InternalVariable[]) => void;
+  variablesContextKey: symbol;
 }
 
 const {
   disableNullable = false,
-  // defaultInternalVariables = [],
-  internalVariables = new InternalVariables(),
   allowedValues = structuredClone(VARIABLE_TYPES),
-  // onChange = () => {},
+  variablesContextKey,
   disabled = false,
 }: Props = $props();
 
-const debounce = new Debounce();
-
-// const internalVariables = $state<InternalVariable[]>(
-//   defaultInternalVariables.map(v => v.clone()),
-// );
+const internalVariables = getInternalVariablesContext(variablesContextKey);
 
 function addInternalVariable() {
   internalVariables.addInternalVariable();
 }
 
-function removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
+function removeInternalVariable(psudoId: string) {
   internalVariables.removeInternalVariable(psudoId);
 }
-
-// export function getVariables() {
-//   return internalVariables.toVariables();
-// }
-
-// export function getInternalVariables(): InternalVariable[] {
-//   return internalVariables.internalVariables;
-// }
-
-// export function clearVariables() {
-//   internalVariables.clearVariables();
-// }
 </script>
 
 <div class="grid grid-cols-1 gap-1 p-4">
@@ -69,11 +44,7 @@ function removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
         class="w-full h-10 outline-none"
         value={internalVariable.name}
         placeholder="Variable name*"
-        oninput={event => {
-          debounce.debounceAsync((value: string) => {
-            internalVariable.name = value;
-          }, DEBOUNCE_OVERIDE_TIME_MSEC)(event.currentTarget.value);
-        }}
+        oninput={event => internalVariable.name = event.currentTarget.value}
       >
       <VariableSelect
         defaultValue={internalVariable.typ}
@@ -93,11 +64,13 @@ function removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
         }}
       />
       <VariableValue
-        internalVariable={internalVariable}
-        onChange={value => {
-          debounce.debounceAsync((value: InternalVariableValue) => {
-            internalVariable.value = value.value;
-          }, DEBOUNCE_OVERIDE_TIME_MSEC)(value);
+        internalVariablePsudoId={internalVariable.psudoId}
+        defaultLabel={internalVariable.label}
+        defaultValue={internalVariable.value}
+        typ={internalVariable.typ}
+        onChange={(value, label) => {
+          internalVariable.value = value;
+          internalVariable.label = label;
         }}
       />
       <button
