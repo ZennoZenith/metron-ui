@@ -108,6 +108,7 @@ function extractLabel(
 
 <form
   onsubmit={event => {
+    if (disabled) return;
     event.preventDefault();
     onSubmit(internalProblem, internalVariables, internalVariants);
   }}
@@ -185,10 +186,12 @@ function extractLabel(
 
   <Variants variantsContextKey={VARIANT_KEY} {disabled} />
 
-  <button
-    class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-    type="submit"
-  >
-    Submit
-  </button>
+  {#if !disabled}
+    <button
+      class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
+      type="submit"
+    >
+      Submit
+    </button>
+  {/if}
 </form>

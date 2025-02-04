@@ -7,7 +7,6 @@ import {
 } from "$schemas/variable";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
-import VariableValue from "./VariableValue.svelte";
 
 type Props = {
   name?: string;

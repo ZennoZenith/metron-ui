@@ -1,7 +1,7 @@
 <script lang="ts">
 import { IdCard, MagnifyingGlass } from "$icons";
 import { VARIABLE_TYPES, type VariableType } from "$schemas/variable";
-import { uuidv4 } from "$utils/helpers";
+import { isEmptyString, uuidv4 } from "$utils/helpers";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   typ: VariableType;
   defaultLabel?: string;
   defaultValue?: string;
+  disabled?: boolean;
   onChange?: (value: string, label: string) => void;
 }
 
@@ -16,6 +17,7 @@ const {
   internalVariablePsudoId: _internalVariablePsudoId = uuidv4(),
   defaultValue,
   defaultLabel,
+  disabled = false,
   typ,
   onChange = () => {},
 }: Props = $props();
@@ -40,7 +42,11 @@ function onVariableSearchSelect(searchResult?: SearchResult) {
   onResponse={onVariableSearchSelect}
 />
 
-{#if typ === "text"}
+{#if disabled}
+  <div>
+    Value: <span>{isEmptyString(label) ? "<empty>" : label}</span>
+  </div>
+{:else if typ === "text"}
   <input
     type="text"
     class="w-full h-10 outline-none"

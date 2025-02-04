@@ -35,6 +35,7 @@ function removeInternalVariant(psudoId: string) {
         <Answers
           defaultAnswers={internalVariant.correctAnswers}
           atleastOne
+          {disabled}
           onChange={v => {
             internalVariant.correctAnswers = v;
           }}
@@ -44,6 +45,7 @@ function removeInternalVariant(psudoId: string) {
         <div>Incorrect answer(s)</div>
         <Answers
           defaultAnswers={internalVariant.incorrectAnswers}
+          {disabled}
           onChange={v => {
             internalVariant.incorrectAnswers = v;
           }}
@@ -53,9 +55,10 @@ function removeInternalVariant(psudoId: string) {
         <div>Variable value(s)</div>
         <VariableValueSelect
           internalVariableValues={internalVariant.internalVariableValues}
+          {disabled}
         />
       </div>
-      {#if internalVariants.internalVariants.length !== 1}
+      {#if internalVariants.internalVariants.length >= 1 && !disabled}
         <button
           class="absolute -right-3 -top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
           onclick={() => removeInternalVariant(internalVariant.psudoId)}
@@ -68,12 +71,14 @@ function removeInternalVariant(psudoId: string) {
   {/each}
 </div>
 
-<div>
-  <button
-    class="mt-2 flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
-    onclick={addInternalVariant}
-    type="button"
-  >
-    Add variant <PlusCircled />
-  </button>
-</div>
+{#if !disabled}
+  <div>
+    <button
+      class="mt-2 flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
+      onclick={addInternalVariant}
+      type="button"
+    >
+      Add variant <PlusCircled />
+    </button>
+  </div>
+{/if}

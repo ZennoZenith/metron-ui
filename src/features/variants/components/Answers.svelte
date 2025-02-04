@@ -5,12 +5,14 @@ import type { AnswerUpdate } from "$schemas/answer";
 interface Props {
   defaultAnswers: AnswerUpdate[];
   atleastOne?: boolean;
+  disabled?: boolean;
   onChange?: (answers: AnswerUpdate[]) => void;
 }
 
 const {
   defaultAnswers = [],
   atleastOne = false,
+  disabled = false,
   onChange = () => {},
 }: Props = $props();
 
@@ -58,6 +60,7 @@ function removeAnswer(indexToRemove: number): any {
         placeholder="Answer"
         name="answer"
         required
+        {disabled}
         value={answer.answer}
         oninput={event => {
           answer.answer = event.currentTarget.value;
@@ -72,13 +75,14 @@ function removeAnswer(indexToRemove: number): any {
         placeholder="Explanation"
         name="explanation"
         value={answer.explanation}
+        {disabled}
         oninput={event => {
           answer.explanation = event.currentTarget.value;
           onChange(answers);
         }}
       ></textarea>
     </label>
-    {#if !atleastOne || answers.length !== 1}
+    {#if (!atleastOne || answers.length !== 1) && !disabled}
       <button
         class="absolute -right-3 -top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
         onclick={() => removeAnswer(index)}
@@ -89,15 +93,18 @@ function removeAnswer(indexToRemove: number): any {
     {/if}
   </div>
 {/each}
-<div>
-  <button
-    class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
-    type="button"
-    onclick={addAnswer}
-  >
-    Add answer
-  </button>
-</div>
+
+{#if !disabled}
+  <div>
+    <button
+      class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
+      type="button"
+      onclick={addAnswer}
+    >
+      Add answer
+    </button>
+  </div>
+{/if}
 
 <style>
 label {

@@ -4,9 +4,10 @@ import VariableValue from "./VariableValue.svelte";
 
 interface Props {
   internalVariableValues: Readonly<InternalVariableValue[]>;
+  disabled?: boolean;
 }
 
-const { internalVariableValues }: Props = $props();
+const { internalVariableValues, disabled = false }: Props = $props();
 
 export function getInternalVariableValues() {
   return internalVariableValues;
@@ -44,6 +45,7 @@ export function getInternalVariableValues() {
           internalVariablePsudoId={variable.internalVariablePsudoId}
           defaultLabel={variable.label}
           defaultValue=""
+          {disabled}
           typ={variable.typ}
           onChange={(value, label) => {
             variable.value = value;
@@ -85,6 +87,7 @@ export function getInternalVariableValues() {
           defaultLabel={variable.label}
           defaultValue=""
           typ={variable.typ}
+          {disabled}
           onChange={(value, label) => {
             variable.value = value;
             variable.label = label;

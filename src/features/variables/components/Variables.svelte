@@ -43,25 +43,33 @@ function removeInternalVariable(psudoId: string) {
         class="w-full h-10 outline-none"
         value={internalVariable.name}
         placeholder="Variable name*"
+        {disabled}
         oninput={event => internalVariable.name = event.currentTarget.value}
       >
       <VariableSelect
         defaultValue={internalVariable.typ}
         {allowedValues}
+        {disabled}
         onChange={value => {
           internalVariable.value = "";
           internalVariable.label = "";
           internalVariable.typ = value;
         }}
       />
-      <Switch
-        label="Is nullable? "
-        disabled={disableNullable}
-        defaultChecked={internalVariable.nullable}
-        onChange={state => {
-          internalVariable.nullable = state;
-        }}
-      />
+      {#if !disabled}
+        <Switch
+          label="Is nullable? "
+          disabled={disableNullable}
+          defaultChecked={internalVariable.nullable}
+          onChange={state => {
+            internalVariable.nullable = state;
+          }}
+        />
+      {:else}
+        <div>
+          Nullable: <span>{internalVariable.nullable ? "Yes" : "No"}</span>
+        </div>
+      {/if}
       <!-- HACK: Refresh VariableValue when type changes -->
       {#key internalVariable.typ}
         <VariableValue
@@ -69,28 +77,34 @@ function removeInternalVariable(psudoId: string) {
           defaultLabel={internalVariable.label}
           defaultValue={internalVariable.value}
           typ={internalVariable.typ}
+          {disabled}
           onChange={(value, label) => {
             internalVariable.value = value;
             internalVariable.label = label;
           }}
         />
       {/key}
-      <button
-        class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
-        onclick={() => removeInternalVariable(internalVariable.psudoId)}
-        type="button"
-      >
-        <Trash class="text-sm" />
-      </button>
+      {#if !disabled}
+        <button
+          class="absolute -right-3 top-3 bg-error text-error-content rounded-full p-1 hover:bg-magnum-100 focus:shadow-magnum-400"
+          onclick={() => removeInternalVariable(internalVariable.psudoId)}
+          type="button"
+        >
+          <Trash class="text-sm" />
+        </button>
+      {/if}
     </div>
   {/each}
-  <div>
-    <button
-      class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
-      onclick={addInternalVariable}
-      type="button"
-    >
-      Add variable <PlusCircled />
-    </button>
-  </div>
+
+  {#if !disabled}
+    <div>
+      <button
+        class="flex items-center gap-2 bg-secondary text-secondary-content px-2 py-1 rounded-full"
+        onclick={addInternalVariable}
+        type="button"
+      >
+        Add variable <PlusCircled />
+      </button>
+    </div>
+  {/if}
 </div>
