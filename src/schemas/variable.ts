@@ -1,6 +1,6 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { title } from "$schemas";
+import { nonEmptyString, title } from "$schemas";
 import { array, boolean, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
 
 const variableTypeSchema = union(
@@ -13,7 +13,7 @@ export const schema = object(
     name: title,
     typ: variableTypeSchema,
     nullable: boolean("Should be boolean"),
-    defaultValue: nullish(string("Should be string or null")),
+    defaultValue: nullish(nonEmptyString),
   },
   "Should be an object",
 );
@@ -23,7 +23,7 @@ export const schemaArray = array(schema, "invalid 'Variable' array");
 export const variableValueSchema = object(
   {
     name: title,
-    value: string("Should be string"),
+    value: nonEmptyString,
   },
   "Should be an object",
 );
@@ -64,7 +64,6 @@ export function validateVariableType(data: unknown) {
 }
 
 export type Variable = InferOutput<typeof schema>;
-export type VariableValue = InferOutput<typeof variableValueSchema>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableTypeLoose = VariableType | ({} & string);
 export const VARIABLE_TYPES: VariableType[] = ["text", "equation", "concept", "problem", "image"] as const;

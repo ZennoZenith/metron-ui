@@ -1,5 +1,5 @@
 import type { Problem, QuestionTypeLoose } from "$type/problems";
-import { uuidv4 } from "$utils/helpers";
+import { setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 
 export class InternalProblem {
@@ -53,10 +53,10 @@ export class InternalProblem {
     return {
       id: $state.snapshot(this.id),
       problemStatement: $state.snapshot(this.problemStatement),
-      hint: $state.snapshot(this.hint),
+      hint: setEmptyStringAsNullish($state.snapshot(this.hint)),
       questionType: $state.snapshot(this.questionType),
       tags: $state.snapshot(this.tags),
-      explanation: $state.snapshot(this.explanation),
+      explanation: setEmptyStringAsNullish($state.snapshot(this.explanation)),
     };
   }
 }

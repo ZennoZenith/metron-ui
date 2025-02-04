@@ -27,7 +27,7 @@ export function isEmptyString(str?: string | null) {
   return false;
 }
 
-export function setEmptyStringAsUndefined(value?: string | null) {
-  if (isEmptyString(value)) undefined;
-  else return value as string;
+export function setEmptyStringAsNullish(value?: string | null): string | undefined {
+  if (isEmptyString(value)) return undefined;
+  else return value?.trim() as string;
 }

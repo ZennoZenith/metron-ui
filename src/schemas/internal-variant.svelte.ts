@@ -1,24 +1,24 @@
+import type { VariantUpdate } from "$features/variants/schemas/update";
 import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import type { SubscribeAction } from "$type";
 import { exhaustiveMatchingGuard } from "$utils";
-import { uuidv4 } from "$utils/helpers";
+import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
-import type { Answer } from "./answer";
+import type { AnswerUpdate } from "./answer";
 import type { InternalVariable, InternalVariables } from "./internal-variable.svelte";
-import type { Variant } from "./variant";
 
 export class InternalVariant {
   readonly _tag = "InternalVariant" as const;
   #psudoId: string;
   #id: string;
-  #correctAnswers: Answer[];
-  #incorrectAnswers: Answer[];
+  #correctAnswers: AnswerUpdate[];
+  #incorrectAnswers: AnswerUpdate[];
   #internalVariableValues: InternalVariableValue[] = $state([]);
 
   constructor(value: {
     id?: string;
-    correctAnswers?: Answer[];
-    incorrectAnswers?: Answer[];
+    correctAnswers?: AnswerUpdate[];
+    incorrectAnswers?: AnswerUpdate[];
     internalVariables?: InternalVariable[];
   }) {
     this.#psudoId = uuidv4();
@@ -48,10 +48,10 @@ export class InternalVariant {
   set id(value: string) {
     this.#id = value;
   }
-  set correctAnswers(value: Answer[]) {
+  set correctAnswers(value: AnswerUpdate[]) {
     this.#correctAnswers = value;
   }
-  set incorrectAnswers(value: Answer[]) {
+  set incorrectAnswers(value: AnswerUpdate[]) {
     this.#incorrectAnswers = value;
   }
 
@@ -60,7 +60,6 @@ export class InternalVariant {
       console.error(`CannotCreate: Internal VariableValue already exist with id: ${internalVariable.psudoId}`);
       return;
     }
-    console.log("hello");
     this.#internalVariableValues.push(
       InternalVariableValue.fromInternalVariable(internalVariable),
     );
@@ -89,6 +88,7 @@ export class InternalVariant {
     }
 
     this.#internalVariableValues[indexToUpdate] = InternalVariableValue.fromInternalVariable(internalVariable);
+    this.#internalVariableValues[indexToUpdate].value = "";
   }
 
   public log() {
@@ -128,12 +128,28 @@ export class InternalVariant {
     );
   }
 
-  public toVariant(): Variant {
+  public toVariant(): VariantUpdate {
     return {
       id: this.#id,
-      correctAnswers: this.#correctAnswers,
-      incorrectAnswers: this.#incorrectAnswers,
-      variableValues: this.#internalVariableValues.map(v => v.toVariableValue()),
+      correctAnswers: this.#correctAnswers.map(v => {
+        return {
+          id: setEmptyStringAsNullish(v.id),
+          answer: v.answer,
+          explanation: setEmptyStringAsNullish(v.explanation),
+        };
+      }),
+      incorrectAnswers: this.#incorrectAnswers.map(v => {
+        return {
+          id: setEmptyStringAsNullish(v.id),
+          answer: v.answer,
+          explanation: setEmptyStringAsNullish(v.explanation),
+        };
+      }),
+      variableValues: this.#internalVariableValues
+        .map(v => v.toVariableValue())
+        .filter(v => {
+          return !isEmptyString(v.name) && !isEmptyString(v.value);
+        }),
     };
   }
 }
@@ -177,7 +193,7 @@ export class InternalVariants {
     );
   }
 
-  public toVariants(): Variant[] {
+  public toVariants(): VariantUpdate[] {
     return this.#internalVariants.map(v => v.toVariant());
   }
 }

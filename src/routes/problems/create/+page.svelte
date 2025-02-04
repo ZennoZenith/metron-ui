@@ -1,14 +1,16 @@
 <script lang="ts">
-import { createProblem } from "$features/problems/api/client";
+import ProblemApiClient from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
+import type { VariantUpdate } from "$features/variants/schemas/update";
 import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
 import { InternalVariants } from "$schemas/internal-variant.svelte";
 import type { Variable, VariableType } from "$schemas/variable";
-import type { Variant } from "$schemas/variant";
 
 const toaster = getToaster();
+const problemClient = new ProblemApiClient();
+let reset = $state(false);
 
 async function onSubmit(
   internalProblem: InternalProblem,
@@ -54,23 +56,9 @@ async function onSubmit(
     ).map(v => v.defaultValue as string)
     .concat(extractVariableValueFromVariants("problem", variables, variants));
 
-  console.log({
-    problemStatement,
-    hint: hint.trim().length === 0 ? null : hint,
-    questionType,
-    tags,
-    equations: equations.join(","),
-    images: images.join(","),
-    concepts: concepts.join(","),
-    problems: problems.join(","),
-    variables,
-    variants,
-    explanation: explanation.trim().length === 0 ? null : explanation,
-  });
-
-  // const maybeProblems = await createProblem({
+  // console.log({
   //   problemStatement,
-  //   hint: hint.trim().length === 0 ? null : hint,
+  //   hint,
   //   questionType,
   //   tags,
   //   equations: equations.join(","),
@@ -79,29 +67,47 @@ async function onSubmit(
   //   problems: problems.join(","),
   //   variables,
   //   variants,
-  //   explanation: explanation.trim().length === 0 ? null : explanation,
+  //   explanation,
   // });
 
-  // if (maybeProblems.err) {
-  //   toaster.error(
-  //     maybeProblems.unwrapErr().message ?? "Internal Server Error",
-  //   );
-  //   const errorObj = maybeProblems.unwrapErr().error;
-  //   console.error(errorObj);
-  //   // setFailureResponse(errorObj);
-  //   return;
-  // }
+  const result = await problemClient.createProblem({
+    problemStatement,
+    hint,
+    questionType,
+    tags,
+    equations: equations.join(","),
+    images: images.join(","),
+    concepts: concepts.join(","),
+    problems: problems.join(","),
+    variables,
+    variants,
+    explanation,
+  });
 
-  // if (maybeProblems.isOk()) {
-  //   toaster.success("Problem saved");
-  //   // resetForm(formElement);
-  // }
+  if (result.err) {
+    toaster.error(
+      result.unwrapErr().message ?? "Internal Server Error",
+    );
+    const errorObj = result.unwrapErr().error;
+    console.error(errorObj);
+    // setFailureResponse(errorObj);
+    return;
+  }
+
+  if (result.isOk()) {
+    toaster.success("Problem saved");
+    resetForm();
+  }
+}
+
+function resetForm() {
+  reset = !reset;
 }
 
 function extractVariableValueFromVariants(
   variableType: VariableType,
   variables: Variable[],
-  variants: Variant[],
+  variants: VariantUpdate[],
 ) {
   const variableNames = variables
     .filter(v => v.typ === variableType)
@@ -118,4 +124,6 @@ function extractVariableValueFromVariants(
 }
 </script>
 
-<Problem {onSubmit} />
+{#key reset}
+  <Problem {onSubmit} />
+{/key}

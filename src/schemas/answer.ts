@@ -63,6 +63,7 @@ export function validateSchema(data: unknown) {
 // }
 
 export type Answer = InferOutput<typeof schema>;
+export type PartialAnswer = Partial<Answer>;
 export type AnswerArray = InferOutput<typeof schemaArray>;
 export type AnswerCreate = InferOutput<typeof schemaCreate>;
 export type AnswerUpdate = InferOutput<typeof schemaUpdate>;

@@ -20,3 +20,9 @@ export const content = pipe(
   minLength(3, "Number of characters should be more than 2"),
   maxLength(2048, "Number of characters should be less than 2049"),
 );
+
+export const nonEmptyString = pipe(
+  string("Should be string"),
+  trim(),
+  nonEmpty("Shoud not be empty"),
+);

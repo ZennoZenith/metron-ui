@@ -1,4 +1,5 @@
-import type { VariableType, VariableValue } from "$schemas/variable";
+import type { VariableType } from "$schemas/variable";
+import type { VariableValue } from "$type/variables";
 import { uuidv4 } from "$utils/helpers";
 import type { InternalVariable } from "./internal-variable.svelte";
 

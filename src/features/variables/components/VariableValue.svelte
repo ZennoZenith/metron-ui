@@ -48,6 +48,7 @@ function onVariableSearchSelect(searchResult?: SearchResult) {
     {value}
     oninput={event => {
       value = event.currentTarget.value;
+      label = event.currentTarget.value;
       onChange(event.currentTarget.value, event.currentTarget.value);
     }}
   >

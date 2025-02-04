@@ -1,6 +1,6 @@
 import type { SubscribeAction } from "$type";
 import type { Variable, VariableType } from "$type/variables";
-import { isEmptyString, uuidv4 } from "$utils/helpers";
+import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 
 type SubscribeFn = (value: InternalVariable, action: SubscribeAction) => void;
@@ -121,7 +121,7 @@ export class InternalVariable {
       name: $state.snapshot(this.#name),
       nullable: $state.snapshot(this.#nullable),
       typ: $state.snapshot(this.#typ),
-      defaultValue: $state.snapshot(this.#value),
+      defaultValue: setEmptyStringAsNullish($state.snapshot(this.#value)),
     };
   }
 
