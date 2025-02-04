@@ -1,11 +1,20 @@
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
+import {
+  ApiError,
+  ApiModelError,
+  CustomError,
+  FetchError,
+  JsonDeserializeError,
+  ParseError,
+  ValidationError,
+} from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type Problem, validateSchema } from "$schemas/problems/self";
+import { type Problem, type ProblemArray, validateSchema, validateShortSchemaArray } from "$schemas/problems/self";
 import { validateUuid } from "$schemas/uuid";
 import { catchError, fetchJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
+import { validateSearchSchema } from "../schemas/search";
 
 export class ProblemApiClient {
   private readonly url: URL;
@@ -16,11 +25,43 @@ export class ProblemApiClient {
     this.url = options.options.url;
   }
 
+  async searchProblemsByQueryTitle(
+    data: unknown,
+  ): Promise<Result<ProblemArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    const parsed = validateSearchSchema(data);
+
+    if (parsed.err) {
+      return parsed;
+    }
+
+    const { search } = parsed.unwrap();
+    const url = new URL("problems", this.url);
+    url.searchParams.append("search", search);
+
+    const errorOrJson = await fetchJson(url, {
+      method: "GET",
+      headers: {
+        ...this.headers,
+      },
+    });
+
+    if (errorOrJson.err) {
+      return errorOrJson as Result<never, typeof errorOrJson.err>;
+    }
+
+    const maybeParseJson = validateShortSchemaArray(errorOrJson.unwrap());
+    if (maybeParseJson.err) {
+      return Err(new ParseError().fromSelf(maybeParseJson.err));
+    }
+
+    return Ok(maybeParseJson.unwrap()) as Result<ProblemArray, never>;
+  }
+
   async getProblemById(
     id: unknown,
   ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid uuid"] }, ["Invalid uuid"]));
+      return Err(new ValidationError({ id: ["Invalid id:uuid"] }, ["Invalid id:uuid"]));
     }
     const url = new URL(`problems/id/${id}`, this.url);
     const errorOrJson = await fetchJson(url, {

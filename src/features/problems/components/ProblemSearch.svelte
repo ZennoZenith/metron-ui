@@ -1,10 +1,11 @@
 <script lang="ts">
-import { searchProblem } from "$features/problems/api/client";
 import { getToaster } from "$lib/toaster.svelte";
 import type { ProblemShortArray } from "$schemas/problems/self";
 import { onMount } from "svelte";
+import { ProblemApiClient } from "../api";
 
 const toaster = getToaster();
+const problemClient = new ProblemApiClient();
 
 type Props = {
   onSearch: (list: ProblemShortArray) => void;
@@ -21,7 +22,9 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeProblems = await searchProblem(formEntries);
+  const maybeProblems = await problemClient.searchProblemsByQueryTitle(
+    formEntries,
+  );
 
   if (maybeProblems.isErr()) {
     const error = maybeProblems.unwrapErr();
