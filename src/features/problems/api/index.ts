@@ -1,14 +1,6 @@
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import {
-  ApiError,
-  ApiModelError,
-  CustomError,
-  FetchError,
-  JsonDeserializeError,
-  ParseError,
-  ValidationError,
-} from "$lib/error";
+import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
 import { type Problem, type ProblemArray, validateSchema, validateShortSchemaArray } from "$schemas/problems/self";
 import { validateUuid } from "$schemas/uuid";
@@ -25,7 +17,7 @@ export class ProblemApiClient {
     this.url = options.options.url;
   }
 
-  async searchProblemsByQueryTitle(
+  async searchProblemsShortByQueryTitle(
     data: unknown,
   ): Promise<Result<ProblemArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateSearchSchema(data);

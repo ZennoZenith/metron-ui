@@ -57,8 +57,6 @@ async function onDeleteResponse(answer: boolean) {
   </button>
 </a>
 
-<ProblemSearch {onSearch} loadListOnLoad />
-
 <ConformationDialog
   bind:this={deleteConformationDialog}
   title="Delete Problem "
@@ -66,6 +64,8 @@ async function onDeleteResponse(answer: boolean) {
   highlight={problemToBeDeleted?.problemStatement}
   onResponse={onDeleteResponse}
 />
+
+<ProblemSearch {onSearch} loadListOnLoad />
 
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as problem}

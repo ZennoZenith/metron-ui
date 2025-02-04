@@ -22,7 +22,7 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeProblems = await problemClient.searchProblemsByQueryTitle(
+  const maybeProblems = await problemClient.searchProblemsShortByQueryTitle(
     formEntries,
   );
 
