@@ -1,154 +1,148 @@
 <script lang="ts">
-import { applyAction, enhance } from "$app/forms";
-import { goto } from "$app/navigation";
+import { goto, invalidateAll } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
-import TagSearch from "$components/TagSearch.svelte";
-import QuestionTypeSelect from "$features/problems/components/QuestionTypeSelect.svelte";
-// import { updateProblem } from "$features/problems/api/client";
-import { type UpdateIssues } from "$features/problems/schemas/update";
-import Variables from "$features/variables/components/Variables.svelte";
-import VariantsUpdate from "$features/variants/components/VariantsUpdate.svelte";
+import { ProblemApiClient } from "$features/problems/api";
+import Problem from "$features/problems/components/Problem.svelte";
+import type { VariantUpdate } from "$features/variants/schemas/update";
 import { Edit, Trash } from "$icons";
-import type { ErrorObject } from "$lib/error";
 import { getToaster } from "$lib/toaster.svelte";
-import { validateUuid } from "$schemas/uuid";
-import { InternalVariable, VARIABLE_TYPES } from "$schemas/variable";
-import type { SubmitFunction } from "../$types";
+import type { InternalProblem } from "$schemas/internal-problem.svelte";
+import type { InternalVariables } from "$schemas/internal-variable.svelte";
+import { InternalVariants } from "$schemas/internal-variant.svelte";
+import type { Variable, VariableType } from "$schemas/variable";
 import type { PageData } from "./$types";
 
 const toaster = getToaster();
+const problemClient = new ProblemApiClient();
 
-let deleteFormRef = $state<HTMLFormElement>();
-let tagSearchRef = $state<TagSearch>();
-let variablesRef = $state<Variables>();
-let variantsUpdateRef = $state<VariantsUpdate>();
-let questionTypeRef = $state<QuestionTypeSelect>();
 let deleteConformationDialog = $state<ConformationDialog>();
-let failureResopnse = $state<UpdateIssues & { message?: string }>();
 
 const { data }: { data: PageData } = $props();
-const { problem } = data;
+const { problem: defaultProblem } = data;
 let edit = $state(data.edit);
 
-const defaultVariables = VariableLoose.fromProblemToArray(problem);
+async function onDeleteResponse(answer: boolean) {
+  if (!answer) return;
 
-function onDeleteResponse(answer: boolean) {
-  if (answer) {
-    deleteFormRef?.requestSubmit();
-  }
-}
+  const response = await problemClient.deleteProblemById(defaultProblem.id);
 
-function setFailureResponse(error?: ErrorObject) {
-  if (error?.type === "validation-error") {
-    failureResopnse = {
-      ...error.extra,
-      message: error?.message,
-    };
-  } else {
-    failureResopnse = {
-      message: error?.message,
-    };
-  }
-}
-
-const deleteProblem: SubmitFunction = (
-  { formData, formElement, cancel },
-) => {
-  const { id } = Object.fromEntries(formData.entries());
-  const isValidUuid = validateUuid(id.toString());
-
-  if (!isValidUuid) {
-    toaster.error("Invalid problem id:uuid");
-    cancel();
+  if (response.isErr()) {
+    const err = response.unwrapErr();
+    toaster.error(err?.message ?? "");
+    console.error(err);
     return;
   }
 
-  return async ({ result }) => {
-    switch (result.type) {
-      case "redirect":
-        goto(result.location);
-        break;
-      case "error":
-        toaster.error(result.error.message ?? "Internal Server Error");
-        break;
-      case "success":
-        formElement.reset();
-        toaster.success(
-          `Problem deleted successfully redirecting to /problems in 5sec`,
-        );
-        setTimeout(() => goto("/problems"), 5000);
-        break;
-      case "failure":
-        toaster.error(result.data?.message ?? "");
-        break;
-    }
-    await applyAction(result);
-  };
-};
+  toaster.success(
+    `Problem deleted successfully redirecting to /problems in 5sec`,
+  );
+  setTimeout(() => goto("/problems"), 5000);
+}
 
-async function onFormSubmit(
-  event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
+async function onSubmit(
+  internalProblem: InternalProblem,
+  internalVariables: InternalVariables,
+  internalVariants: InternalVariants,
 ) {
-  event.preventDefault();
-  // Taking reference because current element becomes null for some reason down in function
-  const formElement = event.currentTarget;
-  const formData = new FormData(formElement);
+  const variables = internalVariables.toVariables();
 
-  const id = formData.get("id")?.toString();
-  const title = formData.get("title")?.toString();
-  const description = formData.get("description")?.toString();
-  const content = formData.get("content")?.toString();
-  const tags = tagSearchRef?.getTagIdStrings();
+  const variants = internalVariants.toVariants();
 
-  const variables = variablesRef?.getVariables();
-  if (variables === undefined) {
-    toaster.error("Variable ref not set");
+  const {
+    problemStatement,
+    hint,
+    questionType,
+    tags,
+    explanation,
+  } = internalProblem.toProblem();
+
+  const equations = variables
+    .filter(v =>
+      v.typ === "equation" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string)
+    .concat(extractVariableValueFromVariants("equation", variables, variants));
+
+  const images = variables.filter(v =>
+    v.typ === "image" && v.defaultValue !== undefined
+    && v.defaultValue !== null
+  ).map(v => v.defaultValue as string)
+    .concat(extractVariableValueFromVariants("image", variables, variants));
+
+  const concepts = variables
+    .filter(v =>
+      v.typ === "concept" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string)
+    .concat(extractVariableValueFromVariants("concept", variables, variants));
+
+  const problems = variables
+    .filter(v =>
+      v.typ === "problem" && v.defaultValue !== undefined
+      && v.defaultValue !== null
+    ).map(v => v.defaultValue as string)
+    .concat(extractVariableValueFromVariants("problem", variables, variants));
+
+  // console.log({
+  //   problemStatement,
+  //   hint,
+  //   questionType,
+  //   tags,
+  //   equations: equations.join(","),
+  //   images: images.join(","),
+  //   concepts: concepts.join(","),
+  //   problems: problems.join(","),
+  //   variables,
+  //   variants,
+  //   explanation,
+  // });
+
+  const result = await problemClient.createProblem({
+    problemStatement,
+    hint,
+    questionType,
+    tags,
+    equations: equations.join(","),
+    images: images.join(","),
+    concepts: concepts.join(","),
+    problems: problems.join(","),
+    variables,
+    variants,
+    explanation,
+  });
+
+  if (result.err) {
+    toaster.error(
+      result.unwrapErr().message ?? "Internal Server Error",
+    );
+    const errorObj = result.unwrapErr().error;
+    console.error(errorObj);
+    // setFailureResponse(errorObj);
     return;
   }
 
-  const images = variables.filter(v => v.typ === "image").map(v =>
-    v.defaultValue
-  ).join(",");
-
-  const equations = variables.filter(v => v.typ === "equation").map(v =>
-    v.defaultValue
-  )
-    .join(",");
-
-  const problems = variables.filter(v => v.typ === "problem").map(v =>
-    v.defaultValue
-  )
-    .join(",");
-
-  //  const maybeProblems = await updateProblem({
-  //    id,
-  //    title,
-  //    description: description?.trim().length === 0 ? null : description,
-  //    content,
-  //    equations,
-  //    tags,
-  //    images,
-  //    problems,
-  //    variables,
-  //  });
-  //
-  //  if (maybeProblems.err) {
-  //    toaster.error(
-  //      maybeProblems.unwrapErr().message ?? "Internal Server Error",
-  //    );
-  //    const errorObj = maybeProblems.unwrapErr().error;
-  //    console.error(errorObj);
-  //    setFailureResponse(errorObj);
-  //    return;
-  //  }
-  //
-  //  if (maybeProblems.isOk()) {
-  //    toaster.success("Problem updated");
-  //    setTimeout(
-  //      () => window.location.replace(`/problems/${problem.id}`),
-  //      5000,
-  //    );
-  //  }
+  if (result.isOk()) {
+    toaster.success("Problem saved");
+    invalidateAll();
+  }
+}
+function extractVariableValueFromVariants(
+  variableType: VariableType,
+  variables: Variable[],
+  variants: VariantUpdate[],
+) {
+  const variableNames = variables
+    .filter(v => v.typ === variableType)
+    .map(v => v.name);
+  const ret: string[] = [];
+  for (const variant of variants) {
+    for (const variableValue of variant.variableValues) {
+      if (variableNames.includes(variableValue.name)) {
+        ret.push(variableValue.value);
+      }
+    }
+  }
+  return ret;
 }
 </script>
 
@@ -156,24 +150,8 @@ async function onFormSubmit(
   bind:this={deleteConformationDialog}
   title="Delete Problem "
   content="Are you sure you want to delete problem"
-  onResponse={onDeleteResponse}
+  onResponse={answer => onDeleteResponse(answer)}
 />
-<form
-  bind:this={deleteFormRef}
-  method="POST"
-  action="/problems?/delete"
-  use:enhance={deleteProblem}
-  hidden
-  class="absolute w-0 h-0 overflow-hidden"
->
-  <input
-    name="id"
-    class="inline-flex h-8 w-full flex-1 items-center justify-center rounded-sm border border-solid border-neutral px-3 leading-none"
-    value={problem.id}
-    type="hidden"
-    aria-disabled="true"
-  />
-</form>
 
 <div class="flex justify-between">
   <button
@@ -198,115 +176,4 @@ async function onFormSubmit(
   {/if}
 </div>
 
-<form
-  onsubmit={onFormSubmit}
-  class="mx-auto grid grid-cols-1 gap-4"
->
-  <input type="hidden" name="id" value={problem.id}>
-
-  <label>
-    <div>
-      Problem Statement
-      <span class="text-error" aria-label="required"> * </span>
-    </div>
-    <textarea
-      class="w-full text-xl h-36 min-h-12 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="problemStatement"
-      required
-      value={problem.problemStatement}
-      disabled={!edit}
-    ></textarea>
-    {#if failureResopnse?.problemStatement}
-      <div class="text-error">
-        {failureResopnse.problemStatement[0]}
-      </div>
-    {/if}
-  </label>
-
-  <label>
-    <div>
-      Hint <span aria-label="optional"></span>
-    </div>
-    <textarea
-      class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="hint"
-      value={problem.hint}
-      disabled={!edit}
-    ></textarea>
-    {#if failureResopnse?.hint}
-      <div class="text-error">
-        {failureResopnse.hint[0]}
-      </div>
-    {/if}
-  </label>
-
-  {#key edit}
-    <QuestionTypeSelect
-      bind:this={questionTypeRef}
-      name="questionType"
-      defaultValue={problem.questionType}
-      disabled={!edit}
-    />
-  {/key}
-
-  {#if edit}
-    <TagSearch bind:this={tagSearchRef} defaultSelectedTags={problem.tags} />
-    {#if failureResopnse?.tags}
-      <div class="text-error">
-        {failureResopnse.tags[0]}
-      </div>
-    {/if}
-  {:else}
-    <div
-      class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
-    >
-      {#each problem.tags as tag}
-        <span
-          class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
-        >
-          {tag.title}
-        </span>
-      {/each}
-    </div>
-  {/if}
-
-  <label>
-    <div>
-      Explanation <span aria-label="optional"></span>
-    </div>
-    <textarea
-      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="explanation"
-      value={problem.explanation}
-      disabled={!edit}
-    ></textarea>
-    {#if failureResopnse?.explanation}
-      <div class="text-error">
-        {failureResopnse.explanation[0]}
-      </div>
-    {/if}
-  </label>
-
-  <Variables
-    bind:this={variablesRef}
-    allowedValues={structuredClone(VARIABLE_TYPES)}
-    defaultInternalVariables={defaultVariables}
-    disabled={!edit}
-  />
-
-  <VariantsUpdate
-    bind:this={variantsUpdateRef}
-    variables={variablesRef?.getVariables()}
-    defaultProblem={problem}
-  />
-
-  <button
-    class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-    type="submit"
-  >
-    Submit
-  </button>
-</form>
+<Problem {onSubmit} {defaultProblem} disabled={!edit} />

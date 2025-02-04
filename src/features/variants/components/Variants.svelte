@@ -6,9 +6,10 @@ import Answers from "./Answers.svelte";
 
 interface Props {
   variantsContextKey: symbol;
+  disabled?: boolean;
 }
 
-const { variantsContextKey }: Props = $props();
+const { variantsContextKey, disabled = false }: Props = $props();
 
 const internalVariants = getInternalVariantsContext(variantsContextKey);
 

@@ -25,6 +25,17 @@ export class InternalProblem {
       return;
     }
     this.id = problem.id ?? "";
+    this.problemStatement = problem.problemStatement ?? "";
+    this.hint = problem.hint ?? "";
+    this.questionType = problem.questionType;
+    this.tags = problem.tags.map(tag => tag.id).join(",");
+    this.explanation = problem.explanation ?? "";
+    this.equations = problem.equations.map(equation => equation.id).join(",");
+    this.images = problem.images.map(image => image.id).join(",");
+    this.concepts = problem.concepts.map(concept => concept.id).join(",");
+    this.problems = problem.problems.map(problem => problem.id).join(",");
+    this.createdAt = problem.createdAt;
+    this.updatedAt = problem.updatedAt;
   }
 
   get psudoId() {

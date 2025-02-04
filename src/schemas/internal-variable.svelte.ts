@@ -1,5 +1,5 @@
 import type { SubscribeAction } from "$type";
-import type { Variable, VariableType } from "$type/variables";
+import type { Variable, VariableType, VariableValue } from "$type/variables";
 import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 
@@ -94,6 +94,15 @@ export class InternalVariable {
     this.#label = value ?? "";
   }
 
+  /**
+   * HACK: this function clears Label and value without effecting require state
+   */
+  public clearLabelAndValue() {
+    this.#name = "";
+    this.#label = "";
+    return this;
+  }
+
   public clone() {
     return new InternalVariable({
       name: this.#name,
@@ -102,6 +111,24 @@ export class InternalVariable {
       value: this.#value,
       label: this.#label,
     });
+  }
+
+  public cloneWithSamePsudoId() {
+    const cloned = this.clone();
+    cloned.#psudoId = this.#psudoId;
+    return cloned;
+  }
+
+  public cloneFromVariableValue(variableValue?: VariableValue) {
+    const cloned = this.clone();
+
+    if (variableValue && variableValue.name === this.#name) {
+      cloned.#psudoId = this.#psudoId;
+      cloned.#value = variableValue.value;
+    } else {
+      cloned.#value = "";
+    }
+    return cloned;
   }
 
   public log() {
@@ -151,11 +178,15 @@ export class InternalVariables {
   #internalVariables = $state<InternalVariable[]>([]);
   #subscribers: (SubscribeFn | undefined)[] = [];
 
-  constructor() {
+  constructor(defaultVariables?: Variable[]) {
+    if (!defaultVariables) {
+      return;
+    }
+    this.#internalVariables = defaultVariables.map(variable => new InternalVariable(variable));
   }
 
   get internalVariables() {
-    return this.#internalVariables as readonly InternalVariable[];
+    return this.#internalVariables;
   }
 
   public log() {

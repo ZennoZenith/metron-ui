@@ -7,7 +7,7 @@ import { validateUuid } from "$schemas/uuid";
 import { catchError, fetchJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
 
-export default class ApiClient {
+export class ProblemApiClient {
   private readonly url: URL;
   private readonly headers: HeadersInit;
 
@@ -86,6 +86,32 @@ export default class ApiClient {
     const maybeParseJson = validateSchema(json);
     if (maybeParseJson.err) {
       return Err(new ParseError().fromSelf(maybeParseJson.err));
+    }
+
+    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
+  }
+
+  async deleteProblemById(
+    id: unknown,
+  ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    if (!validateUuid(id)) {
+      return Err(new ValidationError({ id: ["Invalid problem id:uuid"] }, ["Invalid problem id:uuid"]));
+    }
+    const url = new URL(`problems/id/${id}`, this.url);
+    const errorOrJson = await fetchJson(url, {
+      method: "DELETE",
+      headers: {
+        ...this.headers,
+      },
+    });
+
+    if (errorOrJson.err) {
+      return errorOrJson as Result<never, typeof errorOrJson.err>;
+    }
+
+    const maybeParseJson = validateSchema(errorOrJson.unwrap());
+    if (maybeParseJson.err) {
+      return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
     }
 
     return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;

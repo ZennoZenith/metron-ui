@@ -1,5 +1,5 @@
 <script lang="ts">
-import ProblemApiClient from "$features/problems/api";
+import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
 import type { VariantUpdate } from "$features/variants/schemas/update";
 import { getToaster } from "$lib/toaster.svelte";

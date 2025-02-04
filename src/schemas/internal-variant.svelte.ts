@@ -1,11 +1,13 @@
 import type { VariantUpdate } from "$features/variants/schemas/update";
 import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import type { SubscribeAction } from "$type";
+import type { Problem } from "$type/problems";
 import { exhaustiveMatchingGuard } from "$utils";
 import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 import type { AnswerUpdate } from "./answer";
 import type { InternalVariable, InternalVariables } from "./internal-variable.svelte";
+import type { Variant } from "./variant";
 
 export class InternalVariant {
   readonly _tag = "InternalVariant" as const;
@@ -89,6 +91,7 @@ export class InternalVariant {
 
     this.#internalVariableValues[indexToUpdate] = InternalVariableValue.fromInternalVariable(internalVariable);
     this.#internalVariableValues[indexToUpdate].value = "";
+    this.#internalVariableValues[indexToUpdate].label = "";
   }
 
   public log() {
@@ -117,13 +120,15 @@ export class InternalVariant {
     }
   }
 
-  public static default(internalVaribles?: InternalVariable[]) {
+  public static default(internalVariables?: InternalVariable[]) {
     return new InternalVariant(
       {
         id: "",
         correctAnswers: [{ id: uuidv4(), answer: "", explanation: "" }],
         incorrectAnswers: [],
-        internalVariables: internalVaribles ?? [],
+        internalVariables:
+          internalVariables?.map(internalVariable => internalVariable.cloneWithSamePsudoId().clearLabelAndValue())
+            ?? [],
       },
     );
   }
@@ -152,17 +157,62 @@ export class InternalVariant {
         }),
     };
   }
+
+  public static fromProblem(internalVariables: InternalVariable[], variant: Variant, problem: Problem) {
+    const internalClonedVariable = internalVariables
+      .map(internalVariable =>
+        internalVariable.cloneFromVariableValue(variant.variableValues.find(v => v.name === internalVariable.name))
+      )
+      .map(internalVariable => InternalVariant.setLabelInVariable(internalVariable, problem));
+
+    return new InternalVariant({
+      id: variant.id,
+      correctAnswers: variant.correctAnswers,
+      incorrectAnswers: variant.incorrectAnswers,
+      internalVariables: internalClonedVariable,
+    });
+  }
+
+  private static setLabelInVariable(internalVariable: InternalVariable, problem: Problem) {
+    switch (internalVariable.typ) {
+      case "image":
+        internalVariable.label = problem.images.find(v => v.id === internalVariable.value)?.title;
+        break;
+      case "equation":
+        internalVariable.label = problem.equations.find(v => v.id === internalVariable.value)?.title;
+        break;
+      case "concept":
+        internalVariable.label = problem.concepts.find(v => v.id === internalVariable.value)?.title;
+        break;
+      case "problem":
+        internalVariable.label = problem.problems.find(v => v.id === internalVariable.value)
+          ?.problemStatement;
+        break;
+      default:
+        break;
+    }
+
+    return internalVariable;
+  }
 }
 
 export class InternalVariants {
   readonly _tag = "InternalVariants" as const;
 
   readonly #internalVariants: InternalVariant[] = $state<InternalVariant[]>([]);
-  readonly #internalVariables: readonly InternalVariable[];
+  readonly #internalVariables: InternalVariables;
 
-  constructor(internalVariables: InternalVariables) {
-    this.#internalVariables = internalVariables.internalVariables;
-    this.#internalVariants = [InternalVariant.default()];
+  constructor(internalVariables: InternalVariables, defaultProblem?: Problem) {
+    this.#internalVariables = internalVariables;
+
+    if (!defaultProblem) {
+      this.#internalVariants = [InternalVariant.default(internalVariables.internalVariables)];
+      return;
+    }
+
+    this.#internalVariants = defaultProblem.variants.map(variant =>
+      InternalVariant.fromProblem(internalVariables.internalVariables, variant, defaultProblem)
+    );
   }
 
   get internalVariants() {
@@ -174,7 +224,9 @@ export class InternalVariants {
   }
 
   public addInternalVariant(internalVariant?: InternalVariant) {
-    this.#internalVariants.push(internalVariant ?? InternalVariant.default([...this.#internalVariables]));
+    this.#internalVariants.push(
+      internalVariant ?? InternalVariant.default([...this.#internalVariables.internalVariables]),
+    );
   }
 
   public removeInternalVariant(psudoId: InternalVariant["psudoId"]) {

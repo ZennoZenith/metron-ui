@@ -32,17 +32,24 @@ type Props = {
   ) => void;
 };
 
-const { defaultProblem, onSubmit = () => {} }: Props = $props();
+const { defaultProblem, disabled = false, onSubmit = () => {} }: Props =
+  $props();
 const PROBLEM_KEY = Symbol("PROBLEM");
 const VARIABLE_KEY = Symbol("VARIABLE");
 const VARIANT_KEY = Symbol("VARIANT");
 const debounce = new Debounce();
 
+console.log(defaultProblem);
+
 const internalProblem = setProblemContext(PROBLEM_KEY, defaultProblem);
-const internalVariables = setInternalVariablesContext(VARIABLE_KEY);
+const internalVariables = setInternalVariablesContext(
+  VARIABLE_KEY,
+  addLabelToVariable(defaultProblem),
+);
 const internalVariants = setInternalVariantsContext(
   VARIANT_KEY,
   internalVariables,
+  defaultProblem,
 );
 internalVariables.subscribe((internalVariable, action) => {
   if (action === "UPDATE") {
@@ -55,6 +62,48 @@ internalVariables.subscribe((internalVariable, action) => {
     internalVariants.internalVariableAction(internalVariable, action);
   }
 });
+
+function addLabelToVariable(problem?: Problem) {
+  if (!problem) return undefined;
+
+  return problem.variables.map(variable => {
+    const label = extractLabel(
+      variable,
+      problem.equations,
+      problem.images,
+      problem.concepts,
+      problem.problems,
+    );
+
+    return {
+      ...variable,
+      value: variable.defaultValue,
+      label,
+    };
+  });
+}
+
+function extractLabel(
+  variable: Problem["variables"][number],
+  equations: Problem["equations"],
+  images: Problem["images"],
+  concepts: Problem["concepts"],
+  problems: Problem["problems"],
+) {
+  switch (variable.typ) {
+    case "image":
+      return images.find(v => v.id === variable.defaultValue)?.title;
+    case "equation":
+      return equations.find(v => v.id === variable.defaultValue)?.title;
+    case "concept":
+      return concepts.find(v => v.id === variable.defaultValue)?.title;
+    case "problem":
+      return problems.find(v => v.id === variable.defaultValue)
+        ?.problemStatement;
+    default:
+      return undefined;
+  }
+}
 </script>
 
 <form
@@ -76,6 +125,7 @@ internalVariables.subscribe((internalVariable, action) => {
       name="problemStatement"
       required
       bind:value={internalProblem.problemStatement}
+      {disabled}
     ></textarea>
   </label>
 
@@ -88,16 +138,35 @@ internalVariables.subscribe((internalVariable, action) => {
       placeholder=""
       name="hint"
       bind:value={internalProblem.hint}
+      {disabled}
     ></textarea>
   </label>
 
   <QuestionTypeSelect
     name="questionType"
     defaultValue="MCQ"
+    {disabled}
     onChange={value => internalProblem.questionType = value}
   />
 
-  <TagSearch onChange={value => internalProblem.tags = value} />
+  {#if !disabled}
+    <TagSearch
+      defaultSelectedTags={defaultProblem?.tags}
+      onChange={value => internalProblem.tags = value}
+    />
+  {:else if defaultProblem}
+    <div
+      class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
+    >
+      {#each defaultProblem.tags as tag}
+        <span
+          class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
+        >
+          {tag.title}
+        </span>
+      {/each}
+    </div>
+  {/if}
 
   <label>
     <div>
@@ -108,12 +177,13 @@ internalVariables.subscribe((internalVariable, action) => {
       placeholder=""
       name="explanation"
       bind:value={internalProblem.explanation}
+      {disabled}
     ></textarea>
   </label>
 
-  <Variables variablesContextKey={VARIABLE_KEY} />
+  <Variables variablesContextKey={VARIABLE_KEY} {disabled} />
 
-  <Variants variantsContextKey={VARIANT_KEY} />
+  <Variants variantsContextKey={VARIANT_KEY} {disabled} />
 
   <button
     class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"

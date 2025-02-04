@@ -1,4 +1,3 @@
-import { validateCreateSchema } from "$features/problems/schemas/create";
 import { validateSearchSchema } from "$features/problems/schemas/search";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";

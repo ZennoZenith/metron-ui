@@ -66,6 +66,7 @@ export function validateVariableType(data: unknown) {
 export type Variable = InferOutput<typeof schema>;
 export type VariableType = InferOutput<typeof schema>["typ"];
 export type VariableTypeLoose = VariableType | ({} & string);
+export type VariableValue = InferOutput<typeof variableValueSchema>;
 export const VARIABLE_TYPES: VariableType[] = ["text", "equation", "concept", "problem", "image"] as const;
 export type VariableArray = InferOutput<typeof schemaArray>;
 
