@@ -1,10 +1,11 @@
 <script lang="ts">
-import { searchEquation } from "$features/equations/api/client";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Equation } from "$type/equations";
 import { onMount } from "svelte";
+import { EquationApiClient } from "../api";
 
 const toaster = getToaster();
+const equationClient = new EquationApiClient();
 
 type Props = { onSearch: (list: Equation[]) => void; loadListOnLoad?: boolean };
 let { onSearch, loadListOnLoad = false }: Props = $props();
@@ -19,7 +20,7 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeEquations = await searchEquation(formEntries);
+  const maybeEquations = await equationClient.searchByQueryTitle(formEntries);
 
   if (maybeEquations.isErr()) {
     const error = maybeEquations.unwrapErr();

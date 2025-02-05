@@ -1,3 +1,4 @@
+TagSearch should impelement disabled
 set empty string to undefined where possible
 move tagsearch component out from components to features
 rename tagsearch to tagselect
