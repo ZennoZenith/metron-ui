@@ -8,6 +8,6 @@ const imageClient = new ImageApiClient(apiClientOptions);
   const temp = await imageClient.getImageById(
     "0964cf80-c7f2-11ef-8a8e-ff84e6ecd36a",
   );
-  console.log(temp);
+  console.info(temp);
 })();
 </script>

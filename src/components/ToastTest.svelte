@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getToaster } from "$lib/toaster.svelte";
 import type { ToastType } from "$type";
+import { exhaustiveMatchingGuard } from "$utils/helpers";
 
 const toaster = getToaster();
 
@@ -18,6 +19,8 @@ function showToast(toastType: ToastType) {
     case "ERROR":
       toaster.error("Error Message", "Error title");
       break;
+    default:
+      return exhaustiveMatchingGuard(toastType);
   }
 }
 </script>

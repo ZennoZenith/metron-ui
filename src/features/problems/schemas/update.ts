@@ -3,13 +3,14 @@ import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";
 import { questionTypeSchema } from "$schemas/problems/self";
-import { uuidArrayString } from "$schemas/uuid";
+import { uuidArrayString, uuidSchema } from "$schemas/uuid";
 import { schemaArray as variableSchemaArray } from "$schemas/variable";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
 
 const updateSchema = pipe(
   object(
     {
+      id: uuidSchema,
       problemStatement: content,
       hint: nullish(content),
       questionType: questionTypeSchema,

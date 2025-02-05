@@ -66,7 +66,7 @@ export class InternalVariableValue {
   }
 
   public log() {
-    console.log(
+    console.info(
       { name: this.#name, typ: this.#typ, value: this.#value, label: this.#label },
     );
   }

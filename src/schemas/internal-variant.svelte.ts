@@ -2,7 +2,7 @@ import type { VariantUpdate } from "$features/variants/schemas/update";
 import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import type { SubscribeAction } from "$type";
 import type { Problem } from "$type/problems";
-import { exhaustiveMatchingGuard } from "$utils";
+import { exhaustiveMatchingGuard } from "$utils/helpers";
 import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
 import type { AnswerUpdate } from "./answer";
@@ -95,7 +95,7 @@ export class InternalVariant {
   }
 
   public log() {
-    console.log({
+    console.info({
       psudoId: this.#psudoId,
       id: this.#id,
       correctAnswers: this.#correctAnswers,
@@ -135,7 +135,7 @@ export class InternalVariant {
 
   public toVariant(): VariantUpdate {
     return {
-      id: this.#id,
+      id: setEmptyStringAsNullish(this.#id),
       correctAnswers: this.#correctAnswers.map(v => {
         return {
           id: setEmptyStringAsNullish(v.id),

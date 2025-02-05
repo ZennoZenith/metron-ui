@@ -59,8 +59,10 @@ export async function fetchEmpty(
 export async function fetchJson(
   url: RequestInfo | URL,
   init?: RequestInit,
+  extra?: { customFetch?: typeof fetch },
 ): Promise<Result<Record<string, unknown>, FetchError | ApiError | JsonDeserializeError>> {
-  const maybeResponse = await catchError(fetch(url, init));
+  const internalFetch = extra?.customFetch ? extra.customFetch : fetch;
+  const maybeResponse = await catchError(internalFetch(url, init));
   if (maybeResponse.err) {
     return Err(new FetchError().fromError(maybeResponse.err));
   }
@@ -77,16 +79,4 @@ export async function fetchJson(
   }
 
   return Ok(json);
-}
-
-export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(data: T[], key: (obj: T) => T[keyof T]) {
-  return [
-    ...new Map(
-      data.map(x => [key(x), x]),
-    ).values(),
-  ];
-}
-
-export function exhaustiveMatchingGuard(_: never, message?: string): never {
-  throw new Error(message ?? "Should not have reached here");
 }

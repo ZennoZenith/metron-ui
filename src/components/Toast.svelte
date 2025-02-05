@@ -6,6 +6,7 @@ import SuccessSvg from "$icons/success.svelte";
 import WarningSvg from "$icons/warning.svelte";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Toast } from "$type";
+import { exhaustiveMatchingGuard } from "$utils/helpers";
 import { onMount } from "svelte";
 import { fade, fly } from "svelte/transition";
 type Props = {
@@ -36,6 +37,8 @@ switch (toast.toastType) {
     toastTypeClass = "bg-error text-error-content";
     toastTypeTextClass = "text-error";
     break;
+  default:
+    return exhaustiveMatchingGuard(toast.toastType);
 }
 
 function setIfEmptyTitle(toast: Toast) {
@@ -53,6 +56,8 @@ function setIfEmptyTitle(toast: Toast) {
     case "ERROR":
       title = "Error";
       break;
+    default:
+      return exhaustiveMatchingGuard(toast.toastType);
   }
 
   if (!toast.title) return title;

@@ -132,7 +132,7 @@ export class InternalVariable {
   }
 
   public log() {
-    console.log({
+    console.info({
       psudoId: this.#psudoId,
       name: this.#name,
       typ: this.#typ,

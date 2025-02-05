@@ -20,6 +20,7 @@ import {
 } from "$schemas/internal-variant.svelte";
 import type { SubscribeAction } from "$type";
 import type { Problem } from "$type/problems";
+import { exhaustiveMatchingGuard } from "$utils/helpers";
 import QuestionTypeSelect from "./QuestionTypeSelect.svelte";
 
 type Props = {
@@ -39,8 +40,6 @@ const VARIABLE_KEY = Symbol("VARIABLE");
 const VARIANT_KEY = Symbol("VARIANT");
 const debounce = new Debounce();
 
-console.log(defaultProblem);
-
 const internalProblem = setProblemContext(PROBLEM_KEY, defaultProblem);
 const internalVariables = setInternalVariablesContext(
   VARIABLE_KEY,
@@ -54,8 +53,6 @@ const internalVariants = setInternalVariantsContext(
 internalVariables.subscribe((internalVariable, action) => {
   if (action === "UPDATE") {
     debounce.debounceAsync((value: InternalVariable, act: SubscribeAction) => {
-      // console.log(`Action: ${act}`);
-      // value.log();
       internalVariants.internalVariableAction(value, act);
     }, DEBOUNCE_OVERIDE_TIME_MSEC)(internalVariable, action);
   } else {
@@ -91,6 +88,8 @@ function extractLabel(
   problems: Problem["problems"],
 ) {
   switch (variable.typ) {
+    case "text":
+      return variable.defaultValue;
     case "image":
       return images.find(v => v.id === variable.defaultValue)?.title;
     case "equation":
@@ -101,7 +100,7 @@ function extractLabel(
       return problems.find(v => v.id === variable.defaultValue)
         ?.problemStatement;
     default:
-      return undefined;
+      return exhaustiveMatchingGuard(variable.typ);
   }
 }
 </script>

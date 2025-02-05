@@ -31,3 +31,15 @@ export function setEmptyStringAsNullish(value?: string | null): string | undefin
   if (isEmptyString(value)) return undefined;
   else return value?.trim() as string;
 }
+
+export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(data: T[], key: (obj: T) => T[keyof T]) {
+  return [
+    ...new Map(
+      data.map(x => [key(x), x]),
+    ).values(),
+  ];
+}
+
+export function exhaustiveMatchingGuard(_: never, message?: string): never {
+  throw new Error(message ?? "Should not have reached here");
+}

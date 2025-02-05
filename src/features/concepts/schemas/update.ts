@@ -1,12 +1,13 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
+import { uuidSchema } from "$schemas/uuid";
 import { flatten, type InferOutput, object, pipe, safeParse, string, transform, uuid } from "valibot";
 import { createSchema } from "./create";
 
 const updateSchema = pipe(
   object(
     {
-      id: pipe(string(), uuid("The UUID is badly formatted.")),
+      id: uuidSchema,
       ...createSchema.entries,
     },
   ),

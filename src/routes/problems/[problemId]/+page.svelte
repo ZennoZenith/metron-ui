@@ -1,5 +1,6 @@
 <script lang="ts">
-import { goto, invalidateAll } from "$app/navigation";
+import { goto, invalidateAll, replaceState } from "$app/navigation";
+import { page } from "$app/state";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
@@ -49,6 +50,7 @@ async function onSubmit(
   const variants = internalVariants.toVariants();
 
   const {
+    id,
     problemStatement,
     hint,
     questionType,
@@ -84,6 +86,7 @@ async function onSubmit(
     .concat(extractVariableValueFromVariants("problem", variables, variants));
 
   // console.log({
+  //   id,
   //   problemStatement,
   //   hint,
   //   questionType,
@@ -97,7 +100,8 @@ async function onSubmit(
   //   explanation,
   // });
 
-  const result = await problemClient.createProblem({
+  const result = await problemClient.updateProblem({
+    id,
     problemStatement,
     hint,
     questionType,
@@ -122,8 +126,13 @@ async function onSubmit(
   }
 
   if (result.isOk()) {
-    toaster.success("Problem saved");
+    edit = false;
+    toaster.success("Problem updated, refresh to get updated data");
     invalidateAll();
+    replaceState(
+      page.url.toString().replaceAll("edit=true", ""),
+      {},
+    );
   }
 }
 function extractVariableValueFromVariants(

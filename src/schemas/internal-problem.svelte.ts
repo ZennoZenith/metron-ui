@@ -43,7 +43,7 @@ export class InternalProblem {
   }
 
   public log() {
-    console.log({
+    console.info({
       id: $state.snapshot(this.id),
       psudoId: this.#psudoId,
       problemStatement: $state.snapshot(this.problemStatement),
