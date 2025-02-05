@@ -120,14 +120,16 @@ export class InternalVariant {
     }
   }
 
-  public static default(internalVariables?: InternalVariable[]) {
+  public static default(internalVariables: InternalVariables) {
     return new InternalVariant(
       {
         id: "",
         correctAnswers: [{ id: uuidv4(), answer: "", explanation: "" }],
         incorrectAnswers: [],
         internalVariables:
-          internalVariables?.map(internalVariable => internalVariable.cloneWithSamePsudoId().clearLabelAndValue())
+          internalVariables.internalVariables.map(internalVariable =>
+            internalVariable.cloneWithSamePsudoId().clearLabelAndValue()
+          )
             ?? [],
       },
     );
@@ -209,7 +211,7 @@ export class InternalVariants {
     this.#internalVariables = internalVariables;
 
     if (!defaultProblem) {
-      this.#internalVariants = [InternalVariant.default(internalVariables.internalVariables)];
+      this.#internalVariants = [InternalVariant.default(internalVariables)];
       return;
     }
 
@@ -228,7 +230,7 @@ export class InternalVariants {
 
   public addInternalVariant(internalVariant?: InternalVariant) {
     this.#internalVariants.push(
-      internalVariant ?? InternalVariant.default([...this.#internalVariables.internalVariables]),
+      internalVariant ?? InternalVariant.default(this.#internalVariables),
     );
   }
 

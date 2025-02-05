@@ -98,7 +98,7 @@ export class InternalVariable {
    * HACK: this function clears Label and value without effecting require state
    */
   public clearLabelAndValue() {
-    this.#name = "";
+    this.#value = "";
     this.#label = "";
     return this;
   }
