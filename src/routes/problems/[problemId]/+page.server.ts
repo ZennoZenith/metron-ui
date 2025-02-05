@@ -9,7 +9,7 @@ const errorHandleFn = (message: string) => error(INTERNAL_SERVER_ERROR, { messag
 
 export const load: PageServerLoad = async ({ params, url, fetch }) => {
   const problemId = params.problemId;
-  const problem = await problemClient.getProblemById(problemId, { customFetch: fetch });
+  const problem = await problemClient.getById(problemId, { customFetch: fetch });
 
   if (problem.isErr()) {
     return error(NOT_FOUND, problem.unwrapErr(errorHandleFn).error as ErrorObject);

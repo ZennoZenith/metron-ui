@@ -18,7 +18,7 @@ export class ProblemApiClient {
     this.url = options.options.url;
   }
 
-  async searchProblemsShortByQueryTitle(
+  async searchShortsByQueryTitle(
     data: unknown,
   ): Promise<Result<ProblemShortArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateSearchSchema(data);
@@ -50,7 +50,7 @@ export class ProblemApiClient {
     return Ok(maybeParseJson.unwrap()) as Result<ProblemShortArray, never>;
   }
 
-  async getProblemById(
+  async getById(
     id: unknown,
     extra?: { customFetch?: typeof fetch },
   ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
@@ -77,7 +77,7 @@ export class ProblemApiClient {
     return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
   }
 
-  async createProblem(
+  async create(
     data: unknown,
   ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateCreateSchema(data);
@@ -126,7 +126,7 @@ export class ProblemApiClient {
     return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
   }
 
-  async updateProblem(
+  async update(
     data: unknown,
   ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateUpdateSchema(data);
@@ -175,7 +175,7 @@ export class ProblemApiClient {
     return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
   }
 
-  async deleteProblemById(
+  async delete(
     id: unknown,
   ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     if (!validateUuid(id)) {

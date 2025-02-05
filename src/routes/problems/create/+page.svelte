@@ -74,7 +74,7 @@ async function onSubmit(
   //   explanation,
   // });
 
-  const result = await problemClient.createProblem({
+  const result = await problemClient.create({
     problemStatement,
     hint,
     questionType,

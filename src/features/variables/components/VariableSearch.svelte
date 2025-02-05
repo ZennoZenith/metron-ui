@@ -142,7 +142,7 @@ async function searchProblems(
   value: Record<string, unknown>,
 ): Promise<SearchResult[]> {
   const maybeProblems = await problemClient
-    .searchProblemsShortByQueryTitle(value);
+    .searchShortsByQueryTitle(value);
 
   if (maybeProblems.isErr()) {
     const error = maybeProblems.unwrapErr();

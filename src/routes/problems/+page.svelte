@@ -29,7 +29,7 @@ async function onDeleteResponse(answer: boolean) {
     return;
   }
 
-  const response = await problemClient.deleteProblemById(
+  const response = await problemClient.delete(
     problemToBeDeleted?.id,
   );
 

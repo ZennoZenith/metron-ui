@@ -25,7 +25,7 @@ let edit = $state(data.edit);
 async function onDeleteResponse(answer: boolean) {
   if (!answer) return;
 
-  const response = await problemClient.deleteProblemById(defaultProblem.id);
+  const response = await problemClient.delete(defaultProblem.id);
 
   if (response.isErr()) {
     const err = response.unwrapErr();
@@ -85,7 +85,7 @@ async function onSubmit(
     ).map(v => v.defaultValue as string)
     .concat(extractVariableValueFromVariants("problem", variables, variants));
 
-  const result = await problemClient.updateProblem({
+  const result = await problemClient.update({
     id,
     problemStatement,
     hint,
