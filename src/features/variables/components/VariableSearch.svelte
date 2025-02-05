@@ -9,12 +9,13 @@ import { X } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
 import type { VariableType } from "$type/variables";
 import { Debounce } from "$utils/debounce";
+import { exhaustiveMatchingGuard } from "$utils/helpers";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 
 type Props = {
   onResponse?: (searchResult?: SearchResult) => void;
-  variableType?: VariableType | ({} & string);
+  variableType?: VariableType;
 };
 
 export interface SearchResult {
@@ -145,6 +146,8 @@ async function onFormSubmit(
 
   if (!variableType) return;
   switch (variableType) {
+    case "text":
+      break;
     case "image":
       searchedResults = await searchImages(formEntries);
       break;
@@ -158,7 +161,7 @@ async function onFormSubmit(
       // searchedResults = await searchImages(formEntries);
       break;
     default:
-      return;
+      return exhaustiveMatchingGuard(variableType);
   }
 }
 

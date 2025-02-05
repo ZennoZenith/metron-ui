@@ -175,6 +175,9 @@ export class InternalVariant {
 
   private static setLabelInVariable(internalVariable: InternalVariable, problem: Problem) {
     switch (internalVariable.typ) {
+      case "text":
+        internalVariable.label = internalVariable.value;
+        break;
       case "image":
         internalVariable.label = problem.images.find(v => v.id === internalVariable.value)?.title;
         break;
@@ -189,7 +192,7 @@ export class InternalVariant {
           ?.problemStatement;
         break;
       default:
-        break;
+        return exhaustiveMatchingGuard(internalVariable.typ);
     }
 
     return internalVariable;
