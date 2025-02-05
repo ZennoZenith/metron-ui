@@ -1,7 +1,7 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { uuidSchema } from "$schemas/uuid";
-import { flatten, type InferOutput, object, pipe, safeParse, string, transform, uuid } from "valibot";
+import { flatten, type InferOutput, object, pipe, safeParse, transform } from "valibot";
 import { createSchema } from "./create";
 
 const updateSchema = pipe(
@@ -35,3 +35,5 @@ export function validateUpdateSchema(data: unknown) {
 
   return Err(new ValidationError(issues));
 }
+
+export type ConceptUpdate = UpdateSchema;

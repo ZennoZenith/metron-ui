@@ -1,170 +1,60 @@
 <script lang="ts">
-import TagSearch from "$components/TagSearch.svelte";
-import { createConcept } from "$features/concepts/api/client";
-import { type CreateIssues } from "$features/concepts/schemas/create";
-import Variables from "$features/variables/components/Variables.svelte";
-import type { ErrorObject } from "$lib/error";
+import { ConceptApiClient } from "$features/concepts/api";
+import Concept from "$features/concepts/components/Concept.svelte";
 import { getToaster } from "$lib/toaster.svelte";
+import { type InternalVariables } from "$schemas/internal-variable.svelte";
+import { setEmptyStringAsNullish } from "$utils/helpers";
 
-let tagSearchRef = $state<TagSearch>();
-let variablesRef = $state<Variables>();
 const toaster = getToaster();
-let failureResopnse = $state<CreateIssues & { message?: string }>();
+const conceptClient = new ConceptApiClient();
+let reset = $state(false);
 
-function setFailureResponse(error?: ErrorObject) {
-  if (error?.type === "validation-error") {
-    failureResopnse = {
-      ...error.extra,
-      message: error?.message,
-    };
-  } else {
-    failureResopnse = {
-      message: error?.message,
-    };
-  }
-}
+async function onSubmit(
+  id: string,
+  title: string,
+  description: string,
+  content: string,
+  tags: string,
+  equations: string,
+  images: string,
+  concepts: string,
+  internalVariables: InternalVariables,
+): Promise<void> {
+  const variables = internalVariables.toVariables();
 
-function resetForm(formElement: HTMLFormElement) {
-  formElement.reset();
-  tagSearchRef?.clearSelectedTags();
-  variablesRef?.clearVariables();
-}
-
-async function onFormSubmit(
-  event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
-) {
-  event.preventDefault();
-  // Taking reference because current element becomes null for some reason down in function
-  const formElement = event.currentTarget;
-  const formData = new FormData(formElement);
-
-  const title = formData.get("title")?.toString() ?? "";
-  const description = formData.get("description")?.toString() ?? "";
-  const content = formData.get("content")?.toString() ?? "";
-  const tags = tagSearchRef?.getTagIdStrings() ?? "";
-
-  const variables = variablesRef?.getVariables();
-  if (variables === undefined) {
-    toaster.error("Variable ref not set");
-    return;
-  }
-
-  const images = variables.filter(v => v.typ === "image").map(v =>
-    v.defaultValue
-  ).join(",");
-
-  const equations = variables.filter(v => v.typ === "equation").map(v =>
-    v.defaultValue
-  )
-    .join(",");
-
-  const concepts = variables.filter(v => v.typ === "concept").map(v =>
-    v.defaultValue
-  )
-    .join(",");
-
-  const maybeConcepts = await createConcept({
+  const result = await conceptClient.create({
+    id,
     title,
-    description: description.trim().length === 0 ? null : description,
+    description: setEmptyStringAsNullish(description),
     content,
-    equations,
     tags,
+    equations,
     images,
     concepts,
     variables,
   });
 
-  if (maybeConcepts.err) {
+  if (result.err) {
     toaster.error(
-      maybeConcepts.unwrapErr().message ?? "Internal Server Error",
+      result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = maybeConcepts.unwrapErr().error;
+    const errorObj = result.unwrapErr().error;
     console.error(errorObj);
-    setFailureResponse(errorObj);
+    // setFailureResponse(errorObj);
     return;
   }
 
-  if (maybeConcepts.isOk()) {
+  if (result.isOk()) {
     toaster.success("Concept saved");
-    resetForm(formElement);
+    resetForm();
   }
+}
+
+function resetForm() {
+  reset = !reset;
 }
 </script>
 
-<form
-  onsubmit={onFormSubmit}
-  class="mx-auto grid grid-cols-1 gap-4"
->
-  <label>
-    <div>
-      Title <span class="text-error" aria-label="required"> * </span>
-    </div>
-    <textarea
-      id="title"
-      class="w-full text-xl h-12 min-h-12 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="title"
-      required
-    ></textarea>
-    {#if failureResopnse?.title}
-      <div class="text-error">
-        {failureResopnse.title[0]}
-      </div>
-    {/if}
-  </label>
-
-  <label>
-    <div>
-      Description <span aria-label="optional"></span>
-    </div>
-    <textarea
-      id="description"
-      class="w-full text-xl min-h-12 h-52 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="description"
-    ></textarea>
-    {#if failureResopnse?.description}
-      <div class="text-error">
-        {failureResopnse.description[0]}
-      </div>
-    {/if}
-  </label>
-
-  <label>
-    <div>
-      Content <span class="text-error" aria-label="required"> * </span>
-    </div>
-    <textarea
-      id="content"
-      class="w-full text-xl min-h-12 h-96 p-2 rounded border border-solid border-base-content"
-      placeholder=""
-      name="content"
-      required
-    ></textarea>
-    {#if failureResopnse?.content}
-      <div class="text-error">
-        {failureResopnse.content[0]}
-      </div>
-    {/if}
-  </label>
-
-  <TagSearch bind:this={tagSearchRef} />
-  {#if failureResopnse?.tags}
-    <div class="text-error">
-      {failureResopnse.tags[0]}
-    </div>
-  {/if}
-
-  <Variables
-    bind:this={variablesRef}
-    allowedValues={["image", "equation", "concept"]}
-    disableNullable
-  />
-
-  <button
-    class="px-4 font-semibold active:scale-98 active:transition-all bg-primary text-primary-content py-2 rounded-full"
-    type="submit"
-  >
-    Submit
-  </button>
-</form>
+{#key reset}
+  <Concept {onSubmit} />
+{/key}

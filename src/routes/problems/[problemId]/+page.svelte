@@ -85,21 +85,6 @@ async function onSubmit(
     ).map(v => v.defaultValue as string)
     .concat(extractVariableValueFromVariants("problem", variables, variants));
 
-  // console.log({
-  //   id,
-  //   problemStatement,
-  //   hint,
-  //   questionType,
-  //   tags,
-  //   equations: equations.join(","),
-  //   images: images.join(","),
-  //   concepts: concepts.join(","),
-  //   problems: problems.join(","),
-  //   variables,
-  //   variants,
-  //   explanation,
-  // });
-
   const result = await problemClient.updateProblem({
     id,
     problemStatement,

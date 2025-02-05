@@ -34,37 +34,41 @@ async function onSubmit(
       v.typ === "equation" && v.defaultValue !== undefined
       && v.defaultValue !== null
     ).map(v => v.defaultValue as string)
-    .concat(extractVariableValueFromVariants("equation", variables, variants));
+    .concat(extractVariableValueFromVariants("equation", variables, variants))
+    .join(",");
 
   const images = variables.filter(v =>
     v.typ === "image" && v.defaultValue !== undefined
     && v.defaultValue !== null
   ).map(v => v.defaultValue as string)
-    .concat(extractVariableValueFromVariants("image", variables, variants));
+    .concat(extractVariableValueFromVariants("image", variables, variants))
+    .join(",");
 
   const concepts = variables
     .filter(v =>
       v.typ === "concept" && v.defaultValue !== undefined
       && v.defaultValue !== null
     ).map(v => v.defaultValue as string)
-    .concat(extractVariableValueFromVariants("concept", variables, variants));
+    .concat(extractVariableValueFromVariants("concept", variables, variants))
+    .join(",");
 
   const problems = variables
     .filter(v =>
       v.typ === "problem" && v.defaultValue !== undefined
       && v.defaultValue !== null
     ).map(v => v.defaultValue as string)
-    .concat(extractVariableValueFromVariants("problem", variables, variants));
+    .concat(extractVariableValueFromVariants("problem", variables, variants))
+    .join(",");
 
   // console.log({
   //   problemStatement,
   //   hint,
   //   questionType,
   //   tags,
-  //   equations: equations.join(","),
-  //   images: images.join(","),
-  //   concepts: concepts.join(","),
-  //   problems: problems.join(","),
+  //   equations ,
+  //   images ,
+  //   concepts ,
+  //   problems ,
   //   variables,
   //   variants,
   //   explanation,
@@ -75,10 +79,10 @@ async function onSubmit(
     hint,
     questionType,
     tags,
-    equations: equations.join(","),
-    images: images.join(","),
-    concepts: concepts.join(","),
-    problems: problems.join(","),
+    equations,
+    images,
+    concepts,
+    problems,
     variables,
     variants,
     explanation,

@@ -2,14 +2,14 @@ import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
 import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type Problem, type ProblemShortArray, validateSchema, validateShortSchemaArray } from "$schemas/problems/self";
+import { type Concept, type ConceptShortArray, validateSchema, validateShortSchemaArray } from "$schemas/concepts/self";
 import { validateUuid } from "$schemas/uuid";
 import { catchError, fetchJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
 import { validateSearchSchema } from "../schemas/search";
 import { validateUpdateSchema } from "../schemas/update";
 
-export class ProblemApiClient {
+export class ConceptApiClient {
   private readonly url: URL;
   private readonly headers: HeadersInit;
 
@@ -18,9 +18,9 @@ export class ProblemApiClient {
     this.url = options.options.url;
   }
 
-  async searchProblemsShortByQueryTitle(
+  async searchShortsByQueryTitle(
     data: unknown,
-  ): Promise<Result<ProblemShortArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  ): Promise<Result<ConceptShortArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateSearchSchema(data);
 
     if (parsed.err) {
@@ -28,7 +28,7 @@ export class ProblemApiClient {
     }
 
     const { search } = parsed.unwrap();
-    const url = new URL("problems", this.url);
+    const url = new URL("concepts", this.url);
     url.searchParams.append("search", search);
 
     const errorOrJson = await fetchJson(url, {
@@ -47,17 +47,17 @@ export class ProblemApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.err));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<ProblemShortArray, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<ConceptShortArray, never>;
   }
 
-  async getProblemById(
+  async getById(
     id: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     if (!validateUuid(id)) {
       return Err(new ValidationError({ id: ["Invalid id:uuid"] }, ["Invalid id:uuid"]));
     }
-    const url = new URL(`problems/id/${id}`, this.url);
+    const url = new URL(`concepts/id/${id}`, this.url);
     const errorOrJson = await fetchJson(url, {
       method: "GET",
       headers: {
@@ -74,28 +74,27 @@ export class ProblemApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
   }
 
-  async createProblem(
+  async create(
     data: unknown,
-  ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateCreateSchema(data);
     if (parsed.err) {
       return parsed;
     }
 
-    const problem = parsed.unwrap();
-    const url = new URL("problems", this.url);
+    const concept = parsed.unwrap();
+    const url = new URL("concepts", this.url);
     const maybeResponse = await catchError(fetch(url, {
       method: "POST",
       body: JSON.stringify({
-        ...problem,
-        tags: problem.tags?.split(",") ?? null,
-        equations: problem.equations?.split(",") ?? null,
-        concepts: problem.concepts?.split(",") ?? null,
-        images: problem.images?.split(",") ?? null,
-        problems: problem.problems?.split(",") ?? null,
+        ...concept,
+        tags: concept.tags?.split(",") ?? null,
+        equations: concept.equations?.split(",") ?? null,
+        concepts: concept.concepts?.split(",") ?? null,
+        images: concept.images?.split(",") ?? null,
       }),
       headers: {
         "content-type": "application/json",
@@ -123,28 +122,27 @@ export class ProblemApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.err));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
   }
 
-  async updateProblem(
+  async update(
     data: unknown,
-  ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateUpdateSchema(data);
     if (parsed.err) {
       return parsed;
     }
 
-    const problem = parsed.unwrap();
-    const url = new URL(`problems/id/${problem.id}`, this.url);
+    const concept = parsed.unwrap();
+    const url = new URL(`concepts/id/${concept.id}`, this.url);
     const maybeResponse = await catchError(fetch(url, {
       method: "PATCH",
       body: JSON.stringify({
-        ...problem,
-        tags: problem.tags?.split(",") ?? null,
-        equations: problem.equations?.split(",") ?? null,
-        concepts: problem.concepts?.split(",") ?? null,
-        images: problem.images?.split(",") ?? null,
-        problems: problem.problems?.split(",") ?? null,
+        ...concept,
+        tags: concept.tags?.split(",") ?? null,
+        equations: concept.equations?.split(",") ?? null,
+        concepts: concept.concepts?.split(",") ?? null,
+        images: concept.images?.split(",") ?? null,
       }),
       headers: {
         "content-type": "application/json",
@@ -172,16 +170,16 @@ export class ProblemApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.err));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
   }
 
-  async deleteProblemById(
+  async deleteById(
     id: unknown,
-  ): Promise<Result<Problem, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+  ): Promise<Result<Concept, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid problem id:uuid"] }, ["Invalid problem id:uuid"]));
+      return Err(new ValidationError({ id: ["Invalid concept id:uuid"] }, ["Invalid concept id:uuid"]));
     }
-    const url = new URL(`problems/id/${id}`, this.url);
+    const url = new URL(`concepts/id/${id}`, this.url);
     const errorOrJson = await fetchJson(url, {
       method: "DELETE",
       headers: {
@@ -198,6 +196,6 @@ export class ProblemApiClient {
       return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Problem, never>;
+    return Ok(maybeParseJson.unwrap()) as Result<Concept, never>;
   }
 }

@@ -1,14 +1,14 @@
 <script lang="ts">
 import { flyAndScale } from "$components/melt/utils/index";
 import { IMAGE_BASE_ROUTE } from "$constants";
-import { searchConcept } from "$features/concepts/api/client";
+import { ConceptApiClient } from "$features/concepts/api";
 import { searchEquation } from "$features/equations/api/client";
 import { searchImage } from "$features/images/api/client";
+import { ProblemApiClient } from "$features/problems/api";
 import { MagnifyingGlass } from "$icons";
 import { X } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
 import type { VariableType } from "$type/variables";
-import { Debounce } from "$utils/debounce";
 import { exhaustiveMatchingGuard } from "$utils/helpers";
 import { createDialog, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
@@ -27,7 +27,9 @@ export interface SearchResult {
   imgSrc?: string;
 }
 
-const debounce = new Debounce();
+const conceptClient = new ConceptApiClient();
+const problemClient = new ProblemApiClient();
+
 const toaster = getToaster();
 const {
   onResponse = () => {},
@@ -112,7 +114,7 @@ async function searchEquations(
 async function searchConcepts(
   value: Record<string, unknown>,
 ): Promise<SearchResult[]> {
-  const maybeConcepts = await searchConcept(value);
+  const maybeConcepts = await conceptClient.searchShortsByQueryTitle(value);
 
   if (maybeConcepts.isErr()) {
     const error = maybeConcepts.unwrapErr();
@@ -127,6 +129,34 @@ async function searchConcepts(
           id,
           description,
           title,
+          value: id,
+          content: "",
+        };
+      },
+    );
+  }
+  return [];
+}
+
+async function searchProblems(
+  value: Record<string, unknown>,
+): Promise<SearchResult[]> {
+  const maybeProblems = await problemClient
+    .searchProblemsShortByQueryTitle(value);
+
+  if (maybeProblems.isErr()) {
+    const error = maybeProblems.unwrapErr();
+    console.error(error);
+    toaster.error(error.message);
+    return [];
+  }
+  if (maybeProblems.isOk()) {
+    return maybeProblems.unwrap().map(
+      ({ id, problemStatement, questionType }) => {
+        return {
+          id,
+          description: questionType,
+          title: problemStatement,
           value: id,
           content: "",
         };
@@ -158,7 +188,7 @@ async function onFormSubmit(
       searchedResults = await searchConcepts(formEntries);
       break;
     case "problem":
-      // searchedResults = await searchImages(formEntries);
+      searchedResults = await searchProblems(formEntries);
       break;
     default:
       exhaustiveMatchingGuard(variableType);
@@ -197,9 +227,7 @@ let formRef = $state<HTMLFormElement>();
             name="search"
             placeholder="Search {variableType}"
             required
-            oninput={() => {
-              debounce.debounceAsync(() => formRef?.requestSubmit())();
-            }}
+            oninput={() => formRef?.requestSubmit()}
           />
           <button
             type="submit"

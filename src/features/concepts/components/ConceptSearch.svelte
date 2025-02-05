@@ -1,10 +1,11 @@
 <script lang="ts">
-import { searchConcept } from "$features/concepts/api/client";
+import { ConceptApiClient } from "$features/concepts/api";
 import { getToaster } from "$lib/toaster.svelte";
 import type { ConceptShortArray } from "$schemas/concepts/self";
 import { onMount } from "svelte";
 
 const toaster = getToaster();
+const conceptClient = new ConceptApiClient();
 
 type Props = {
   onSearch: (list: ConceptShortArray) => void;
@@ -21,7 +22,9 @@ async function onFormSubmit(
   const formData = new FormData(event.currentTarget);
   const formEntries = Object.fromEntries(formData.entries());
 
-  const maybeConcepts = await searchConcept(formEntries);
+  const maybeConcepts = await conceptClient.searchShortsByQueryTitle(
+    formEntries,
+  );
 
   if (maybeConcepts.isErr()) {
     const error = maybeConcepts.unwrapErr();
