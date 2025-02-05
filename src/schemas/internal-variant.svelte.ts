@@ -116,7 +116,7 @@ export class InternalVariant {
         this.deleteInternalVariableValue(internalVariable);
         break;
       default:
-        return exhaustiveMatchingGuard(action);
+        exhaustiveMatchingGuard(action);
     }
   }
 
@@ -192,7 +192,7 @@ export class InternalVariant {
           ?.problemStatement;
         break;
       default:
-        return exhaustiveMatchingGuard(internalVariable.typ);
+        exhaustiveMatchingGuard(internalVariable.typ);
     }
 
     return internalVariable;

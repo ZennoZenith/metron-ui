@@ -38,7 +38,7 @@ switch (toast.toastType) {
     toastTypeTextClass = "text-error";
     break;
   default:
-    return exhaustiveMatchingGuard(toast.toastType);
+    exhaustiveMatchingGuard(toast.toastType);
 }
 
 function setIfEmptyTitle(toast: Toast) {
@@ -57,7 +57,7 @@ function setIfEmptyTitle(toast: Toast) {
       title = "Error";
       break;
     default:
-      return exhaustiveMatchingGuard(toast.toastType);
+      exhaustiveMatchingGuard(toast.toastType);
   }
 
   if (!toast.title) return title;

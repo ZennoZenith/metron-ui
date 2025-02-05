@@ -161,7 +161,7 @@ async function onFormSubmit(
       // searchedResults = await searchImages(formEntries);
       break;
     default:
-      return exhaustiveMatchingGuard(variableType);
+      exhaustiveMatchingGuard(variableType);
   }
 }
 

@@ -20,7 +20,7 @@ function showToast(toastType: ToastType) {
       toaster.error("Error Message", "Error title");
       break;
     default:
-      return exhaustiveMatchingGuard(toastType);
+      exhaustiveMatchingGuard(toastType);
   }
 }
 </script>

@@ -100,7 +100,7 @@ function extractLabel(
       return problems.find(v => v.id === variable.defaultValue)
         ?.problemStatement;
     default:
-      return exhaustiveMatchingGuard(variable.typ);
+      exhaustiveMatchingGuard(variable.typ);
   }
 }
 </script>
