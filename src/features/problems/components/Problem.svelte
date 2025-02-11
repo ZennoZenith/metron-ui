@@ -149,24 +149,11 @@ function extractLabel(
     onChange={value => internalProblem.questionType = value}
   />
 
-  {#if !disabled}
-    <TagSearch
-      defaultSelectedTags={defaultProblem?.tags}
-      onChange={value => internalProblem.tags = value}
-    />
-  {:else if defaultProblem}
-    <div
-      class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
-    >
-      {#each defaultProblem.tags as tag}
-        <span
-          class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
-        >
-          {tag.title}
-        </span>
-      {/each}
-    </div>
-  {/if}
+  <TagSearch
+    defaultSelectedTags={defaultProblem?.tags}
+    onChange={value => internalProblem.tags = value}
+    {disabled}
+  />
 
   <label>
     <div>

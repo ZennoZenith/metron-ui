@@ -153,24 +153,11 @@ function extractLabel(
     ></textarea>
   </label>
 
-  {#if !disabled}
-    <TagSearch
-      defaultSelectedTags={defaultConcept?.tags}
-      onChange={value => tags = value}
-    />
-  {:else if defaultConcept}
-    <div
-      class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
-    >
-      {#each defaultConcept.tags as tag}
-        <span
-          class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
-        >
-          {tag.title}
-        </span>
-      {/each}
-    </div>
-  {/if}
+  <TagSearch
+    defaultSelectedTags={defaultConcept?.tags}
+    onChange={value => tags = value}
+    {disabled}
+  />
 
   <Variables
     variablesContextKey={VARIABLE_KEY}

@@ -68,24 +68,11 @@ let tags = $state(defaultEquation?.tags.map(v => v.id).join(",") ?? "");
       ></textarea>
     </label>
 
-    {#if !disabled}
-      <TagSearch
-        defaultSelectedTags={defaultEquation?.tags}
-        onChange={value => tags = value}
-      />
-    {:else if defaultEquation}
-      <div
-        class="flex p-2 gap-2 flex-wrap border rounded border-solid border-base-content min-h-fit items-center"
-      >
-        {#each defaultEquation.tags as tag}
-          <span
-            class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
-          >
-            {tag.title}
-          </span>
-        {/each}
-      </div>
-    {/if}
+    <TagSearch
+      defaultSelectedTags={defaultEquation?.tags}
+      onChange={value => tags = value}
+      {disabled}
+    />
   </div>
   <div class="px-2 py-4 flex flex-col gap-6">
     <label class="">

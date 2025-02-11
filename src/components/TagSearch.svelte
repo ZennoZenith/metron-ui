@@ -9,11 +9,13 @@ import { Searchable } from "$utils/searchable.svelte";
 import { setMySet } from "$utils/set.svelte";
 
 type Props = {
+  disabled?: boolean;
   defaultSelectedTags?: Tag[];
   onChange?: (value: string) => void;
 };
 
 let {
+  disabled = false,
   defaultSelectedTags = [],
   onChange = () => {},
 }: Props = $props();
@@ -109,10 +111,11 @@ export function getTagIdStrings() {
     {#each selectedTags.values as tag}
       <button
         type="button"
-        class="bg-info text-info-content font-semibold pl-3 pr-1 rounded-full flex items-center gap-1"
+        class="bg-info text-info-content font-semibold px-3 rounded-full flex items-center gap-1"
         onclick={() => removeTag(tag.id)}
+        {disabled}
       >
-        {tag.title} <X class="text-error h-5" />
+        {tag.title} {#if !disabled} <X class="text-error h-5" /> {/if}
       </button>
     {/each}
     <input
@@ -125,12 +128,11 @@ export function getTagIdStrings() {
       bind:value={tagSearchQuery}
       oninput={searchTags}
       onfocus={tagSearchable.onFocus}
+      hidden={disabled}
+      {disabled}
     />
   </div>
   <div class="relative w-full h-0">
-    <!-- 
-      anchorName="--dropdown-anchor-1"
-     -->
     <Dropdown
       searchable={tagSearchable}
       multiple
@@ -141,9 +143,3 @@ export function getTagIdStrings() {
 </div>
 
 <input type="hidden" name="tags" value={tagIdsString}>
-
-<style>
-/* .anchor {
-  anchor-name: --dropdown-anchor-1;
-} */
-</style>
