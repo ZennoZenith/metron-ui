@@ -1,5 +1,5 @@
 <script lang="ts">
-import TagSearch from "$components/TagSearch.svelte";
+import TagSelect from "$components/TagSelect.svelte";
 import Variables from "$features/variables/components/Variables.svelte";
 import {
   InternalProblem,
@@ -149,7 +149,7 @@ function extractLabel(
     onChange={value => internalProblem.questionType = value}
   />
 
-  <TagSearch
+  <TagSelect
     defaultSelectedTags={defaultProblem?.tags}
     onChange={value => internalProblem.tags = value}
     {disabled}

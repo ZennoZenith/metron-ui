@@ -6,7 +6,7 @@ import type { CreateIssues } from "$features/equations/schemas/create";
 import {
   CreateTagDialog,
   TagCard,
-  TagSearch,
+  TagSelect,
   UpdateTagDialog,
 } from "$features/tags/components";
 import { validateCreateSchema } from "$features/tags/schemas/create";
@@ -291,7 +291,7 @@ const submitDeleteTag: SubmitFunction = (
     Create Tag
   </button>
 
-  <TagSearch {onSearch} loadListOnLoad />
+  <TagSelect {onSearch} loadListOnLoad />
   <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
     {#each list as tag}
       <TagCard {tag} {onClickDelete} {onClickUpdate} />

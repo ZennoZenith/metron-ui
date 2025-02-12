@@ -1,5 +1,5 @@
 <script lang="ts">
-import TagSearch from "$components/TagSearch.svelte";
+import TagSelect from "$components/TagSelect.svelte";
 import type { Equation } from "$type/equations";
 
 type Props = {
@@ -68,7 +68,7 @@ let tags = $state(defaultEquation?.tags.map(v => v.id).join(",") ?? "");
       ></textarea>
     </label>
 
-    <TagSearch
+    <TagSelect
       defaultSelectedTags={defaultEquation?.tags}
       onChange={value => tags = value}
       {disabled}

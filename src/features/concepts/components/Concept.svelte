@@ -1,5 +1,5 @@
 <script lang="ts">
-import TagSearch from "$components/TagSearch.svelte";
+import TagSelect from "$components/TagSelect.svelte";
 import Variables from "$features/variables/components/Variables.svelte";
 import {
   InternalVariables,
@@ -153,7 +153,7 @@ function extractLabel(
     ></textarea>
   </label>
 
-  <TagSearch
+  <TagSelect
     defaultSelectedTags={defaultConcept?.tags}
     onChange={value => tags = value}
     {disabled}

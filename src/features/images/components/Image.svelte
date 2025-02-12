@@ -1,5 +1,5 @@
 <script lang="ts">
-import TagSearch from "$components/TagSearch.svelte";
+import TagSelect from "$components/TagSelect.svelte";
 import type { Image } from "$type/images";
 
 type Props = {
@@ -153,7 +153,7 @@ function onFormSubmit(
       ></textarea>
     </label>
 
-    <TagSearch
+    <TagSelect
       defaultSelectedTags={defaultImage?.tags}
       onChange={value => tags = value}
       {disabled}
