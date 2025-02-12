@@ -2,6 +2,7 @@
 import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
 import type { VariantUpdate } from "$features/variants/schemas/update";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
@@ -60,7 +61,7 @@ async function onSubmit(
     .concat(extractVariableValueFromVariants("problem", variables, variants))
     .join(",");
 
-  // console.log({
+  // Log.log({
   //   problemStatement,
   //   hint,
   //   questionType,
@@ -93,7 +94,7 @@ async function onSubmit(
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }

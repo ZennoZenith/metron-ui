@@ -1,6 +1,7 @@
 <script lang="ts">
 import { ConceptApiClient } from "$features/concepts/api";
 import Concept from "$features/concepts/components/Concept.svelte";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import { type InternalVariables } from "$schemas/internal-variable.svelte";
 import { setEmptyStringAsNullish } from "$utils/helpers";
@@ -39,7 +40,7 @@ async function onSubmit(
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }

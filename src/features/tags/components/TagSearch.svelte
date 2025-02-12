@@ -1,8 +1,11 @@
 <script lang="ts">
+import { Log } from "$lib/logger";
+import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$type/tags";
 import { onMount } from "svelte";
 import { TagApiClient } from "../api";
 
+const toaster = getToaster();
 const tagClient = new TagApiClient();
 
 type Props = { onSearch: (list: Tag[]) => void; loadListOnLoad?: boolean };
@@ -14,7 +17,8 @@ async function onFormSubmit() {
   const maybeTags = await tagClient.searchByQueryTitle({ search });
 
   if (maybeTags.err) {
-    console.error(maybeTags.err);
+    Log.info("Tag saved");
+    toaster.success("Tag saved");
     return;
   }
   if (maybeTags.isOk()) {

@@ -10,6 +10,7 @@ type Props = {
 import { Switch } from "$components/melt";
 import { IMAGE_BASE_ROUTE } from "$constants";
 import { X } from "$icons";
+import { Log } from "$lib/logger";
 import { base64ToFile, imageSrcToBase64 } from "$utils/imageConversion";
 import { MimeTypes } from "$utils/mime";
 import { onMount } from "svelte";
@@ -58,7 +59,7 @@ function previewImage(
 ) {
   const imageFiles = event.currentTarget.files;
   if (null === imageFiles) {
-    console.error("Image file is null");
+    Log.error("Image file is null");
     return;
   }
 

@@ -7,6 +7,7 @@ import {
   TagSearch,
   UpdateTagDialog,
 } from "$features/tags/components";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$type/tags";
 
@@ -53,7 +54,7 @@ async function onCreateSubmit(title: string): Promise<void> {
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }
@@ -79,7 +80,7 @@ async function onUpdateSubmit(title: string): Promise<void> {
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     return;
   }
 
@@ -100,7 +101,7 @@ async function onDeleteResponse(answer: boolean) {
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }

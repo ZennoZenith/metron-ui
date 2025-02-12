@@ -4,6 +4,7 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ImageApiClient } from "$features/images/api";
 import { ImageCard, ImageSearch } from "$features/images/components";
 import { ArrowRight } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Image } from "$type/images";
 
@@ -35,7 +36,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 

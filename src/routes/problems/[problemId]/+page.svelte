@@ -6,6 +6,7 @@ import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
 import type { VariantUpdate } from "$features/variants/schemas/update";
 import { Edit, Trash } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
@@ -30,7 +31,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
@@ -105,7 +106,7 @@ async function onSubmit(
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }

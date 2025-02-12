@@ -4,6 +4,7 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ProblemApiClient } from "$features/problems/api";
 import { ProblemCard, ProblemSearch } from "$features/problems/components";
 import { ArrowRight } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { ProblemShort, ProblemShortArray } from "$schemas/problems/self";
 
@@ -36,7 +37,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 

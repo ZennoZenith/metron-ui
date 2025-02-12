@@ -1,5 +1,6 @@
 <script lang="ts">
 import { ConceptApiClient } from "$features/concepts/api";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { ConceptShortArray } from "$schemas/concepts/self";
 import { onMount } from "svelte";
@@ -28,7 +29,7 @@ async function onFormSubmit(
 
   if (maybeConcepts.isErr()) {
     const error = maybeConcepts.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return;
   }

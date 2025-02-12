@@ -26,7 +26,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
@@ -56,7 +56,7 @@ async function onSubmit(
       result.unwrapErr().message ?? "Internal Server Error",
     );
     const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
+    Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
   }

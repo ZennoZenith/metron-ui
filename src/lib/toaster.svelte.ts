@@ -2,6 +2,7 @@ import { DEFAULT_TOAST_DURATION_TIME } from "$constants";
 import type { Toast, ToastType } from "$type";
 import { clamp, uuidv4 } from "$utils/helpers";
 import { getContext, onDestroy, setContext } from "svelte";
+import { Log } from "./logger";
 
 type Hover = "pause" | "pause-all" | null;
 export class Toaster {
@@ -38,7 +39,7 @@ export class Toaster {
         pausedAtMs: 0,
       },
     };
-    console.info(value);
+    Log.info(value);
     this._toasts.push(value);
 
     this._toastToTimeout.set(

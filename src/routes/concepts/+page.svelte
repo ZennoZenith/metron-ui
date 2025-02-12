@@ -4,6 +4,7 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ConceptApiClient } from "$features/concepts/api";
 import { ConceptCard, ConceptSearch } from "$features/concepts/components";
 import { ArrowRight } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { ConceptShort, ConceptShortArray } from "$schemas/concepts/self";
 
@@ -36,7 +37,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
