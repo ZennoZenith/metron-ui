@@ -1,4 +1,6 @@
-export class Result<T, E extends Error> {
+import type { Taged } from "$type";
+
+export class Result<T, E extends Taged> {
   #ok?: T;
   #err?: E;
 
@@ -59,10 +61,10 @@ export function Ok<T>(ok: T) {
   return new Result<T, never>(ok);
 }
 
-export function Err<E extends Error>(err: E) {
+export function Err<E extends Taged>(err: E) {
   return new Result<never, E>(undefined, err);
 }
 
-export const isOk = <T, E extends Error>(value: Result<T, E>): value is Result<T, never> => value.isOk();
+export const isOk = <T, E extends Taged>(value: Result<T, E>): value is Result<T, never> => value.isOk();
 
-export const isErr = <T, E extends Error>(value: Result<T, E>): value is Result<never, E> => value.isErr();
+export const isErr = <T, E extends Taged>(value: Result<T, E>): value is Result<never, E> => value.isErr();

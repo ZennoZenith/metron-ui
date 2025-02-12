@@ -1,5 +1,5 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok } from "$lib/superposition";
+import { Err, Ok, Result } from "$lib/superposition";
 import { title } from "$schemas";
 import { flatten, type InferOutput, object, safeParse } from "valibot";
 
@@ -10,7 +10,7 @@ export const createSchema = object(
   "Should be an object",
 );
 
-export function validateCreateSchema(data: unknown) {
+export function validateCreateSchema(data: unknown): Result<CreateSchema, ValidationError> {
   const d = safeParse(createSchema, data);
 
   if (d.success) {

@@ -1,4 +1,4 @@
-import type { InternalApiError } from "$type";
+import type { InternalApiError, Taged } from "$type";
 import { array, literal, minLength, object, optional, pipe, record, safeParse, string, union, unknown } from "valibot";
 
 const errorType = [
@@ -80,7 +80,8 @@ const errorSchema = pipe(
   ),
 );
 
-export class CustomError extends Error {
+export class CustomError extends Error implements Taged {
+  readonly _tag: string;
   readonly success = false;
   readonly type: ErrorType;
   messages: [string, ...string[]];
@@ -89,6 +90,7 @@ export class CustomError extends Error {
   constructor(type: ErrorType, extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
     const message = messages?.[0] ?? "Default Err message";
     super(message);
+    this._tag = type;
     this.messages = messages ?? [message];
     this.type = type;
     this.extra = extra ?? {};

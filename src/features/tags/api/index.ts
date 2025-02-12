@@ -81,6 +81,7 @@ export class TagApiClient {
     data: unknown,
   ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     const parsed = validateCreateSchema(data);
+
     if (parsed.err) {
       return parsed;
     }
