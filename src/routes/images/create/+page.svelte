@@ -39,4 +39,6 @@ async function onSubmit(data: UpdateSchema): Promise<void> {
 }
 </script>
 
-<Image {onSubmit} />
+{#key reset}
+  <Image {onSubmit} />
+{/key}

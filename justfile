@@ -1,4 +1,6 @@
+build:
+	echo "Building..."
+	bun run build
 dev:
-	echo "Dev"
 	bun run dev
 

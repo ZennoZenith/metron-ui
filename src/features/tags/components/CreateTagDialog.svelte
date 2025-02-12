@@ -6,13 +6,18 @@ import { fade } from "svelte/transition";
 import type { CreateIssues } from "../schemas/create";
 
 type Props = {
-  failureResopnse: CreateIssues & { message?: string };
+  failureResopnse?: CreateIssues & { message?: string };
   closeOnYes?: boolean;
-  onResponse?: (answer: boolean, title?: string) => void;
+  onResponse?: (answer: boolean) => void;
+  onSubmit?: (title: string) => void;
 };
 
-const { failureResopnse, closeOnYes = true, onResponse = () => {} }: Props =
-  $props();
+const {
+  failureResopnse,
+  closeOnYes = true,
+  onResponse = () => {},
+  onSubmit = () => {},
+}: Props = $props();
 let tagTitle = $state("");
 
 const {
@@ -87,7 +92,8 @@ export function setOpenState(state: boolean = true) {
             class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
             type="submit"
             onclick={() => {
-              onResponse(true, $state.snapshot(tagTitle));
+              onResponse(true);
+              onSubmit($state.snapshot(tagTitle));
               if (closeOnYes) {
                 open.set(false);
               }

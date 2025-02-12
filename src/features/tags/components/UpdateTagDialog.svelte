@@ -8,13 +8,19 @@ import type { UpdateIssues } from "../schemas/update";
 
 type Props = {
   tag?: Tag;
-  failureResopnse: UpdateIssues & { message?: string };
+  failureResopnse?: UpdateIssues & { message?: string };
   closeOnYes?: boolean;
-  onResponse?: (answer: boolean, newTitle?: string) => void;
+  onResponse?: (answer: boolean) => void;
+  onSubmit?: (newTitle: string) => void;
 };
 
-const { tag, failureResopnse, closeOnYes = true, onResponse = () => {} }:
-  Props = $props();
+const {
+  tag,
+  failureResopnse,
+  closeOnYes = true,
+  onResponse = () => {},
+  onSubmit = () => {},
+}: Props = $props();
 let newTitle = $state("");
 
 const {
@@ -101,7 +107,8 @@ export function setOpenState(state: boolean = true) {
             class="inline-flex h-8 items-center justify-center rounded-sm bg-secondary px-4 font-medium leading-none text-secondary-content"
             type="submit"
             onclick={() => {
-              onResponse(true, $state.snapshot(newTitle));
+              onResponse(true);
+              onSubmit($state.snapshot(newTitle));
               if (closeOnYes) {
                 open.set(false);
               }

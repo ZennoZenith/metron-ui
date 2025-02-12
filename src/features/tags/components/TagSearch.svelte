@@ -1,22 +1,17 @@
 <script lang="ts">
-import { searchTag } from "$features/tags/api/client";
 import type { Tag } from "$type/tags";
 import { onMount } from "svelte";
+import { TagApiClient } from "../api";
+
+const tagClient = new TagApiClient();
 
 type Props = { onSearch: (list: Tag[]) => void; loadListOnLoad?: boolean };
 let { onSearch, loadListOnLoad = false }: Props = $props();
 
-let formRef = $state<HTMLFormElement>();
-// let response = $state<Superposition<ValidationError, Tag[]>>();
+let search = $state("");
 
-async function onFormSubmit(
-  event: SubmitEvent & { currentTarget: EventTarget & HTMLFormElement },
-) {
-  event.preventDefault();
-  const formData = new FormData(event.currentTarget);
-  const formEntries = Object.fromEntries(formData.entries());
-
-  const maybeTags = await searchTag(formEntries);
+async function onFormSubmit() {
+  const maybeTags = await tagClient.searchByQueryTitle({ search });
 
   if (maybeTags.err) {
     console.error(maybeTags.err);
@@ -29,23 +24,25 @@ async function onFormSubmit(
 
 onMount(() => {
   if (loadListOnLoad) {
-    formRef?.requestSubmit();
+    onFormSubmit();
   }
 });
 </script>
 
 <div class="">
   <form
-    bind:this={formRef}
     class="mb-4 flex items-center gap-2 h-10"
-    onsubmit={onFormSubmit}
+    onsubmit={event => {
+      event.preventDefault();
+      onFormSubmit();
+    }}
   >
     <input
       class="inline-flex h-10 w-full flex-1 items-center justify-center rounded border border-solid border-accent px-3 leading-none"
       id="name"
       name="search"
       placeholder="Tag title"
-      value=""
+      bind:value={search}
     />
     <button
       type="submit"
