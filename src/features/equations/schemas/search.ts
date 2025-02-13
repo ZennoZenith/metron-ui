@@ -3,13 +3,18 @@ import { Err, Ok } from "$lib/superposition";
 import { search } from "$schemas";
 import { flatten, object, safeParse } from "valibot";
 
+export class SearchSchemaError extends ValidationError {
+  constructor(issues: SearchIssues) {
+    super(issues, "EquationSearchSchemaError", "Invalid equation search schema");
+  }
+}
+
 const searchSchema = object(
   {
     search,
   },
   "Should be an object",
 );
-export type SearchIssues = ReturnType<typeof flatten<typeof searchSchema>>["nested"];
 
 export function validateSearchSchema(data: unknown) {
   const d = safeParse(searchSchema, data);
@@ -19,5 +24,7 @@ export function validateSearchSchema(data: unknown) {
 
   const issues: SearchIssues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new SearchSchemaError(issues));
 }
+
+export type SearchIssues = NonNullable<ReturnType<typeof flatten<typeof searchSchema>>["nested"]>;

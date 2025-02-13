@@ -1,7 +1,6 @@
 <script lang="ts">
 import { EquationApiClient } from "$features/equations/api";
 import Equation from "$features/equations/components/Equation.svelte";
-import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import { setEmptyStringAsNullish } from "$utils/helpers";
 
@@ -24,13 +23,10 @@ async function onSubmit(
     tags,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    Log.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 

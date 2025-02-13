@@ -74,4 +74,12 @@ export class ApiClientOptions {
   }
 }
 
+export class ApiClient {
+  protected readonly apiClientOptions: ApiClientOptions;
+
+  constructor(apiOptions: ApiClientOptions = apiClientOptions) {
+    this.apiClientOptions = apiOptions;
+  }
+}
+
 export const apiClientOptions = new ApiClientOptions({ API_PORT: "10105" });

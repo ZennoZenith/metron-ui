@@ -11,7 +11,7 @@ export const load: PageLoad = async ({ params, url }) => {
   const concept = await conceptClient.getById(conceptId);
 
   if (concept.isErr()) {
-    return error(NOT_FOUND, concept.unwrapErr(errorHandleFn));
+    return error(NOT_FOUND, concept.unwrapErr(errorHandleFn).message);
   }
 
   return {

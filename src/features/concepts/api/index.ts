@@ -1,5 +1,5 @@
 import { type Concept, type ConceptShortArray, validateSchema, validateShortSchemaArray } from "$api/schemas/concepts";
-import { apiClientOptions } from "$lib/api-builder";
+import { ApiClient, apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
 import { ApiError, ApiModelError, FetchError, JsonDeserializeError } from "$lib/error";
 import { isErr, Result } from "$lib/superposition";
@@ -8,11 +8,9 @@ import { CreateSchemaError, validateCreateSchema } from "../schemas/create";
 import { SearchSchemaError, validateSearchSchema } from "../schemas/search";
 import { UpdateSchemaError, validateUpdateSchema } from "../schemas/update";
 
-export class ConceptApiClient {
-  private readonly apiClientOptions: ApiClientOptions;
-
+export class ConceptApiClient extends ApiClient {
   constructor(apiOptions: ApiClientOptions = apiClientOptions) {
-    this.apiClientOptions = apiOptions;
+    super(apiOptions);
   }
 
   async searchShortsByQueryTitle(

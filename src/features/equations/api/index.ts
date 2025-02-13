@@ -1,195 +1,115 @@
 import { type Equation, type EquationArray, validateSchema, validateSchemaArray } from "$api/schemas/equations";
-import { apiClientOptions } from "$lib/api-builder";
+import type { SearchSchemaError } from "$features/tags/schemas/search";
+import { ApiClient, apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, FetchError, JsonDeserializeError, ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
-import { validateUuid } from "$schemas/uuid";
-import { catchError, fetchApiJson } from "$utils";
-import { validateCreateSchema } from "../schemas/create";
+import { ApiError, ApiModelError, FetchError, JsonDeserializeError } from "$lib/error";
+import { isErr, Result } from "$lib/superposition";
+import { UuidSchemaError, validateUuid } from "$schemas/uuid";
+import { CreateSchemaError, validateCreateSchema } from "../schemas/create";
 import { validateSearchSchema } from "../schemas/search";
-import { validateUpdateSchema } from "../schemas/update";
+import { UpdateSchemaError, validateUpdateSchema } from "../schemas/update";
 
-export class EquationApiClient {
-  private readonly url: URL;
-  private readonly headers: HeadersInit;
-
+export class EquationApiClient extends ApiClient {
   constructor(options: ApiClientOptions = apiClientOptions) {
-    this.headers = options.options.headers;
-    this.url = options.options.url;
+    super(options);
   }
 
   async searchByQueryTitle(
     data: unknown,
-  ): Promise<Result<EquationArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<EquationArray, SearchSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateSearchSchema(data);
 
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
     const { search } = parsed.unwrap();
-    const url = new URL("equations", this.url);
+    const url = new URL("equations", this.apiClientOptions.options.url);
     url.searchParams.append("search", search);
 
-    const errorOrJson = await fetchJson(url, {
-      method: "GET",
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
-    }
-
-    const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<EquationArray, never>;
+    return this.apiClientOptions.fetchFromApi(url, { method: "GET" }, validateSchemaArray, extra);
   }
 
   async getById(
     id: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Equation, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-    if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid id:uuid"] }, ["Invalid id:uuid"]));
+  ): Promise<Result<Equation, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    const uuidOrError = validateUuid(id, "Invalid equation id:uuid");
+    if (isErr(uuidOrError)) {
+      return uuidOrError;
     }
-    const url = new URL(`equations/id/${id}`, this.url);
-    const errorOrJson = await fetchJson(url, {
-      method: "GET",
-      headers: {
-        ...this.headers,
-      },
-    }, extra);
-
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+    const uuid = uuidOrError.unwrap();
+    const url = new URL(`equations/id/${uuid}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(url, { method: "GET" }, validateSchema, extra);
   }
 
   async create(
     data: unknown,
-  ): Promise<Result<Equation, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Equation, CreateSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateCreateSchema(data);
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
     const equation = parsed.unwrap();
-    const url = new URL("equations", this.url);
-    const maybeResponse = await catchError(fetch(url, {
-      method: "POST",
-      body: JSON.stringify({
-        ...equation,
-        tags: equation.tags?.split(",") ?? null,
-      }),
-      headers: {
-        "content-type": "application/json",
+    const url = new URL("equations", this.apiClientOptions.options.url);
+
+    return this.apiClientOptions.fetchFromApi(
+      url,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          ...equation,
+          tags: equation.tags?.split(",") ?? null,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
       },
-    }));
-
-    if (maybeResponse.isErr()) {
-      return Err(new FetchError().fromError(maybeResponse.unwrapErr()));
-    }
-
-    const response = maybeResponse.unwrap();
-    const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
-
-    if (maybeJson.err) {
-      return Err(new JsonDeserializeError().fromError(maybeJson.err));
-    }
-
-    const json = maybeJson.unwrap();
-    if (response.status > 399) {
-      return Err(CustomError.parseError(json));
-    }
-
-    const maybeParseJson = validateSchema(json);
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+      validateSchema,
+      extra,
+    );
   }
 
   async update(
     data: unknown,
-  ): Promise<Result<Equation, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Equation, UpdateSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateUpdateSchema(data);
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
     const equation = parsed.unwrap();
-    const url = new URL(`equations/id/${equation.id}`, this.url);
-    const maybeResponse = await catchError(fetch(url, {
-      method: "PATCH",
-      body: JSON.stringify({
-        ...equation,
-        tags: equation.tags?.split(",") ?? null,
-      }),
-      headers: {
-        "content-type": "application/json",
+    const url = new URL(`equations/id/${equation.id}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(
+      url,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          ...equation,
+          tags: equation.tags?.split(",") ?? null,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
       },
-    }));
-
-    if (maybeResponse.isErr()) {
-      return Err(new FetchError().fromError(maybeResponse.unwrapErr()));
-    }
-
-    const response = maybeResponse.unwrap();
-    const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
-
-    if (maybeJson.err) {
-      return Err(new JsonDeserializeError().fromError(maybeJson.err));
-    }
-
-    const json = maybeJson.unwrap();
-    if (response.status > 399) {
-      return Err(CustomError.parseError(json));
-    }
-
-    const maybeParseJson = validateSchema(json);
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+      validateSchema,
+      extra,
+    );
   }
 
   async deleteById(
     id: unknown,
-  ): Promise<Result<Equation, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-    if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid equation id:uuid"] }, ["Invalid equation id:uuid"]));
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Equation, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    const uuidOrError = validateUuid(id, "Invalid equation id:uuid");
+    if (isErr(uuidOrError)) {
+      return uuidOrError;
     }
-    const url = new URL(`equations/id/${id}`, this.url);
-    const errorOrJson = await fetchJson(url, {
-      method: "DELETE",
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Equation, never>;
+    const url = new URL(`equations/id/${id}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(url, { method: "DELETE" }, validateSchema, extra);
   }
 }

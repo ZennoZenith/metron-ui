@@ -31,7 +31,7 @@ const updateSchema = pipe(
 export type UpdateSchema = InferOutput<typeof updateSchema>;
 export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];
 
-export function validateUpdateSchema(data: unknown): Result<ConceptUpdate, UpdateSchemaError> {
+export function validateUpdateSchema(data: unknown): Result<UpdateSchema, UpdateSchemaError> {
   const d = safeParse(updateSchema, data);
   if (d.success) {
     return Ok(d.output);

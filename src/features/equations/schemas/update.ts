@@ -1,8 +1,14 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok } from "$lib/superposition";
+import { Err, Ok, Result } from "$lib/superposition";
 import { uuidSchema } from "$schemas/uuid";
 import { flatten, type InferOutput, object, safeParse } from "valibot";
 import { createSchema } from "./create";
+
+export class UpdateSchemaError extends ValidationError {
+  constructor(issues: UpdateIssues = {}) {
+    super(issues, "ConceptUpdateSchemaError", "Concept update schema error");
+  }
+}
 
 const updateSchema = object(
   {
@@ -12,7 +18,7 @@ const updateSchema = object(
   "Should be an object",
 );
 
-export function validateUpdateSchema(data: unknown) {
+export function validateUpdateSchema(data: unknown): Result<UpdateSchema, UpdateSchemaError> {
   const d = safeParse(updateSchema, data);
   if (d.success) {
     return Ok(d.output);
