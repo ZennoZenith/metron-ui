@@ -1,10 +1,10 @@
+import { type Image, type ImageArray, validateSchema, validateSchemaArray } from "$api/schemas/images";
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
+import { ApiError, FetchError, JsonDeserializeError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type Image, type ImageArray, validateSchema, validateSchemaArray } from "$schemas/images/self";
 import { validateUuid } from "$schemas/uuid";
-import { fetchJson } from "$utils";
+import { fetchApiJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
 import { validateSearchSchema } from "../schemas/search";
 import { validateUpdateSchema } from "../schemas/update";

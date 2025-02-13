@@ -1,8 +1,8 @@
+import { schemaCreateArray as answerSchemaCreateArary } from "$api/schemas/answer";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { schemaCreateArray as answerSchemaCreateArary } from "$schemas/answer";
 
-import { variableValueSchemaArray } from "$schemas/variable";
+import { variableValueSchemaArray } from "$api/schemas/variable";
 import { array, flatten, type InferOutput, minLength, object, pipe, safeParse } from "valibot";
 
 export const createSchema = object(

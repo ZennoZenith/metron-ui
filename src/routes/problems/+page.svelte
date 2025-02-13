@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { ProblemShort, ProblemShortArray } from "$api/schemas/problems";
 import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ProblemApiClient } from "$features/problems/api";
@@ -6,7 +7,6 @@ import { ProblemCard, ProblemSearch } from "$features/problems/components";
 import { ArrowRight } from "$icons";
 import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ProblemShort, ProblemShortArray } from "$schemas/problems/self";
 
 let list = $state<ProblemShortArray>([]);
 let deleteConformationDialog = $state<ConformationDialog>();

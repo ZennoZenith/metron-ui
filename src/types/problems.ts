@@ -1,1 +1,1 @@
-export type { Problem, ProblemArray, ProblemShort, QuestionType, QuestionTypeLoose } from "$schemas/problems/self";
+export type { Problem, ProblemArray, ProblemShort, QuestionType, QuestionTypeLoose } from "$api/schemas/problems";

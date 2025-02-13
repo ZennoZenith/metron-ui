@@ -1,8 +1,8 @@
 <script lang="ts">
+import type { ConceptShortArray } from "$api/schemas/concepts";
 import { ConceptApiClient } from "$features/concepts/api";
 import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ConceptShortArray } from "$schemas/concepts/self";
 import { onMount } from "svelte";
 
 const toaster = getToaster();

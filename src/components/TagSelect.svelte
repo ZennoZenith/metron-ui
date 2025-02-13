@@ -43,8 +43,8 @@ export function clearSelectedTags() {
 async function autocomplete(query: string) {
   const maybeTags = await tagClient.searchByQueryTitle({ search: query });
 
-  if (maybeTags.err) {
-    Log.error(maybeTags.err);
+  if (maybeTags.isErr()) {
+    Log.error(maybeTags.unwrapErr());
     return;
   }
 

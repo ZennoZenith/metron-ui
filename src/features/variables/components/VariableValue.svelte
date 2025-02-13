@@ -1,6 +1,6 @@
 <script lang="ts">
+import { VARIABLE_TYPES, type VariableType } from "$api/schemas/variable";
 import { IdCard, MagnifyingGlass } from "$icons";
-import { VARIABLE_TYPES, type VariableType } from "$schemas/variable";
 import { isEmptyString, uuidv4 } from "$utils/helpers";
 import VariableSearch, { type SearchResult } from "./VariableSearch.svelte";
 

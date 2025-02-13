@@ -1,8 +1,8 @@
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";
+import { uuidSchema } from "$schemas/uuid";
 import { array, flatten, type InferOutput, minLength, nullish, object, pipe, safeParse } from "valibot";
-import { uuidSchema } from "./uuid";
 
 export const schema = object(
   {

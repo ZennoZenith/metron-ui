@@ -1,1 +1,1 @@
-export type { Equation } from "$schemas/equations/self";
+export type { Equation } from "$api/schemas/equations";

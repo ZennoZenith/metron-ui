@@ -1,11 +1,11 @@
 <script lang="ts">
+import type { ConceptShort, ConceptShortArray } from "$api/schemas/concepts";
 import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ConceptApiClient } from "$features/concepts/api";
 import { ConceptCard, ConceptSearch } from "$features/concepts/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ConceptShort, ConceptShortArray } from "$schemas/concepts/self";
 
 let list = $state<ConceptShortArray>([]);
 let deleteConformationDialog = $state<ConformationDialog>();

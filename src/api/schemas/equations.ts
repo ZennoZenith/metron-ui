@@ -1,6 +1,6 @@
+import { schemaArray as tags } from "$api/schemas/tags";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { schemaArray as tags } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
 import { array, flatten, type InferOutput, nullish, object, safeParse, string } from "valibot";
 

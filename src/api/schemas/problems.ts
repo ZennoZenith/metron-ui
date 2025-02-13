@@ -1,12 +1,12 @@
+import { schemaShortArray as conceptsShortSchemaArary } from "$api/schemas/concepts";
+import { schemaArray as equationSchemaArray } from "$api/schemas/equations";
+import { schemaArray as imagesSchemaArary } from "$api/schemas/images";
+import { schemaArray as tagSchemaArray } from "$api/schemas/tags";
+import { schemaArray as variableSchemaArray } from "$api/schemas/variable";
+import { schemaArray as varientSchemaArray } from "$api/schemas/variant";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { schemaShortArray as conceptsShortSchemaArary } from "$schemas/concepts/self";
-import { schemaArray as equationSchemaArray } from "$schemas/equations/self";
-import { schemaArray as imagesSchemaArary } from "$schemas/images/self";
-import { schemaArray as tagSchemaArray } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable";
-import { schemaArray as varientSchemaArray } from "$schemas/variant";
 import { array, flatten, type InferOutput, literal, nullish, object, safeParse, string, union } from "valibot";
 
 export const questionTypeSchema = union(

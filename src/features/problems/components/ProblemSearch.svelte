@@ -1,7 +1,7 @@
 <script lang="ts">
+import type { ProblemShortArray } from "$api/schemas/problems";
 import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ProblemShortArray } from "$schemas/problems/self";
 import { onMount } from "svelte";
 import { ProblemApiClient } from "../api";
 

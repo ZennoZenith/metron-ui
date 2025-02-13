@@ -13,6 +13,7 @@ import type { PageData } from "./$types";
 
 const toaster = getToaster();
 const conceptClient = new ConceptApiClient();
+let reset = $state(false);
 
 let deleteConformationDialog = $state<ConformationDialog>();
 
@@ -35,7 +36,12 @@ async function onDeleteResponse(answer: boolean) {
   toaster.success(
     `Concept deleted successfully redirecting to /concepts in 5sec`,
   );
+  resetForm();
   setTimeout(() => goto("/concepts"), 5000);
+}
+
+function resetForm() {
+  reset = !reset;
 }
 
 async function onSubmit(
@@ -63,13 +69,10 @@ async function onSubmit(
     variables,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    Log.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 
@@ -115,4 +118,6 @@ async function onSubmit(
   {/if}
 </div>
 
-<Concept {onSubmit} {defaultConcept} disabled={!edit} />
+{#key reset}
+  <Concept {onSubmit} {defaultConcept} disabled={!edit} />
+{/key}

@@ -4,7 +4,7 @@ import { title } from "$schemas";
 import { flatten, type InferOutput, object, safeParse } from "valibot";
 
 export class CreateSchemaError extends ValidationError {
-  constructor(issues: CreateIssues) {
+  constructor(issues: CreateIssues = {}) {
     super(issues, "TagCreateSchemaError", "Tag create schema error");
   }
 }
@@ -29,4 +29,4 @@ export function validateCreateSchema(data: unknown): Result<CreateSchema, Create
 }
 
 export type CreateSchema = InferOutput<typeof createSchema>;
-export type CreateIssues = NonNullable<ReturnType<typeof flatten<typeof createSchema>>["nested"]>;
+export type CreateIssues = ReturnType<typeof flatten<typeof createSchema>>["nested"];

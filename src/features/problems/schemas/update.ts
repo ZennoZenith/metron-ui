@@ -1,10 +1,10 @@
+import { questionTypeSchema } from "$api/schemas/problems";
+import { schemaArray as variableSchemaArray } from "$api/schemas/variable";
 import { schemaUpdateArray as varientSchemaUpdateArray } from "$features/variants/schemas/update";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { content } from "$schemas";
-import { questionTypeSchema } from "$schemas/problems/self";
 import { uuidArrayString, uuidSchema } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
 
 const updateSchema = pipe(

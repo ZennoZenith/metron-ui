@@ -4,7 +4,7 @@ import { search } from "$schemas";
 import { flatten, object, safeParse } from "valibot";
 
 export class SearchSchemaError extends ValidationError {
-  constructor(issues: SearchIssues) {
+  constructor(issues: SearchIssues = {}) {
     super(issues, "TagSearchSchemaError", "Invalid tag search schema");
   }
 }
@@ -27,4 +27,4 @@ export function validateSearchSchema(data: unknown) {
   return Err(new SearchSchemaError(issues));
 }
 
-export type SearchIssues = NonNullable<ReturnType<typeof flatten<typeof searchSchema>>["nested"]>;
+export type SearchIssues = ReturnType<typeof flatten<typeof searchSchema>>["nested"];

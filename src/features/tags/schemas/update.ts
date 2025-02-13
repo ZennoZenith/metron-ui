@@ -5,7 +5,7 @@ import { flatten, type InferOutput, object, safeParse } from "valibot";
 import { createSchema } from "./create";
 
 export class UpdateSchemaError extends ValidationError {
-  constructor(issues: UpdateIssues) {
+  constructor(issues: UpdateIssues = {}) {
     super(issues, "TagUpdateSchemaError", "Tag update schema error");
   }
 }
@@ -30,4 +30,4 @@ export function validateUpdateSchema(data: unknown) {
 }
 
 export type UpdateSchema = InferOutput<typeof updateSchema>;
-export type UpdateIssues = NonNullable<ReturnType<typeof flatten<typeof updateSchema>>["nested"]>;
+export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];

@@ -1,10 +1,10 @@
+import { type Problem, type ProblemShortArray, validateSchema, validateShortSchemaArray } from "$api/schemas/problems";
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
+import { ApiError, FetchError, JsonDeserializeError, ValidationError } from "$lib/error";
 import { Err, Ok, Result } from "$lib/superposition";
-import { type Problem, type ProblemShortArray, validateSchema, validateShortSchemaArray } from "$schemas/problems/self";
 import { validateUuid } from "$schemas/uuid";
-import { catchError, fetchJson } from "$utils";
+import { catchError, fetchApiJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
 import { validateSearchSchema } from "../schemas/search";
 import { validateUpdateSchema } from "../schemas/update";

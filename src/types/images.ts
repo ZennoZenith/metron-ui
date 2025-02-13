@@ -1,1 +1,1 @@
-export type { Image } from "$schemas/images/self";
+export type { Image } from "$api/schemas/images";
