@@ -22,7 +22,7 @@ export function validateSchema(data: unknown) {
 
   const issues: TagIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Tag model outdate"));
 }
 
 export function validateSchemaArray(data: unknown) {
@@ -34,7 +34,7 @@ export function validateSchemaArray(data: unknown) {
 
   const issues: TagArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues));
 }
 
 export type Tag = InferOutput<typeof schema>;

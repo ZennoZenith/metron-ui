@@ -1,8 +1,8 @@
+import { type Tag, type TagArray, validateSchema, validateSchemaArray } from "$api/schemas/tags";
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
 import { type ApiError, ApiModelError, type FetchError, type JsonDeserializeError } from "$lib/error";
 import { isErr, Result } from "$lib/superposition";
-import { type Tag, type TagArray, validateSchema, validateSchemaArray } from "$schemas/tags/self";
 import { UuidSchemaError, validateUuid } from "$schemas/uuid";
 import { CreateSchemaError, validateCreateSchema } from "../schemas/create";
 import { SearchSchemaError, validateSearchSchema } from "../schemas/search";
@@ -35,7 +35,7 @@ export class TagApiClient {
     id: unknown,
     extra?: { customFetch?: typeof fetch },
   ): Promise<Result<Tag, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
-    const uuidOrError = validateUuid(id, "Invalid id:uuid");
+    const uuidOrError = validateUuid(id, "Invalid tag id:uuid");
     if (isErr(uuidOrError)) {
       return uuidOrError;
     }
@@ -99,7 +99,7 @@ export class TagApiClient {
     id: unknown,
     extra?: { customFetch?: typeof fetch },
   ): Promise<Result<Tag, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
-    const uuidOrError = validateUuid(id, "Invalid id:uuid");
+    const uuidOrError = validateUuid(id, "Invalid tag id:uuid");
     if (isErr(uuidOrError)) {
       return uuidOrError;
     }

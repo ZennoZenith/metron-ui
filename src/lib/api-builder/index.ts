@@ -70,12 +70,7 @@ export class ApiClientOptions {
       return errorOrJson;
     }
 
-    const maybeParseJson = validationFn(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<T, never>;
+    return validationFn(errorOrJson.unwrap());
   }
 }
 

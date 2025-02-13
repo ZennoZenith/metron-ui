@@ -222,17 +222,17 @@ export class ValidationError extends CustomError {
 export class ApiModelError extends CustomError {
   readonly validationError: Record<string, unknown>;
 
-  private constructor(extra: Record<string, unknown>, message?: string) {
+  constructor(extra: Record<string, unknown>, message?: string) {
     super("ApiModelError", message ?? "Api Model Error");
     this.validationError = extra;
   }
 
-  static fromValidationError(error: ValidationError) {
-    return new ApiModelError(
-      error.validationError,
-      error.message === "Validation Error" ? undefined : error.message,
-    );
-  }
+  // static fromValidationError(error: ValidationError) {
+  //   return new ApiModelError(
+  //     error.validationError,
+  //     error.message === "Validation Error" ? undefined : error.message,
+  //   );
+  // }
 }
 
 // /**
