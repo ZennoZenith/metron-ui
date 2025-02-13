@@ -70,5 +70,7 @@ async function onDeleteResponse(answer: boolean) {
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as image}
     <ImageCard {image} {onClickDelete} />
+  {:else}
+    <p>No image found</p>
   {/each}
 </div>

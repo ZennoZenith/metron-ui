@@ -2,7 +2,6 @@
 import { ImageApiClient } from "$features/images/api";
 import Image from "$features/images/components/Image.svelte";
 import type { UpdateSchema } from "$features/images/schemas/update";
-import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import { setEmptyStringAsNullish } from "$utils/helpers";
 
@@ -23,13 +22,10 @@ async function onSubmit(data: UpdateSchema): Promise<void> {
     image: data.image,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    Log.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 
