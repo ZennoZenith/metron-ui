@@ -1,13 +1,11 @@
-import { CustomError } from "$lib/error";
+import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { search } from "$schemas";
 import { flatten, object, safeParse } from "valibot";
 
-export class SearchSchemaError extends CustomError {
-  readonly issues: SearchIssues;
+export class SearchSchemaError extends ValidationError {
   constructor(issues: SearchIssues) {
-    super("TagSearchSchemaError", "Invalid tag search schema");
-    this.issues = issues;
+    super(issues, "TagSearchSchemaError", "Invalid tag search schema");
   }
 }
 

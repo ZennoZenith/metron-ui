@@ -1,21 +1,18 @@
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { type ApiError, ApiModelError, type FetchError, type JsonDeserializeError, ValidationError } from "$lib/error";
-import { Err, isErr, Result } from "$lib/superposition";
+import { type ApiError, ApiModelError, type FetchError, type JsonDeserializeError } from "$lib/error";
+import { isErr, Result } from "$lib/superposition";
 import { type Tag, type TagArray, validateSchema, validateSchemaArray } from "$schemas/tags/self";
-import { validateUuid } from "$schemas/uuid";
-import { fetchApiJson } from "$utils";
-import { validateCreateSchema } from "../schemas/create";
+import { UuidSchemaError, validateUuid } from "$schemas/uuid";
+import { CreateSchemaError, validateCreateSchema } from "../schemas/create";
 import { SearchSchemaError, validateSearchSchema } from "../schemas/search";
-import { validateUpdateSchema } from "../schemas/update";
+import { UpdateSchemaError, validateUpdateSchema } from "../schemas/update";
 
 export class TagApiClient {
-  private readonly url: URL;
-  private readonly headers: HeadersInit;
+  private readonly apiClientOptions: ApiClientOptions;
 
-  constructor(options: ApiClientOptions = apiClientOptions) {
-    this.headers = options.options.headers;
-    this.url = options.options.url;
+  constructor(apiOptions: ApiClientOptions = apiClientOptions) {
+    this.apiClientOptions = apiOptions;
   }
 
   async searchByQueryTitle(
@@ -29,59 +26,28 @@ export class TagApiClient {
     }
 
     const { search } = parsed.unwrap();
-    const url = new URL("tags", this.url);
+    const url = new URL("tags", this.apiClientOptions.options.url);
     url.searchParams.append("tagName", search);
-
-    const errorOrJson = await fetchApiJson(url, {
-      method: "GET",
-      headers: {
-        ...this.headers,
-      },
-    }, extra);
-
-    if (isErr(errorOrJson)) {
-      return errorOrJson;
-    }
-
-    const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<TagArray, never>;
+    return this.apiClientOptions.fetchFromApi(url, { method: "GET" }, validateSchemaArray, extra);
   }
 
   async getById(
     id: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
-    if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid id:uuid"] }, "Invalid id:uuid"));
+  ): Promise<Result<Tag, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    const uuidOrError = validateUuid(id, "Invalid id:uuid");
+    if (isErr(uuidOrError)) {
+      return uuidOrError;
     }
-    const url = new URL(`tags/id/${id}`, this.url);
-    const errorOrJson = await fetchApiJson(url, {
-      method: "GET",
-      headers: {
-        ...this.headers,
-      },
-    }, extra);
-
-    if (isErr(errorOrJson)) {
-      return errorOrJson;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<Tag, never>;
+    const uuid = uuidOrError.unwrap();
+    const url = new URL(`tags/id/${uuid}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(url, { method: "GET" }, validateSchema, extra);
   }
 
   async create(
     data: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+  ): Promise<Result<Tag, CreateSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateCreateSchema(data);
 
     if (isErr(parsed)) {
@@ -89,82 +55,56 @@ export class TagApiClient {
     }
 
     const tag = parsed.unwrap();
-    const url = new URL("tags", this.url);
-    const errorOrJson = await fetchApiJson(url, {
-      method: "POST",
-      body: JSON.stringify(tag),
-      headers: {
-        "content-type": "application/json",
+    const url = new URL("tags", this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(
+      url,
+      {
+        method: "POST",
+        body: JSON.stringify(tag),
+        headers: {
+          "content-type": "application/json",
+        },
       },
-    }, extra);
-
-    if (isErr(errorOrJson)) {
-      return errorOrJson;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<Tag, never>;
+      validateSchema,
+      extra,
+    );
   }
 
   async update(
     data: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+  ): Promise<Result<Tag, UpdateSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateUpdateSchema(data);
     if (isErr(parsed)) {
       return parsed;
     }
 
     const tag = parsed.unwrap();
-    const url = new URL(`tags/id/${tag.id}`, this.url);
-    const errorOrJson = await fetchApiJson(url, {
-      method: "PATCH",
-      body: JSON.stringify(tag),
-      headers: {
-        "content-type": "application/json",
+    const url = new URL(`tags/id/${tag.id}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(
+      url,
+      {
+        method: "PATCH",
+        body: JSON.stringify(tag),
+        headers: {
+          "content-type": "application/json",
+        },
       },
-    }, extra);
-
-    if (isErr(errorOrJson)) {
-      return errorOrJson;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<Tag, never>;
+      validateSchema,
+      extra,
+    );
   }
 
   async deleteById(
     id: unknown,
     extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-    if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid tag id:uuid"] }, "Invalid tag id:uuid"));
+  ): Promise<Result<Tag, UuidSchemaError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    const uuidOrError = validateUuid(id, "Invalid id:uuid");
+    if (isErr(uuidOrError)) {
+      return uuidOrError;
     }
-    const url = new URL(`tags/id/${id}`, this.url);
-    const errorOrJson = await fetchApiJson(url, {
-      method: "DELETE",
-      headers: {
-        ...this.headers,
-      },
-    }, extra);
-
-    if (isErr(errorOrJson)) {
-      return errorOrJson;
-    }
-
-    const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (isErr(maybeParseJson)) {
-      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
-    }
-
-    return maybeParseJson as Result<Tag, never>;
+    const uuid = uuidOrError.unwrap();
+    const url = new URL(`tags/id/${uuid}`, this.apiClientOptions.options.url);
+    return this.apiClientOptions.fetchFromApi(url, { method: "DELETE" }, validateSchema, extra);
   }
 }

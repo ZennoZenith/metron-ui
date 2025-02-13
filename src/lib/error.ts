@@ -80,15 +80,14 @@ function constructApiError(err?: unknown): InternalApiError {
 //   ),
 // );
 
-export class CustomError implements Taged {
+class CustomError extends Error implements Taged {
   readonly _tag: ErrorType;
-  readonly message: string;
   // readonly messages: [string, ...string[]];
   // extra: Record<string, unknown>;
 
   constructor(tag: ErrorType, message: string) {
+    super(message);
     this._tag = tag;
-    this.message = message;
   }
 
   // fromError(error: Error, extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
@@ -214,8 +213,8 @@ export class ApiError extends CustomError {
 export class ValidationError extends CustomError {
   readonly validationError: Record<string, unknown>;
 
-  constructor(validationError: Record<string, unknown>, message?: string) {
-    super("ValidationError", message ?? "Validation Error");
+  constructor(validationError: Record<string, unknown>, tag: ErrorType = "ValidationError", message?: string) {
+    super(tag, message ?? "Validation Error");
     this.validationError = validationError;
   }
 }

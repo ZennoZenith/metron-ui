@@ -57,7 +57,7 @@ export async function fetchApiEmpty(
 
 export async function fetchApiJson(
   url: RequestInfo | URL,
-  init?: RequestInit,
+  init: RequestInit,
   extra?: { customFetch?: typeof fetch },
 ): Promise<Result<Record<string, unknown>, FetchError | ApiError | JsonDeserializeError>> {
   const internalFetch = extra?.customFetch ? extra.customFetch : fetch;

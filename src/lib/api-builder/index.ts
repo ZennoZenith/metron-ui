@@ -1,4 +1,7 @@
 import { API_HOST, API_PORT, API_PROTOCOL, API_VRSION } from "$constants";
+import { ApiError, ApiModelError, FetchError, JsonDeserializeError, type ValidationError } from "$lib/error";
+import { Err, isErr, type Result } from "$lib/superposition";
+import { fetchApiJson } from "$utils";
 
 // type FetchOptions = {
 //   url: string;
@@ -49,6 +52,30 @@ export class ApiClientOptions {
 
   get getApiCalls() {
     return this.apiCalls;
+  }
+
+  async fetchFromApi<T>(
+    url: RequestInfo | URL,
+    init: RequestInit,
+    validationFn: (value: unknown) => Result<T, ApiModelError>,
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<T, FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    const errorOrJson = await fetchApiJson(
+      url,
+      { ...init, headers: { ...this.options.headers, ...init.headers } },
+      extra,
+    );
+
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
+    }
+
+    const maybeParseJson = validationFn(errorOrJson.unwrap());
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
+    }
+
+    return maybeParseJson as Result<T, never>;
   }
 }
 

@@ -1,4 +1,4 @@
-// import { browser } from "$app/environment";
+import { browser } from "$app/environment";
 import { LOG_LEVEL } from "$constants";
 import { catchErrorSync } from "$utils";
 import { exhaustiveMatchingGuard, type LogLevels, toLogLevel } from "$utils/helpers";
@@ -56,9 +56,9 @@ export class Log {
   }
 
   private static FormatLog(option: FormatLogOptions) {
-    // if (browser) {
-    //   return option.message;
-    // }
+    if (browser) {
+      return option.message;
+    }
 
     const log: string[] = [];
     log.push(Log.FormatDate(new Date()));
