@@ -1,7 +1,15 @@
-import { ValidationError } from "$lib/error";
+import { CustomError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { search } from "$schemas";
 import { flatten, object, safeParse } from "valibot";
+
+export class SearchSchemaError extends CustomError {
+  readonly issues: SearchIssues;
+  constructor(issues: SearchIssues) {
+    super("TagSearchSchemaError", "Invalid tag search schema");
+    this.issues = issues;
+  }
+}
 
 const searchSchema = object(
   {
@@ -18,7 +26,7 @@ export function validateSearchSchema(data: unknown) {
 
   const issues: SearchIssues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new SearchSchemaError(issues));
 }
 
-export type SearchIssues = ReturnType<typeof flatten<typeof searchSchema>>["nested"];
+export type SearchIssues = NonNullable<ReturnType<typeof flatten<typeof searchSchema>>["nested"]>;

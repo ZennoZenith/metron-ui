@@ -1,4 +1,8 @@
-const LogLevels = ["INFO", "ERROR", "WARN", "DEBUG", "CRITICAL"] as const;
+// import { browser } from "$app/environment";
+import { LOG_LEVEL } from "$constants";
+import { catchErrorSync } from "$utils";
+import { exhaustiveMatchingGuard, type LogLevels, toLogLevel } from "$utils/helpers";
+import { isErr } from "./superposition";
 
 type FormatLogOptions = {
   message: any;
@@ -10,6 +14,36 @@ export class Log {
   constructor() {
     throw Error("Log is an static class and cannot be instantiated.");
   }
+  private static LogLevelValue: number = 10;
+  private static _logLevel: typeof LogLevels[number] = LOG_LEVEL;
+
+  static get LogLevel() {
+    return this._logLevel;
+  }
+
+  static set LogLevel(value: string) {
+    Log._logLevel = toLogLevel(value);
+    switch (Log._logLevel) {
+      case "DEBUG":
+        Log.LogLevelValue = 0;
+        break;
+      case "INFO":
+        Log.LogLevelValue = 5;
+        break;
+      case "WARN":
+        Log.LogLevelValue = 10;
+        break;
+      case "ERROR":
+        Log.LogLevelValue = 15;
+        break;
+      case "CRITICAL":
+        Log.LogLevelValue = 20;
+        break;
+      default:
+        exhaustiveMatchingGuard(Log._logLevel);
+    }
+  }
+
   private static FormatDate(date: Date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Ensure two digits
@@ -22,27 +56,49 @@ export class Log {
   }
 
   private static FormatLog(option: FormatLogOptions) {
+    // if (browser) {
+    //   return option.message;
+    // }
+
     const log: string[] = [];
     log.push(Log.FormatDate(new Date()));
     log.push("INFO");
     if (option.eventTag) log.push(`Event: ${option.eventTag}`);
-    log.push(`Message: ${option.message}`);
+
+    if (typeof option.message === "string") {
+      log.push(`Message: ${option.message}`);
+    } else {
+      const jsonOrError = catchErrorSync(JSON.stringify, option.message, null, 2);
+      if (isErr(jsonOrError)) {
+        log.push(`Message: ${option.message}`);
+      } else {
+        log.push(`Message: ${jsonOrError.unwrap()}`);
+      }
+    }
+
     return log.join(" | ");
   }
 
   static debug(message: any, eventTag?: string) {
+    if (Log.LogLevelValue > 0) return;
     console.log(Log.FormatLog({ logLevel: "DEBUG", message, eventTag }));
   }
   static info(message: any | Record<string, unknown>, eventTag?: string) {
+    if (Log.LogLevelValue > 5) return;
     console.log(Log.FormatLog({ logLevel: "INFO", message, eventTag }));
   }
   static warn(message: any, eventTag?: string) {
+    if (Log.LogLevelValue > 10) return;
     console.log(Log.FormatLog({ logLevel: "WARN", message, eventTag }));
   }
   static error(message: any, eventTag?: string) {
+    if (Log.LogLevelValue > 15) return;
     console.log(Log.FormatLog({ logLevel: "ERROR", message, eventTag }));
   }
   static critical(message: any, eventTag?: string) {
+    if (Log.LogLevelValue > 20) return;
     console.log(Log.FormatLog({ logLevel: "CRITICAL", message, eventTag }));
   }
 }
+
+Log.LogLevel = LOG_LEVEL;

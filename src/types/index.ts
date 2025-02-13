@@ -48,6 +48,6 @@ export type DropDownListItem<T extends Record<string, unknown> = { nothing: "" }
 
 export type SubscribeAction = "CREATE" | "UPDATE" | "DELETE";
 
-export type Taged = {
+export interface Taged {
   readonly _tag: string;
-};
+}

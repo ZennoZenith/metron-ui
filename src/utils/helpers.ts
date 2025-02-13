@@ -43,3 +43,12 @@ export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(d
 export function exhaustiveMatchingGuard(_: never, message?: string): never {
   throw new Error(message ?? "Should not have reached here");
 }
+
+export const LogLevels = ["DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"] as const;
+
+export function toLogLevel(value?: string): typeof LogLevels[number] {
+  if (value && LogLevels.includes(value as typeof LogLevels[number])) {
+    return value as typeof LogLevels[number];
+  }
+  return "WARN";
+}

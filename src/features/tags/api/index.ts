@@ -1,12 +1,12 @@
 import { apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, CustomError, FetchError, JsonDeserializeError, ParseError, ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
+import { type ApiError, ApiModelError, type FetchError, type JsonDeserializeError, ValidationError } from "$lib/error";
+import { Err, isErr, Result } from "$lib/superposition";
 import { type Tag, type TagArray, validateSchema, validateSchemaArray } from "$schemas/tags/self";
 import { validateUuid } from "$schemas/uuid";
-import { catchError, fetchJson } from "$utils";
+import { fetchApiJson } from "$utils";
 import { validateCreateSchema } from "../schemas/create";
-import { validateSearchSchema } from "../schemas/search";
+import { SearchSchemaError, validateSearchSchema } from "../schemas/search";
 import { validateUpdateSchema } from "../schemas/update";
 
 export class TagApiClient {
@@ -20,10 +20,11 @@ export class TagApiClient {
 
   async searchByQueryTitle(
     data: unknown,
-  ): Promise<Result<TagArray, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<TagArray, SearchSchemaError | FetchError | ApiError | ApiModelError | JsonDeserializeError>> {
     const parsed = validateSearchSchema(data);
 
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
@@ -31,160 +32,139 @@ export class TagApiClient {
     const url = new URL("tags", this.url);
     url.searchParams.append("tagName", search);
 
-    const errorOrJson = await fetchJson(url, {
-      method: "GET",
-      headers: {
-        ...this.headers,
-      },
-    });
-
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
-    }
-
-    const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<TagArray, never>;
-  }
-
-  async getById(
-    id: unknown,
-    extra?: { customFetch?: typeof fetch },
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
-    if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid id:uuid"] }, ["Invalid id:uuid"]));
-    }
-    const url = new URL(`tags/id/${id}`, this.url);
-    const errorOrJson = await fetchJson(url, {
+    const errorOrJson = await fetchApiJson(url, {
       method: "GET",
       headers: {
         ...this.headers,
       },
     }, extra);
 
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
+    }
+
+    const maybeParseJson = validateSchemaArray(errorOrJson.unwrap());
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
+    }
+
+    return maybeParseJson as Result<TagArray, never>;
+  }
+
+  async getById(
+    id: unknown,
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
+    if (!validateUuid(id)) {
+      return Err(new ValidationError({ id: ["Invalid id:uuid"] }, "Invalid id:uuid"));
+    }
+    const url = new URL(`tags/id/${id}`, this.url);
+    const errorOrJson = await fetchApiJson(url, {
+      method: "GET",
+      headers: {
+        ...this.headers,
+      },
+    }, extra);
+
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
     }
 
     const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
+    return maybeParseJson as Result<Tag, never>;
   }
 
   async create(
     data: unknown,
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateCreateSchema(data);
 
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
     const tag = parsed.unwrap();
     const url = new URL("tags", this.url);
-    const maybeResponse = await catchError(fetch(url, {
+    const errorOrJson = await fetchApiJson(url, {
       method: "POST",
       body: JSON.stringify(tag),
       headers: {
         "content-type": "application/json",
       },
-    }));
+    }, extra);
 
-    if (maybeResponse.isErr()) {
-      return Err(new FetchError().fromError(maybeResponse.unwrapErr()));
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
     }
 
-    const response = maybeResponse.unwrap();
-    const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
-
-    if (maybeJson.err) {
-      return Err(new JsonDeserializeError().fromError(maybeJson.err));
+    const maybeParseJson = validateSchema(errorOrJson.unwrap());
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
     }
 
-    const json = maybeJson.unwrap();
-    if (response.status > 399) {
-      return Err(CustomError.parseError(json));
-    }
-
-    const maybeParseJson = validateSchema(json);
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
+    return maybeParseJson as Result<Tag, never>;
   }
 
   async update(
     data: unknown,
-  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
+    extra?: { customFetch?: typeof fetch },
+  ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError | ApiModelError>> {
     const parsed = validateUpdateSchema(data);
-    if (parsed.err) {
+    if (isErr(parsed)) {
       return parsed;
     }
 
     const tag = parsed.unwrap();
     const url = new URL(`tags/id/${tag.id}`, this.url);
-    const maybeResponse = await catchError(fetch(url, {
+    const errorOrJson = await fetchApiJson(url, {
       method: "PATCH",
       body: JSON.stringify(tag),
       headers: {
         "content-type": "application/json",
       },
-    }));
+    }, extra);
 
-    if (maybeResponse.isErr()) {
-      return Err(new FetchError().fromError(maybeResponse.unwrapErr()));
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
     }
 
-    const response = maybeResponse.unwrap();
-    const maybeJson = await catchError<Record<string, unknown>, Error>(response.json());
-
-    if (maybeJson.err) {
-      return Err(new JsonDeserializeError().fromError(maybeJson.err));
+    const maybeParseJson = validateSchema(errorOrJson.unwrap());
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
     }
 
-    const json = maybeJson.unwrap();
-    if (response.status > 399) {
-      return Err(CustomError.parseError(json));
-    }
-
-    const maybeParseJson = validateSchema(json);
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.err));
-    }
-
-    return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
+    return maybeParseJson as Result<Tag, never>;
   }
 
   async deleteById(
     id: unknown,
+    extra?: { customFetch?: typeof fetch },
   ): Promise<Result<Tag, ValidationError | FetchError | ApiError | JsonDeserializeError>> {
     if (!validateUuid(id)) {
-      return Err(new ValidationError({ id: ["Invalid tag id:uuid"] }, ["Invalid tag id:uuid"]));
+      return Err(new ValidationError({ id: ["Invalid tag id:uuid"] }, "Invalid tag id:uuid"));
     }
     const url = new URL(`tags/id/${id}`, this.url);
-    const errorOrJson = await fetchJson(url, {
+    const errorOrJson = await fetchApiJson(url, {
       method: "DELETE",
       headers: {
         ...this.headers,
       },
-    });
+    }, extra);
 
-    if (errorOrJson.err) {
-      return errorOrJson as Result<never, typeof errorOrJson.err>;
+    if (isErr(errorOrJson)) {
+      return errorOrJson;
     }
 
     const maybeParseJson = validateSchema(errorOrJson.unwrap());
-    if (maybeParseJson.err) {
-      return Err(new ParseError().fromSelf(maybeParseJson.unwrapErr()));
+    if (isErr(maybeParseJson)) {
+      return Err(ApiModelError.fromValidationError(maybeParseJson.unwrapErr()));
     }
 
-    return Ok(maybeParseJson.unwrap()) as Result<Tag, never>;
+    return maybeParseJson as Result<Tag, never>;
   }
 }

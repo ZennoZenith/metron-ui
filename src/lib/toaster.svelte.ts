@@ -39,7 +39,7 @@ export class Toaster {
         pausedAtMs: 0,
       },
     };
-    Log.info(value);
+    Log.debug(value);
     this._toasts.push(value);
 
     this._toastToTimeout.set(

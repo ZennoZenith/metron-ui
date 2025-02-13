@@ -8,6 +8,7 @@ import {
   UpdateTagDialog,
 } from "$features/tags/components";
 import { Log } from "$lib/logger";
+import { isErr } from "$lib/superposition";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Tag } from "$type/tags";
 
@@ -49,11 +50,11 @@ function resetForm() {
 async function onCreateSubmit(title: string): Promise<void> {
   const result = await tagClient.create({ title });
 
-  if (result.err) {
+  if (isErr(result)) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
+    const errorObj = result.unwrapErr();
     Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;
@@ -75,11 +76,11 @@ async function onUpdateSubmit(title: string): Promise<void> {
 
   const result = await tagClient.update({ id: tagToBeUpdated?.id, title });
 
-  if (result.err) {
+  if (isErr(result)) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
+    const errorObj = result.unwrapErr();
     Log.error(errorObj);
     return;
   }
@@ -96,11 +97,11 @@ async function onDeleteResponse(answer: boolean) {
   }
   const result = await tagClient.deleteById(tagToBeDeleted?.id);
 
-  if (result.err) {
+  if (isErr(result)) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
+    const errorObj = result.unwrapErr();
     Log.error(errorObj);
     // setFailureResponse(errorObj);
     return;

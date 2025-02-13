@@ -20,7 +20,15 @@ export class Result<T, E extends Taged> {
     return this.#ok as NonNullable<T>;
   }
 
-  unwrapOr(fn: () => NonNullable<T>) {
+  unwrapOr(value: NonNullable<T>) {
+    if (!this.#ok) {
+      return value;
+    } else {
+      return this.#ok;
+    }
+  }
+
+  unwrapElseOr(fn: () => NonNullable<T>) {
     if (!this.#ok) {
       return fn();
     } else {
@@ -48,13 +56,13 @@ export class Result<T, E extends Taged> {
     return this.#err !== undefined && this.#err !== null;
   }
 
-  get ok() {
-    return this.#ok;
-  }
+  // get ok() {
+  //   return this.#ok;
+  // }
 
-  get err() {
-    return this.#err;
-  }
+  // get err() {
+  //   return this.#err;
+  // }
 }
 
 export function Ok<T>(ok: T) {
