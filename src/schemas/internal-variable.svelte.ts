@@ -1,3 +1,4 @@
+import { Log } from "$lib/logger";
 import type { SubscribeAction } from "$type";
 import type { Variable, VariableType, VariableValue } from "$type/variables";
 import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
@@ -132,7 +133,7 @@ export class InternalVariable {
   }
 
   public log() {
-    console.info({
+    Log.info({
       psudoId: this.#psudoId,
       name: this.#name,
       typ: this.#typ,

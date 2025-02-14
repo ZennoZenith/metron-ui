@@ -1,5 +1,4 @@
 import { ImageApiClient } from "$features/images/api";
-import type { ErrorObject } from "$lib/error";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "$utils/http-codes";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
@@ -12,7 +11,7 @@ export const load: PageLoad = async ({ params, url }) => {
   const image = await imageClient.getById(imageId);
 
   if (image.isErr()) {
-    return error(NOT_FOUND, image.unwrapErr(errorHandleFn).error as ErrorObject);
+    return error(NOT_FOUND, image.unwrapErr(errorHandleFn).message);
   }
 
   const img = image.unwrap(errorHandleFn);

@@ -1,8 +1,14 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok } from "$lib/superposition";
+import { Err, Ok, Result } from "$lib/superposition";
 import { content, title } from "$schemas";
 import { uuidArrayString } from "$schemas/uuid";
 import { flatten, type InferOutput, object, optional, safeParse } from "valibot";
+
+export class CreateSchemaError extends ValidationError {
+  constructor(issues: CreateIssues = {}) {
+    super(issues, "EquationCreateSchemaError", "Concept create schema error");
+  }
+}
 
 export const createSchema = object(
   {
@@ -14,7 +20,7 @@ export const createSchema = object(
   "Should be an object",
 );
 
-export function validateCreateSchema(data: unknown) {
+export function validateCreateSchema(data: unknown): Result<CreateSchema, CreateSchemaError> {
   const d = safeParse(createSchema, data);
 
   if (d.success) {
@@ -23,7 +29,7 @@ export function validateCreateSchema(data: unknown) {
 
   const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new CreateSchemaError(issues));
 }
 
 export type CreateSchema = InferOutput<typeof createSchema>;

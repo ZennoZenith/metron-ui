@@ -1,23 +1,23 @@
-import type { InternalApiError } from "$type";
-import { array, literal, minLength, object, optional, pipe, record, safeParse, string, union, unknown } from "valibot";
+import type { InternalApiError, Taged } from "$type";
 
 const errorType = [
-  "generic-error",
-  "validation-error",
-  "fetch-error",
-  "json-deserialize-error",
-  "api-error",
-  "parse-error",
-  "api-model-error",
+  "UnknownError",
+  "UntagedError",
+  "FetchError",
+  "JsonDeserializeError",
+  "ApiError",
+  "ApiModelError",
+  "ValidationError",
+  // "ParseError",
 ] as const;
 
-export type ErrorType = typeof errorType[number];
+export type ErrorType = typeof errorType[number] | ({} & string);
 
 export type ErrorObject = Readonly<{
+  _tag: ErrorType;
   success: false;
   message: string;
   messages: [string, ...string[]];
-  type: ErrorType;
   cause: unknown;
   extra: Record<string, unknown>;
 }>;
@@ -53,137 +53,198 @@ function constructApiError(err?: unknown): InternalApiError {
   } satisfies InternalApiError;
 }
 
-const errorSchema = pipe(
-  object(
-    {
-      success: literal(false, "success should be boolean false"),
-      type: union(
-        errorType.map(v => literal(v)),
-        "invalid error type",
-      ),
-      message: string("message should be string"),
-      name: optional(string("name should be string")),
-      cause: optional(unknown()),
-      messages: pipe(
-        array(
-          string("messages should be string"),
-          "messages should be an array of string",
-        ),
-        minLength(1, "messages array should atleast contain one element of string"),
-      ),
-      extra: record(
-        string("extra object key shoud be string"),
-        unknown(),
-        "extra must by of type Record<string, unknown>",
-      ),
-    },
-  ),
-);
+// const errorSchema = pipe(
+//   object(
+//     {
+//       success: literal(false, "success should be boolean false"),
+//       type: union(
+//         errorType.map(v => literal(v)),
+//         "invalid error type",
+//       ),
+//       message: string("message should be string"),
+//       name: optional(string("name should be string")),
+//       cause: optional(unknown()),
+//       messages: pipe(
+//         array(
+//           string("messages should be string"),
+//           "messages should be an array of string",
+//         ),
+//         minLength(1, "messages array should atleast contain one element of string"),
+//       ),
+//       extra: record(
+//         string("extra object key shoud be string"),
+//         unknown(),
+//         "extra must by of type Record<string, unknown>",
+//       ),
+//     },
+//   ),
+// );
 
-export class CustomError extends Error {
-  readonly success = false;
-  readonly type: ErrorType;
-  messages: [string, ...string[]];
-  extra: Record<string, unknown>;
+class CustomError extends Error implements Taged {
+  readonly _tag: ErrorType;
+  // readonly messages: [string, ...string[]];
+  // extra: Record<string, unknown>;
 
-  constructor(type: ErrorType, extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    const message = messages?.[0] ?? "Default Err message";
+  constructor(tag: ErrorType, message: string) {
     super(message);
-    this.messages = messages ?? [message];
-    this.type = type;
-    this.extra = extra ?? {};
+    this._tag = tag;
   }
 
-  fromError(error: Error, extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    this.cause = error.cause;
-    this.message = error.message;
-    this.name = error.name;
-    this.stack = error.stack;
-    this.messages = messages ?? [this.message];
-    this.extra = extra ?? {};
-    return this;
-  }
+  // fromError(error: Error, extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
+  //   this.cause = error.cause;
+  //   this.message = error.message;
+  //   this.name = error.name;
+  //   this.stack = error.stack;
+  //   this.messages = messages ?? [this.message];
+  //   this.extra = extra ?? {};
+  //   return this;
+  // }
 
-  fromSelf(error: CustomError) {
-    this.cause = error.cause;
-    this.message = error.message;
-    this.name = error.name;
-    this.stack = error.stack;
-    this.messages = error.messages;
-    this.extra = error.extra;
-    return this;
-  }
+  // static parseError(value: unknown) {
+  //   const d = safeParse(errorSchema, value);
+  //   if (!d.success) {
+  //     return new ParseError(undefined, ["Unable to parse error schema"]);
+  //   }
+  //   const { type, extra, messages, cause, name } = d.output;
+  //   const customError = new CustomError(type, extra, messages as [string, ...string[]]);
+  //   customError.cause = cause;
+  //   customError.name = name ?? "";
+  //   return customError;
+  // }
 
-  static parseError(value: unknown) {
-    const d = safeParse(errorSchema, value);
-    if (!d.success) {
-      return new ParseError(undefined, ["Unable to parse error schema"]);
+  // get error(): ErrorObject {
+  //   return {
+  //     _tag: this._tag,
+  //     success: this.success,
+  //     message: this.message,
+  //     messages: this.messages,
+  //     cause: this.cause,
+  //     extra: this.extra,
+  //   } as const;
+  // }
+}
+
+// export class GenericError extends CustomError {
+//   constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
+//     super("GenericError", extra, messages ?? ["Generic Error"]);
+//   }
+// }
+
+export class UnknowError extends CustomError {
+  readonly error: Error;
+  constructor(error: unknown) {
+    let message = "Unknow Message";
+    if (
+      typeof error === "object"
+      && error !== null
+      && "message" in error
+      && typeof error.message === "string"
+    ) message = error.message;
+    super("UnknownError", message);
+    if (error instanceof Error) {
+      this.error = error;
+      return;
     }
-    const { type, extra, messages, cause, name } = d.output;
-    const customError = new CustomError(type, extra, messages as [string, ...string[]]);
-    customError.cause = cause;
-    customError.name = name ?? "";
-    return customError;
-  }
-
-  get error(): ErrorObject {
-    return {
-      success: this.success,
-      type: this.type,
-      message: this.message,
-      messages: this.messages,
-      cause: this.cause,
-      extra: this.extra,
-    } as const;
+    this.error = new Error(message, { cause: error });
   }
 }
 
-export class GenericError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("generic-error", extra, messages ?? ["Generic Error"]);
+export class TagedError extends CustomError {
+  readonly error: Error;
+  constructor(error: Taged) {
+    let message = "Unknow Message";
+    if (
+      typeof error === "object"
+      && error !== null
+      && "message" in error
+      && typeof error.message === "string"
+    ) message = error.message;
+    super(error._tag, message);
+    if (error instanceof Error) {
+      this.error = error;
+      return;
+    }
+    this.error = new Error(message, { cause: error });
   }
 }
 
-export class ValidationError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("validation-error", extra, messages ?? ["Validation Error"]);
+export class UntagedError extends CustomError {
+  readonly error: Error;
+  constructor(error: Error) {
+    super("UntagedError", error.message);
+    this.error = error;
   }
 }
 
 export class FetchError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("fetch-error", extra, messages ?? ["Fetch Error"]);
+  readonly error: Error;
+  constructor(error: Error) {
+    super("FetchError", error.message);
+    this.error = error;
+  }
+
+  static fromUnknownError(error: UnknowError) {
+    return new FetchError(error.error);
   }
 }
 
 export class JsonDeserializeError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("json-deserialize-error", extra, messages ?? ["Json Deserialize Error"]);
+  readonly error: Error;
+  constructor(error: Error) {
+    super("JsonDeserializeError", error.message);
+    this.error = error;
+  }
+
+  static fromUnknownError(error: UnknowError) {
+    return new FetchError(error.error);
   }
 }
 
 export class ApiError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    const apiError = constructApiError(extra);
-    super("api-error", apiError, messages ?? [apiError.error]);
+  readonly error: InternalApiError;
+
+  constructor(error: Record<string, unknown>) {
+    const apiError = constructApiError(error);
+    super("ApiError", apiError.error);
+    this.error = apiError;
   }
 }
 
-/**
- * DEPRECATED use ApiModelError instead
- * Parse error shoud only thrown when backend and frontend schema are out of sync
- */
-export class ParseError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("parse-error", extra, messages ?? ["Api Error"]);
+export class ValidationError extends CustomError {
+  readonly validationError: Record<string, unknown>;
+
+  constructor(validationError: Record<string, unknown>, tag: ErrorType = "ValidationError", message?: string) {
+    super(tag, message ?? "Validation Error");
+    this.validationError = validationError;
   }
 }
 
-/**
- * Parse error shoud only thrown when api backend and svelte backend schema are out of sync
- */
 export class ApiModelError extends CustomError {
-  constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
-    super("api-model-error", extra, messages ?? ["Api Model Error"]);
+  readonly validationError: Record<string, unknown>;
+
+  constructor(extra: Record<string, unknown>, message?: string) {
+    super("ApiModelError", message ?? "Api Model Error");
+    this.validationError = extra;
   }
+
+  // static fromValidationError(error: ValidationError) {
+  //   return new ApiModelError(
+  //     error.validationError,
+  //     error.message === "Validation Error" ? undefined : error.message,
+  //   );
+  // }
 }
+
+// /**
+//  * @deprecated use ApiModelError instead
+//  * Parse error shoud only thrown when backend and frontend schema are out of sync
+//  */
+// export class ParseError extends CustomError {
+//   constructor(extra?: Record<string, unknown>, messages?: [string, ...string[]]) {
+//     super("ParseError", extra, messages ?? ["Api Error"]);
+//   }
+// }
+
+// /**
+//  * Parse error shoud only thrown when api backend and svelte backend schema are out of sync
+//  */

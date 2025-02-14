@@ -1,4 +1,4 @@
-import { ValidationError } from "$lib/error";
+import { ApiModelError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
 import { uuidSchema } from "$schemas/uuid";
 import { array, flatten, type InferOutput, object, safeParse, string } from "valibot";
@@ -22,7 +22,7 @@ export function validateSchema(data: unknown) {
 
   const issues: TagIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Tag model out of sync"));
 }
 
 export function validateSchemaArray(data: unknown) {
@@ -34,7 +34,7 @@ export function validateSchemaArray(data: unknown) {
 
   const issues: TagArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Tag array model out of sync"));
 }
 
 export type Tag = InferOutput<typeof schema>;

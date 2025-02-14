@@ -5,6 +5,7 @@ import { ImageApiClient } from "$features/images/api";
 import Image from "$features/images/components/Image.svelte";
 import type { UpdateSchema } from "$features/images/schemas/update";
 import { Edit, Trash } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import { setEmptyStringAsNullish } from "$utils/helpers";
 import type { PageData } from "./$types";
@@ -26,7 +27,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
@@ -46,13 +47,10 @@ async function onSubmit(data: UpdateSchema): Promise<void> {
     image: data.image,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 

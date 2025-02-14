@@ -5,6 +5,7 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ConceptApiClient } from "$features/concepts/api";
 import Concept from "$features/concepts/components/Concept.svelte";
 import { Edit, Trash } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
 import { setEmptyStringAsNullish } from "$utils/helpers";
@@ -12,6 +13,7 @@ import type { PageData } from "./$types";
 
 const toaster = getToaster();
 const conceptClient = new ConceptApiClient();
+let reset = $state(false);
 
 let deleteConformationDialog = $state<ConformationDialog>();
 
@@ -27,14 +29,19 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
   toaster.success(
     `Concept deleted successfully redirecting to /concepts in 5sec`,
   );
+  resetForm();
   setTimeout(() => goto("/concepts"), 5000);
+}
+
+function resetForm() {
+  reset = !reset;
 }
 
 async function onSubmit(
@@ -62,13 +69,10 @@ async function onSubmit(
     variables,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 
@@ -114,4 +118,6 @@ async function onSubmit(
   {/if}
 </div>
 
-<Concept {onSubmit} {defaultConcept} disabled={!edit} />
+{#key reset}
+  <Concept {onSubmit} {defaultConcept} disabled={!edit} />
+{/key}

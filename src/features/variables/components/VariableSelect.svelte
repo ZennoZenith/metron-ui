@@ -1,10 +1,10 @@
 <script lang="ts">
-import { Check, ChevronDown } from "$icons/index.js";
 import {
   VARIABLE_TYPES,
   type VariableType,
   type VariableTypeLoose,
-} from "$schemas/variable";
+} from "$api/schemas/variable";
+import { Check, ChevronDown } from "$icons/index.js";
 import { createSelect, melt } from "@melt-ui/svelte";
 import { fade } from "svelte/transition";
 

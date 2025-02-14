@@ -1,5 +1,4 @@
 import { ProblemApiClient } from "$features/problems/api";
-import type { ErrorObject } from "$lib/error";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "$utils/http-codes";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
@@ -12,7 +11,7 @@ export const load: PageLoad = async ({ params, url, fetch }) => {
   const problem = await problemClient.getById(problemId, { customFetch: fetch });
 
   if (problem.isErr()) {
-    return error(NOT_FOUND, problem.unwrapErr(errorHandleFn).error as ErrorObject);
+    return error(NOT_FOUND, problem.unwrapErr(errorHandleFn).message);
   }
 
   return {

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Equation } from "$type/equations";
 import { onMount } from "svelte";
@@ -24,7 +25,7 @@ async function onFormSubmit(
 
   if (maybeEquations.isErr()) {
     const error = maybeEquations.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return;
   }

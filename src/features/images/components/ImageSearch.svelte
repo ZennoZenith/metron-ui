@@ -1,4 +1,5 @@
 <script lang="ts">
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Image } from "$type/images";
 import { onMount } from "svelte";
@@ -24,7 +25,7 @@ async function onFormSubmit(
 
   if (maybeImages.isErr()) {
     const error = maybeImages.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return;
   }

@@ -1,11 +1,11 @@
 <script lang="ts">
+import type { ConceptShort, ConceptShortArray } from "$api/schemas/concepts";
 import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ConceptApiClient } from "$features/concepts/api";
 import { ConceptCard, ConceptSearch } from "$features/concepts/components";
 import { ArrowRight } from "$icons";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ConceptShort, ConceptShortArray } from "$schemas/concepts/self";
 
 let list = $state<ConceptShortArray>([]);
 let deleteConformationDialog = $state<ConformationDialog>();
@@ -36,7 +36,6 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
     return;
   }
 
@@ -70,5 +69,7 @@ async function onDeleteResponse(answer: boolean) {
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as concept}
     <ConceptCard {concept} {onClickDelete} />
+  {:else}
+    <p>No concept found</p>
   {/each}
 </div>

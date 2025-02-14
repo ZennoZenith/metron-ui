@@ -1,11 +1,12 @@
 <script lang="ts">
+import type { ProblemShort, ProblemShortArray } from "$api/schemas/problems";
 import { goto } from "$app/navigation";
 import ConformationDialog from "$components/ConformationDialog.svelte";
 import { ProblemApiClient } from "$features/problems/api";
 import { ProblemCard, ProblemSearch } from "$features/problems/components";
 import { ArrowRight } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
-import type { ProblemShort, ProblemShortArray } from "$schemas/problems/self";
 
 let list = $state<ProblemShortArray>([]);
 let deleteConformationDialog = $state<ConformationDialog>();
@@ -36,7 +37,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
@@ -70,5 +71,7 @@ async function onDeleteResponse(answer: boolean) {
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as problem}
     <ProblemCard {problem} {onClickDelete} />
+  {:else}
+    <p>No problem found</p>
   {/each}
 </div>

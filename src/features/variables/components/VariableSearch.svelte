@@ -2,11 +2,12 @@
 import { flyAndScale } from "$components/melt/utils/index";
 import { IMAGE_BASE_ROUTE } from "$constants";
 import { ConceptApiClient } from "$features/concepts/api";
-import { searchEquation } from "$features/equations/api/client";
-import { searchImage } from "$features/images/api/client";
+import { EquationApiClient } from "$features/equations/api";
+import { ImageApiClient } from "$features/images/api";
 import { ProblemApiClient } from "$features/problems/api";
 import { MagnifyingGlass } from "$icons";
 import { X } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { VariableType } from "$type/variables";
 import { exhaustiveMatchingGuard } from "$utils/helpers";
@@ -29,6 +30,8 @@ export interface SearchResult {
 
 const conceptClient = new ConceptApiClient();
 const problemClient = new ProblemApiClient();
+const imageClient = new ImageApiClient();
+const equationClient = new EquationApiClient();
 
 const toaster = getToaster();
 const {
@@ -60,11 +63,11 @@ export function setOpenState(state: boolean = true) {
 async function searchImages(
   value: Record<string, unknown>,
 ): Promise<SearchResult[]> {
-  const maybeImages = await searchImage(value);
+  const maybeImages = await imageClient.searchByQueryTitle(value);
 
   if (maybeImages.isErr()) {
     const error = maybeImages.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return [];
   }
@@ -87,11 +90,11 @@ async function searchImages(
 async function searchEquations(
   value: Record<string, unknown>,
 ): Promise<SearchResult[]> {
-  const maybeEquations = await searchEquation(value);
+  const maybeEquations = await equationClient.searchByQueryTitle(value);
 
   if (maybeEquations.isErr()) {
     const error = maybeEquations.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return [];
   }
@@ -118,7 +121,7 @@ async function searchConcepts(
 
   if (maybeConcepts.isErr()) {
     const error = maybeConcepts.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return [];
   }
@@ -146,7 +149,7 @@ async function searchProblems(
 
   if (maybeProblems.isErr()) {
     const error = maybeProblems.unwrapErr();
-    console.error(error);
+    Log.error(error);
     toaster.error(error.message);
     return [];
   }

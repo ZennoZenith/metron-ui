@@ -1,8 +1,8 @@
 <script lang="ts">
+import { VARIABLE_TYPES } from "$api/schemas/variable";
 import { Switch } from "$components/melt";
 import { PlusCircled, Trash } from "$icons";
 import { getInternalVariablesContext } from "$schemas/internal-variable.svelte";
-import { VARIABLE_TYPES } from "$schemas/variable";
 import type { VariableType } from "$type/variables";
 import VariableSelect from "./VariableSelect.svelte";
 import VariableValue from "./VariableValue.svelte";

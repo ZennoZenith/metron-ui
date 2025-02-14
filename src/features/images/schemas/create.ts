@@ -16,6 +16,12 @@ import {
   union,
 } from "valibot";
 
+export class CreateSchemaError extends ValidationError {
+  constructor(issues: CreateIssues = {}) {
+    super(issues, "ImageCreateSchemaError", "Image create schema error");
+  }
+}
+
 export const createSchema = object(
   {
     imageType: union(
@@ -43,7 +49,7 @@ export function validateCreateSchema(data: unknown) {
 
   const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new CreateSchemaError(issues));
 }
 
 export type CreateSchema = InferOutput<typeof createSchema>;

@@ -1,3 +1,4 @@
+import { Log } from "$lib/logger";
 import type { VariableType } from "$schemas/variable";
 import type { VariableValue } from "$type/variables";
 import { uuidv4 } from "$utils/helpers";
@@ -66,7 +67,7 @@ export class InternalVariableValue {
   }
 
   public log() {
-    console.info(
+    Log.info(
       { name: this.#name, typ: this.#typ, value: this.#value, label: this.#label },
     );
   }

@@ -1,5 +1,4 @@
 import { EquationApiClient } from "$features/equations/api";
-import type { ErrorObject } from "$lib/error";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "$utils/http-codes";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
@@ -12,7 +11,7 @@ export const load: PageLoad = async ({ params, url }) => {
   const equation = await equationClient.getById(equationId);
 
   if (equation.isErr()) {
-    return error(NOT_FOUND, equation.unwrapErr(errorHandleFn).error as ErrorObject);
+    return error(NOT_FOUND, equation.unwrapErr(errorHandleFn).message);
   }
 
   return {

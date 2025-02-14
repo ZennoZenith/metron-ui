@@ -1,5 +1,4 @@
 import { ConceptApiClient } from "$features/concepts/api";
-import type { ErrorObject } from "$lib/error";
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from "$utils/http-codes";
 import { error } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
@@ -12,7 +11,7 @@ export const load: PageLoad = async ({ params, url }) => {
   const concept = await conceptClient.getById(conceptId);
 
   if (concept.isErr()) {
-    return error(NOT_FOUND, concept.unwrapErr(errorHandleFn).error as ErrorObject);
+    return error(NOT_FOUND, concept.unwrapErr(errorHandleFn).message);
   }
 
   return {

@@ -1,4 +1,6 @@
-export class Result<T, E extends Error> {
+import type { Taged } from "$type";
+
+export class Result<T, E extends Taged> {
   #ok?: T;
   #err?: E;
 
@@ -18,7 +20,15 @@ export class Result<T, E extends Error> {
     return this.#ok as NonNullable<T>;
   }
 
-  unwrapOr(fn: () => NonNullable<T>) {
+  unwrapOr(value: NonNullable<T>) {
+    if (!this.#ok) {
+      return value;
+    } else {
+      return this.#ok;
+    }
+  }
+
+  unwrapElseOr(fn: () => NonNullable<T>) {
     if (!this.#ok) {
       return fn();
     } else {
@@ -46,23 +56,23 @@ export class Result<T, E extends Error> {
     return this.#err !== undefined && this.#err !== null;
   }
 
-  get ok() {
-    return this.#ok;
-  }
+  // get ok() {
+  //   return this.#ok;
+  // }
 
-  get err() {
-    return this.#err;
-  }
+  // get err() {
+  //   return this.#err;
+  // }
 }
 
 export function Ok<T>(ok: T) {
   return new Result<T, never>(ok);
 }
 
-export function Err<E extends Error>(err: E) {
+export function Err<E extends Taged>(err: E) {
   return new Result<never, E>(undefined, err);
 }
 
-export const isOk = <T, E extends Error>(value: Result<T, E>): value is Result<T, never> => value.isOk();
+export const isOk = <T, E extends Taged>(value: Result<T, E>): value is Result<T, never> => value.isOk();
 
-export const isErr = <T, E extends Error>(value: Result<T, E>): value is Result<never, E> => value.isErr();
+export const isErr = <T, E extends Taged>(value: Result<T, E>): value is Result<never, E> => value.isErr();

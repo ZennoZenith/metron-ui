@@ -1,8 +1,14 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok } from "$lib/superposition";
+import { Err, Ok, Result } from "$lib/superposition";
 import { uuidSchema } from "$schemas/uuid";
 import { flatten, type InferOutput, object, pipe, safeParse, transform } from "valibot";
 import { createSchema } from "./create";
+
+export class UpdateSchemaError extends ValidationError {
+  constructor(issues: UpdateIssues = {}) {
+    super(issues, "ConceptUpdateSchemaError", "Concept update schema error");
+  }
+}
 
 const updateSchema = pipe(
   object(
@@ -25,7 +31,7 @@ const updateSchema = pipe(
 export type UpdateSchema = InferOutput<typeof updateSchema>;
 export type UpdateIssues = ReturnType<typeof flatten<typeof updateSchema>>["nested"];
 
-export function validateUpdateSchema(data: unknown) {
+export function validateUpdateSchema(data: unknown): Result<UpdateSchema, UpdateSchemaError> {
   const d = safeParse(updateSchema, data);
   if (d.success) {
     return Ok(d.output);
@@ -33,7 +39,7 @@ export function validateUpdateSchema(data: unknown) {
 
   const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new UpdateSchemaError(issues));
 }
 
 export type ConceptUpdate = UpdateSchema;

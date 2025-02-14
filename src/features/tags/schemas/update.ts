@@ -4,6 +4,12 @@ import { uuidSchema } from "$schemas/uuid";
 import { flatten, type InferOutput, object, safeParse } from "valibot";
 import { createSchema } from "./create";
 
+export class UpdateSchemaError extends ValidationError {
+  constructor(issues: UpdateIssues = {}) {
+    super(issues, "TagUpdateSchemaError", "Tag update schema error");
+  }
+}
+
 const updateSchema = object(
   {
     id: uuidSchema,

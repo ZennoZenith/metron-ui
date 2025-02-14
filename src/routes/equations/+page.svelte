@@ -4,6 +4,7 @@ import ConformationDialog from "$components/ConformationDialog.svelte";
 import { EquationApiClient } from "$features/equations/api";
 import { EquationCard, EquationSearch } from "$features/equations/components";
 import { ArrowRight } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { Equation } from "$type/equations";
 
@@ -36,7 +37,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 

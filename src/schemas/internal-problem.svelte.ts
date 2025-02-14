@@ -1,3 +1,4 @@
+import { Log } from "$lib/logger";
 import type { Problem, QuestionTypeLoose } from "$type/problems";
 import { setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
@@ -43,7 +44,7 @@ export class InternalProblem {
   }
 
   public log() {
-    console.info({
+    Log.info({
       id: $state.snapshot(this.id),
       psudoId: this.#psudoId,
       problemStatement: $state.snapshot(this.problemStatement),

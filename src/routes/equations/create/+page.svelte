@@ -23,13 +23,10 @@ async function onSubmit(
     tags,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 

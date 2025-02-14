@@ -1,9 +1,9 @@
+import { schemaArray as answerSchemaArray } from "$api/schemas/answer";
 import { ValidationError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { schemaArray as answerSchemaArray } from "$schemas/answer";
+import { uuidSchema } from "$schemas/uuid";
 import type { Prettify } from "$type";
 import { array, flatten, type InferOutput, minLength, object, pipe, safeParse } from "valibot";
-import { uuidSchema } from "./uuid";
 import { variableValueSchemaArray } from "./variable";
 
 export const schema = object(

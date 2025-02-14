@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Variable, VariableType } from "$api/schemas/variable";
 import { goto, invalidateAll, replaceState } from "$app/navigation";
 import { page } from "$app/state";
 import ConformationDialog from "$components/ConformationDialog.svelte";
@@ -6,11 +7,11 @@ import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
 import type { VariantUpdate } from "$features/variants/schemas/update";
 import { Edit, Trash } from "$icons";
+import { Log } from "$lib/logger";
 import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
 import { InternalVariants } from "$schemas/internal-variant.svelte";
-import type { Variable, VariableType } from "$schemas/variable";
 import type { PageData } from "./$types";
 
 const toaster = getToaster();
@@ -30,7 +31,7 @@ async function onDeleteResponse(answer: boolean) {
   if (response.isErr()) {
     const err = response.unwrapErr();
     toaster.error(err?.message ?? "");
-    console.error(err);
+    Log.error(err);
     return;
   }
 
@@ -100,13 +101,10 @@ async function onSubmit(
     explanation,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    console.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 

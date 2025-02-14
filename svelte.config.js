@@ -28,6 +28,11 @@ export default {
       $features: "src/features",
       "$features/*": "src/features/*",
     },
+    env: {
+      dir: "./",
+      privatePrefix: "SECRET_",
+      publicPrefix: "PUBLIC_",
+    },
   },
   compilerOptions: {
     runes: true,

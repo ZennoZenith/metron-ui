@@ -1,10 +1,10 @@
-import { ValidationError } from "$lib/error";
+import { schemaArray as equationSchemaArray } from "$api/schemas/equations";
+import { schemaArray as imagesSchemaArary } from "$api/schemas/images";
+import { schemaArray as tagSchemaArray } from "$api/schemas/tags";
+import { schemaArray as variableSchemaArray } from "$api/schemas/variable";
+import { ApiModelError } from "$lib/error";
 import { Err, Ok } from "$lib/superposition";
-import { schemaArray as equationSchemaArray } from "$schemas/equations/self";
-import { schemaArray as imagesSchemaArary } from "$schemas/images/self";
-import { schemaArray as tagSchemaArray } from "$schemas/tags/self";
 import { uuidSchema } from "$schemas/uuid";
-import { schemaArray as variableSchemaArray } from "$schemas/variable";
 import { array, flatten, type InferOutput, nullable, object, safeParse, string } from "valibot";
 
 export const schemaShort = object(
@@ -49,7 +49,7 @@ export function validateSchema(data: unknown) {
 
   const issues: ConceptIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Concept model out of sync"));
 }
 
 export function validateSchemaArray(data: unknown) {
@@ -61,7 +61,7 @@ export function validateSchemaArray(data: unknown) {
 
   const issues: ConceptArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Concept array model out of sync"));
 }
 
 export function validateShortSchema(data: unknown) {
@@ -73,7 +73,7 @@ export function validateShortSchema(data: unknown) {
 
   const issues: ConceptShortArrayIssues = flatten<typeof schemaShort>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Concept short model out of sync"));
 }
 
 export function validateShortSchemaArray(data: unknown) {
@@ -85,7 +85,7 @@ export function validateShortSchemaArray(data: unknown) {
 
   const issues: ConceptArrayIssues = flatten<typeof schemaShortArray>(d.issues)["nested"] ?? {};
 
-  return Err(new ValidationError(issues));
+  return Err(new ApiModelError(issues, "Concept short array model out of sync"));
 }
 
 export type Concept = InferOutput<typeof schema>;

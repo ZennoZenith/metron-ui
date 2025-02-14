@@ -1,4 +1,5 @@
 import type { VariantUpdate } from "$features/variants/schemas/update";
+import { Log } from "$lib/logger";
 import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
 import type { SubscribeAction } from "$type";
 import type { Problem } from "$type/problems";
@@ -59,7 +60,7 @@ export class InternalVariant {
 
   private createInternalVariableValue(internalVariable: InternalVariable) {
     if (this.#internalVariableValues.findIndex(v => v.internalVariablePsudoId === internalVariable.psudoId) !== -1) {
-      console.error(`CannotCreate: Internal VariableValue already exist with id: ${internalVariable.psudoId}`);
+      Log.error(`CannotCreate: Internal VariableValue already exist with id: ${internalVariable.psudoId}`);
       return;
     }
     this.#internalVariableValues.push(
@@ -73,7 +74,7 @@ export class InternalVariant {
     );
 
     if (indexToRemove === -1) {
-      console.error(`CannotDelete: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
+      Log.error(`CannotDelete: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
       return;
     }
     this.#internalVariableValues.splice(indexToRemove, 1);
@@ -85,7 +86,7 @@ export class InternalVariant {
     );
 
     if (indexToUpdate === -1) {
-      console.error(`CannotUpdate: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
+      Log.error(`CannotUpdate: Internal VariableValue not found with id: ${internalVariable.psudoId}`);
       return;
     }
 
@@ -95,7 +96,7 @@ export class InternalVariant {
   }
 
   public log() {
-    console.info({
+    Log.info({
       psudoId: this.#psudoId,
       id: this.#id,
       correctAnswers: this.#correctAnswers,

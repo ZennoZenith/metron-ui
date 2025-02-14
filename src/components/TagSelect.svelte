@@ -1,7 +1,8 @@
 <script lang="ts">
 import Dropdown from "$components/Dropdown.svelte";
-import { searchTag } from "$features/tags/api/client";
+import { TagApiClient } from "$features/tags/api";
 import { X } from "$icons";
+import { Log } from "$lib/logger";
 import type { DropDownListItem } from "$type";
 import type { Tag } from "$type/tags";
 import { Debounce } from "$utils/debounce";
@@ -22,6 +23,7 @@ let {
 
 const tagSearchable = new Searchable(100);
 const debounce = new Debounce();
+const tagClient = new TagApiClient();
 
 const SET_KEY = Symbol("SET");
 const selectedTags = setMySet<Tag, "id">(SET_KEY, "id");
@@ -39,10 +41,10 @@ export function clearSelectedTags() {
 }
 
 async function autocomplete(query: string) {
-  const maybeTags = await searchTag({ search: query });
+  const maybeTags = await tagClient.searchByQueryTitle({ search: query });
 
-  if (maybeTags.err) {
-    console.error(maybeTags.err);
+  if (maybeTags.isErr()) {
+    Log.error(maybeTags.unwrapErr());
     return;
   }
 
