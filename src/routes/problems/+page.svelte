@@ -71,5 +71,7 @@ async function onDeleteResponse(answer: boolean) {
 <div class="grid lg:grid-cols-3 sm:grid-cols-1 md:grid-cols-2 gap-2">
   {#each list as problem}
     <ProblemCard {problem} {onClickDelete} />
+  {:else}
+    <p>No problem found</p>
   {/each}
 </div>

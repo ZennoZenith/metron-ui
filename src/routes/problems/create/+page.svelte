@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Variable, VariableType } from "$api/schemas/variable";
 import { ProblemApiClient } from "$features/problems/api";
 import Problem from "$features/problems/components/Problem.svelte";
 import type { VariantUpdate } from "$features/variants/schemas/update";
@@ -7,7 +8,6 @@ import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
 import { InternalVariants } from "$schemas/internal-variant.svelte";
-import type { Variable, VariableType } from "$schemas/variable";
 
 const toaster = getToaster();
 const problemClient = new ProblemApiClient();
@@ -89,13 +89,10 @@ async function onSubmit(
     explanation,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    Log.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 

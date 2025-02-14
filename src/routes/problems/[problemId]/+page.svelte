@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { Variable, VariableType } from "$api/schemas/variable";
 import { goto, invalidateAll, replaceState } from "$app/navigation";
 import { page } from "$app/state";
 import ConformationDialog from "$components/ConformationDialog.svelte";
@@ -11,7 +12,6 @@ import { getToaster } from "$lib/toaster.svelte";
 import type { InternalProblem } from "$schemas/internal-problem.svelte";
 import type { InternalVariables } from "$schemas/internal-variable.svelte";
 import { InternalVariants } from "$schemas/internal-variant.svelte";
-import type { Variable, VariableType } from "$schemas/variable";
 import type { PageData } from "./$types";
 
 const toaster = getToaster();
@@ -101,13 +101,10 @@ async function onSubmit(
     explanation,
   });
 
-  if (result.err) {
+  if (result.isErr()) {
     toaster.error(
       result.unwrapErr().message ?? "Internal Server Error",
     );
-    const errorObj = result.unwrapErr().error;
-    Log.error(errorObj);
-    // setFailureResponse(errorObj);
     return;
   }
 
