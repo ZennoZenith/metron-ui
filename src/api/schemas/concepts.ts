@@ -47,7 +47,7 @@ export function validateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: ConceptIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
+  const issues: ConceptIssues = flatten<typeof schema>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Concept model out of sync"));
 }
@@ -59,7 +59,7 @@ export function validateSchemaArray(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: ConceptArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
+  const issues: ConceptArrayIssues = flatten<typeof schemaArray>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Concept array model out of sync"));
 }
@@ -71,7 +71,7 @@ export function validateShortSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: ConceptShortArrayIssues = flatten<typeof schemaShort>(d.issues)["nested"] ?? {};
+  const issues: ConceptShortArrayIssues = flatten<typeof schemaShort>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Concept short model out of sync"));
 }
@@ -83,7 +83,7 @@ export function validateShortSchemaArray(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: ConceptArrayIssues = flatten<typeof schemaShortArray>(d.issues)["nested"] ?? {};
+  const issues: ConceptArrayIssues = flatten<typeof schemaShortArray>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Concept short array model out of sync"));
 }

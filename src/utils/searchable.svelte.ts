@@ -3,7 +3,7 @@ import { browser } from "$app/environment";
 export class Searchable {
   showDropdown = $state(false);
   private focusLossTimeMs: number;
-  constructor(focusLossTimeMs: number = 0) {
+  constructor(focusLossTimeMs = 0) {
     this.focusLossTimeMs = focusLossTimeMs;
   }
 

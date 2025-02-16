@@ -1,5 +1,5 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
+import { Err, Ok, type Result } from "$lib/superposition";
 import { custom, flatten, type InferOutput, pipe, safeParse, string, uuid } from "valibot";
 
 export class UuidSchemaError extends ValidationError {
@@ -24,7 +24,7 @@ export function validateUuid(data: unknown, message: string): Result<Uuid, UuidS
     return Ok(d.output);
   }
 
-  const issues: UuidIssues = { id: flatten<typeof uuidSchema>(d.issues)["root"] ?? ["Invalid uuid"] };
+  const issues: UuidIssues = { id: flatten<typeof uuidSchema>(d.issues).root ?? ["Invalid uuid"] };
 
   return Err(new UuidSchemaError(issues, message));
 }

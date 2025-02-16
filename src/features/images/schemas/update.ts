@@ -24,7 +24,7 @@ export function validateUpdateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
+  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues).nested ?? {};
 
   return Err(new UpdateSchemaError(issues));
 }

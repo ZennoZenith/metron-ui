@@ -1,3 +1,5 @@
+import type { AnswerUpdate } from "$api/schemas/answer";
+import type { Variant } from "$api/schemas/variant";
 import type { VariantUpdate } from "$features/variants/schemas/update";
 import { Log } from "$lib/logger";
 import { InternalVariableValue } from "$schemas/internal-variable-values.svelte";
@@ -6,9 +8,7 @@ import type { Problem } from "$type/problems";
 import { exhaustiveMatchingGuard } from "$utils/helpers";
 import { isEmptyString, setEmptyStringAsNullish, uuidv4 } from "$utils/helpers";
 import { getContext, setContext } from "svelte";
-import type { AnswerUpdate } from "./answer";
 import type { InternalVariable, InternalVariables } from "./internal-variable.svelte";
-import type { Variant } from "./variant";
 
 export class InternalVariant {
   readonly _tag = "InternalVariant" as const;
@@ -246,9 +246,9 @@ export class InternalVariants {
   }
 
   public internalVariableAction(internalVariable: InternalVariable, action: SubscribeAction) {
-    this.#internalVariants.forEach(internalVariant =>
-      internalVariant.updateInternalVariableValues(internalVariable, action)
-    );
+    for (const internalVariant of this.#internalVariants) {
+      internalVariant.updateInternalVariableValues(internalVariable, action);
+    }
   }
 
   public toVariants(): VariantUpdate[] {

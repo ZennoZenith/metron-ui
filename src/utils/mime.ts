@@ -2,6 +2,10 @@
  * Mime Type map of extention to their mime type
  */
 export class MimeTypes {
+  constructor() {
+    throw Error("MimeTypes is an static class and cannot be instantiated.");
+  }
+
   private static _map = new Map([
     ["123", "application/vnd.lotus-1-2-3"],
     ["3dml", "text/vnd.in3d.3dml"],

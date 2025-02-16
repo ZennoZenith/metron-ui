@@ -32,10 +32,10 @@ export const schemaUpdate = object(
 
 export const schemaArray = array(schema, "invalid 'Answer' array");
 
-export const schemaCreateArray = (mLength: number = 0) =>
+export const schemaCreateArray = (mLength = 0) =>
   pipe(array(schemaCreate, "invalid 'Answer' array"), minLength(mLength));
 
-export const schemaUpdateArray = (mLength: number = 0) =>
+export const schemaUpdateArray = (mLength = 0) =>
   pipe(array(schemaUpdate, "invalid 'AnswerUpdate' array"), minLength(mLength));
 
 export function validateSchema(data: unknown) {
@@ -45,7 +45,7 @@ export function validateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: AnswerIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
+  const issues: AnswerIssues = flatten<typeof schema>(d.issues).nested ?? {};
 
   return Err(new ValidationError(issues));
 }
@@ -57,7 +57,7 @@ export function validateSchema(data: unknown) {
 //     return Ok(d.output);
 //   }
 
-//   const issues: AnswerArrayIssues = flatten<ReturnType<typeof schemaArray>>(d.issues)["nested"] ?? {};
+//   const issues: AnswerArrayIssues = flatten<ReturnType<typeof schemaArray>>(d.issues).nested ?? {};
 
 //   return Err(new ValidationError(issues));
 // }

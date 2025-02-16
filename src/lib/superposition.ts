@@ -23,17 +23,15 @@ export class Result<T, E extends Taged> {
   unwrapOr(value: NonNullable<T>) {
     if (!this.#ok) {
       return value;
-    } else {
-      return this.#ok;
     }
+      return this.#ok;
   }
 
   unwrapElseOr(fn: () => NonNullable<T>) {
     if (!this.#ok) {
       return fn();
-    } else {
-      return this.#ok;
     }
+      return this.#ok;
   }
 
   unwrapErr(errorFn?: (message: string) => void) {

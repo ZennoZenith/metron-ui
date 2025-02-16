@@ -20,7 +20,7 @@ export function validateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: TagIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
+  const issues: TagIssues = flatten<typeof schema>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Tag model out of sync"));
 }
@@ -32,7 +32,7 @@ export function validateSchemaArray(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: TagArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
+  const issues: TagArrayIssues = flatten<typeof schemaArray>(d.issues).nested ?? {};
 
   return Err(new ApiModelError(issues, "Tag array model out of sync"));
 }

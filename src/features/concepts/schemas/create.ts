@@ -1,6 +1,6 @@
 import { schemaArray as variableSchemaArray } from "$api/schemas/variable";
 import { ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
+import { Err, Ok, type Result } from "$lib/superposition";
 import { content, title } from "$schemas";
 import { uuidArrayString } from "$schemas/uuid";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
@@ -42,7 +42,7 @@ export function validateCreateSchema(data: unknown): Result<CreateSchema, Create
     return Ok(d.output);
   }
 
-  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues).nested ?? {};
 
   return Err(new CreateSchemaError(issues));
 }

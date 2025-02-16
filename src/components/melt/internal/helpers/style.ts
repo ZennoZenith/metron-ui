@@ -7,7 +7,7 @@
 export function styleToString(style: StyleObject): string {
   return Object.keys(style).reduce((str, key) => {
     if (style[key] === undefined) return str;
-    return str + `${key}:${style[key]};`;
+    return `${str}${key}:${style[key]};`;
   }, "");
 }
 

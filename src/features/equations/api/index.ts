@@ -2,12 +2,12 @@ import { type Equation, type EquationArray, validateSchema, validateSchemaArray 
 import type { SearchSchemaError } from "$features/tags/schemas/search";
 import { ApiClient, apiClientOptions } from "$lib/api-builder";
 import type { ApiClientOptions } from "$lib/api-builder";
-import { ApiError, ApiModelError, FetchError, JsonDeserializeError } from "$lib/error";
-import { isErr, Result } from "$lib/superposition";
-import { UuidSchemaError, validateUuid } from "$schemas/uuid";
-import { CreateSchemaError, validateCreateSchema } from "../schemas/create";
+import type { ApiError, ApiModelError, FetchError, JsonDeserializeError } from "$lib/error";
+import { isErr, type Result } from "$lib/superposition";
+import { type UuidSchemaError, validateUuid } from "$schemas/uuid";
+import { type CreateSchemaError, validateCreateSchema } from "../schemas/create";
 import { validateSearchSchema } from "../schemas/search";
-import { UpdateSchemaError, validateUpdateSchema } from "../schemas/update";
+import { type UpdateSchemaError, validateUpdateSchema } from "../schemas/update";
 
 export class EquationApiClient extends ApiClient {
   constructor(options: ApiClientOptions = apiClientOptions) {

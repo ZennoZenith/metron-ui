@@ -23,7 +23,7 @@ export class Toaster {
     });
   }
 
-  add(toastType: ToastType, message: string, title: string = "", durationMs: number = this.defaultToastDurationMs) {
+  add(toastType: ToastType, message: string, title = "", durationMs: number = this.defaultToastDurationMs) {
     const now = Date.now();
     const value: Toast = {
       id: uuidv4(),
@@ -84,7 +84,9 @@ export class Toaster {
     }
 
     if (this.hover === "pause-all") {
-      this._toasts.forEach(toast => this._pauseToast(toast));
+      for (const toast of this._toasts) {
+        this._pauseToast(toast);
+      }
       return;
     }
   }
@@ -99,7 +101,9 @@ export class Toaster {
     }
 
     if (this.hover === "pause-all") {
-      this._toasts.forEach(toast => this._resumeToast(toast));
+      for (const toast of this._toasts) {
+        this._resumeToast(toast);
+      }
       return;
     }
   }
@@ -142,19 +146,19 @@ export class Toaster {
     );
   }
 
-  info(message: string, title: string = "", durationMs?: number) {
+  info(message: string, title = "", durationMs?: number) {
     this.add("INFO", message, title, durationMs);
   }
 
-  success(message: string, title: string = "", durationMs?: number) {
+  success(message: string, title = "", durationMs?: number) {
     this.add("SUCCESS", message, title, durationMs);
   }
 
-  warning(message: string, title: string = "", durationMs?: number) {
+  warning(message: string, title = "", durationMs?: number) {
     this.add("WARNING", message, title, durationMs);
   }
 
-  error(message: string, title: string = "", durationMs?: number) {
+  error(message: string, title = "", durationMs?: number) {
     this.add("ERROR", message, title, durationMs);
   }
 

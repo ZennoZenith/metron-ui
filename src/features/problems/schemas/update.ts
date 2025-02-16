@@ -2,7 +2,7 @@ import { questionTypeSchema } from "$api/schemas/problems";
 import { schemaArray as variableSchemaArray } from "$api/schemas/variable";
 import { schemaUpdateArray as varientSchemaUpdateArray } from "$features/variants/schemas/update";
 import { ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
+import { Err, Ok, type Result } from "$lib/superposition";
 import { content } from "$schemas";
 import { uuidArrayString, uuidSchema } from "$schemas/uuid";
 import { flatten, type InferOutput, nullish, object, pipe, safeParse, transform } from "valibot";
@@ -51,7 +51,7 @@ export function validateUpdateSchema(data: unknown): Result<UpdateSchema, Update
     return Ok(d.output);
   }
 
-  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
+  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues).nested ?? {};
 
   return Err(new UpdateSchemaError(issues));
 }

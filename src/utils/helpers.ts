@@ -29,7 +29,7 @@ export function isEmptyString(str?: string | null) {
 
 export function setEmptyStringAsNullish(value?: string | null): string | undefined {
   if (isEmptyString(value)) return undefined;
-  else return value?.trim() as string;
+  return value?.trim() as string;
 }
 
 export function uniqByKeepLast<K extends string, T extends Record<K, unknown>>(data: T[], key: (obj: T) => T[keyof T]) {

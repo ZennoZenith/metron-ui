@@ -1,5 +1,5 @@
 import { ValidationError } from "$lib/error";
-import { Err, Ok, Result } from "$lib/superposition";
+import { Err, Ok, type Result } from "$lib/superposition";
 import { title } from "$schemas";
 import { flatten, type InferOutput, object, safeParse } from "valibot";
 
@@ -23,7 +23,7 @@ export function validateCreateSchema(data: unknown): Result<CreateSchema, Create
     return Ok(d.output);
   }
 
-  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues).nested ?? {};
 
   return Err(new CreateSchemaError(issues));
 }

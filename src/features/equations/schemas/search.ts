@@ -22,7 +22,7 @@ export function validateSearchSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: SearchIssues = flatten<typeof searchSchema>(d.issues)["nested"] ?? {};
+  const issues: SearchIssues = flatten<typeof searchSchema>(d.issues).nested ?? {};
 
   return Err(new SearchSchemaError(issues));
 }

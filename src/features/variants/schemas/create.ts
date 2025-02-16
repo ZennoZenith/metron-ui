@@ -21,7 +21,7 @@ export function validateCreateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues).nested ?? {};
 
   return Err(new ValidationError(issues));
 }
@@ -31,5 +31,5 @@ export type CreateIssues = ReturnType<typeof flatten<typeof createSchema>>["nest
 
 export type VariantCreate = InferOutput<typeof createSchema>;
 
-export const schemaCreateArray = (mLength: number = 0) =>
+export const schemaCreateArray = (mLength = 0) =>
   pipe(array(createSchema, "invalid 'Variant' array"), minLength(mLength));

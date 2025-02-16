@@ -36,7 +36,7 @@ export function validateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: VariableIssues = flatten<typeof schema>(d.issues)["nested"] ?? {};
+  const issues: VariableIssues = flatten<typeof schema>(d.issues).nested ?? {};
 
   return Err(new ValidationError(issues));
 }
@@ -48,7 +48,7 @@ export function validateSchemaArray(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: VariableArrayIssues = flatten<typeof schemaArray>(d.issues)["nested"] ?? {};
+  const issues: VariableArrayIssues = flatten<typeof schemaArray>(d.issues).nested ?? {};
 
   return Err(new ValidationError(issues));
 }

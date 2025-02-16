@@ -24,7 +24,7 @@ export type ErrorObject = Readonly<{
 
 function stringToNumber(value: unknown) {
   const n = Number(value);
-  return isNaN(n) ? null : n;
+  return Number.isNaN(n) ? null : n;
 }
 
 function constructApiError(err?: unknown): InternalApiError {

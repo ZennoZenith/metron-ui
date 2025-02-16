@@ -1,5 +1,5 @@
 import { API_HOST, API_PORT, API_PROTOCOL, API_VRSION } from "$constants";
-import { ApiError, ApiModelError, FetchError, JsonDeserializeError, type ValidationError } from "$lib/error";
+import type { ApiError, ApiModelError, FetchError, JsonDeserializeError, ValidationError } from "$lib/error";
 import { Err, isErr, type Result } from "$lib/superposition";
 import { fetchApiJson } from "$utils";
 

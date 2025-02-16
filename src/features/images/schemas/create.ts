@@ -47,7 +47,7 @@ export function validateCreateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: CreateIssues = flatten<typeof createSchema>(d.issues)["nested"] ?? {};
+  const issues: CreateIssues = flatten<typeof createSchema>(d.issues).nested ?? {};
 
   return Err(new CreateSchemaError(issues));
 }

@@ -8,32 +8,31 @@
     "preview": "vite preview --host 0.0.0.0",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "lint": "eslint ."
+    "lint": "biome lint"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.2.6",
+    "@biomejs/biome": "1.9.4",
     "@melt-ui/pp": "^0.3.2",
-    "@melt-ui/svelte": "^0.86.2",
+    "@melt-ui/svelte": "^0.86.3",
     "@sveltejs/adapter-auto": "^4.0.0",
-    "@sveltejs/kit": "^2.17.1",
+    "@sveltejs/kit": "^2.17.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tailwindcss/vite": "^4.0.6",
     "@types/bun": "^1.2.2",
     "clsx": "^2.1.1",
-    "eslint": "^9.20.0",
-    "eslint-plugin-boundaries": "^5.0.1",
-    "eslint-plugin-svelte": "^2.46.1",
-    "globals": "^15.14.0",
-    "svelte": "^5.19.10",
+    "globals": "^15.15.0",
+    "svelte": "^5.20.1",
     "svelte-check": "^4.1.4",
     "svelte-lucide": "^2.0.1",
     "svelte-radix": "^2.0.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss": "^4.0.6",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.24.0",
     "valibot": "^1.0.0-rc.0",
     "vite": "^6.1.0"
   },
-  "type": "module"
+  "type": "module",
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }

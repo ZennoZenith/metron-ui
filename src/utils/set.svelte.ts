@@ -22,7 +22,7 @@ class MySet<T extends object, K extends keyof T> {
   }
 
   delete(value: T) {
-    const found = this.list.findIndex(v => v[this.key] === value[this.key]) !== -1 ? true : false;
+    const found = this.list.findIndex(v => v[this.key] === value[this.key])  !== -1;
 
     if (found) {
       this.list = this.list.filter(v => v[this.key] !== value[this.key]);
@@ -32,7 +32,7 @@ class MySet<T extends object, K extends keyof T> {
   }
 
   deleteByKey(value: T[K]) {
-    const found = this.list.findIndex(v => v[this.key] === value) !== -1 ? true : false;
+    const found = this.list.findIndex(v => v[this.key] === value)  !== -1;
 
     if (found) {
       this.list = this.list.filter(v => v[this.key] !== value);
@@ -42,11 +42,11 @@ class MySet<T extends object, K extends keyof T> {
   }
 
   has(value: T) {
-    return this.list.findIndex(v => v[this.key] === value[this.key]) !== -1 ? true : false;
+    return this.list.findIndex(v => v[this.key] === value[this.key])  !== -1;
   }
 
   hasKey(value: T[K]) {
-    return this.list.findIndex(v => v[this.key] === value) !== -1 ? true : false;
+    return this.list.findIndex(v => v[this.key] === value)  !== -1;
   }
 
   get keys() {

@@ -160,7 +160,9 @@ export class InternalVariable {
 
   private notify(action: SubscribeAction = "UPDATE", internalVariable?: InternalVariable) {
     const temp = internalVariable ?? this;
-    this.#subscribers.forEach(fn => fn?.(temp, action));
+    for (const subscriber of this.#subscribers) {
+      subscriber?.(temp, action);
+    }
   }
 
   public static default() {
@@ -195,22 +197,33 @@ export class InternalVariables {
   }
 
   public subscribe(fn: SubscribeFn) {
-    this.#internalVariables.forEach(v => v.subscribe(fn));
+    for (const internalVariable of this.#internalVariables) {
+      internalVariable.subscribe(fn);
+    }
     this.#subscribers.push(fn);
   }
 
   public addInternalVariable(internalVariable?: InternalVariable) {
     if (internalVariable) {
       const temp = internalVariable.clone();
-      this.#subscribers.forEach(fn => temp.subscribe(fn));
+      for (const subscriber of this.#subscribers) {
+        temp.subscribe(subscriber);
+      }
       this.#internalVariables.push(temp);
-      this.#subscribers.forEach(fn => fn?.(temp, "CREATE"));
+      for (const subscriber of this.#subscribers) {
+        subscriber?.(temp, "CREATE");
+      }
       return;
     }
+
     const temp = InternalVariable.default();
-    this.#subscribers.forEach(fn => temp.subscribe(fn));
+    for (const subscriber of this.#subscribers) {
+      temp.subscribe(subscriber);
+    }
     this.#internalVariables.push(temp);
-    this.#subscribers.forEach(fn => fn?.(temp, "CREATE"));
+    for (const subscriber of this.#subscribers) {
+      subscriber?.(temp, "CREATE");
+    }
   }
 
   public removeInternalVariable(psudoId: InternalVariable["psudoId"]) {
@@ -221,13 +234,17 @@ export class InternalVariables {
     }
 
     const temp = this.#internalVariables.splice(indexToRemove, 1);
-    this.#subscribers.forEach(fn => fn?.(temp[0], "DELETE"));
+    for (const subscriber of this.#subscribers) {
+      subscriber?.(temp[0], "DELETE");
+    }
   }
 
   public clearVariables() {
-    this.#internalVariables.forEach(internalVariable =>
-      this.#subscribers.forEach(sub => sub?.(internalVariable, "DELETE"))
-    );
+    for (const internalVariable of this.#internalVariables) {
+      for (const subscriber of this.#subscribers) {
+        subscriber?.(internalVariable, "DELETE");
+      }
+    }
     this.#internalVariables.length = 0;
   }
 

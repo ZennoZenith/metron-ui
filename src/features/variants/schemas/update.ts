@@ -25,10 +25,10 @@ export function validateUpdateSchema(data: unknown) {
     return Ok(d.output);
   }
 
-  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues)["nested"] ?? {};
+  const issues: UpdateIssues = flatten<typeof updateSchema>(d.issues).nested ?? {};
 
   return Err(new ValidationError(issues));
 }
 
-export const schemaUpdateArray = (mLength: number = 0) =>
+export const schemaUpdateArray = (mLength = 0) =>
   pipe(array(updateSchema, "invalid 'VariantUpdate' array"), minLength(mLength));

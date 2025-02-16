@@ -5,7 +5,7 @@ import { exhaustiveMatchingGuard, type LogLevels, toLogLevel } from "$utils/help
 import { isErr } from "./superposition";
 
 type FormatLogOptions = {
-  message: any;
+  message: unknown;
   logLevel: typeof LogLevels[number];
   eventTag?: string;
 };
@@ -14,11 +14,11 @@ export class Log {
   constructor() {
     throw Error("Log is an static class and cannot be instantiated.");
   }
-  private static LogLevelValue: number = 10;
+  private static LogLevelValue = 10;
   private static _logLevel: typeof LogLevels[number] = LOG_LEVEL;
 
   static get LogLevel() {
-    return this._logLevel;
+    return Log._logLevel;
   }
 
   static set LogLevel(value: string) {
@@ -79,23 +79,23 @@ export class Log {
     return log.join(" | ");
   }
 
-  static debug(message: any, eventTag?: string) {
+  static debug(message: unknown, eventTag?: string) {
     if (Log.LogLevelValue > 0) return;
     console.log(Log.FormatLog({ logLevel: "DEBUG", message, eventTag }));
   }
-  static info(message: any | Record<string, unknown>, eventTag?: string) {
+  static info(message: unknown | Record<string, unknown>, eventTag?: string) {
     if (Log.LogLevelValue > 5) return;
     console.log(Log.FormatLog({ logLevel: "INFO", message, eventTag }));
   }
-  static warn(message: any, eventTag?: string) {
+  static warn(message: unknown, eventTag?: string) {
     if (Log.LogLevelValue > 10) return;
     console.log(Log.FormatLog({ logLevel: "WARN", message, eventTag }));
   }
-  static error(message: any, eventTag?: string) {
+  static error(message: unknown, eventTag?: string) {
     if (Log.LogLevelValue > 15) return;
     console.log(Log.FormatLog({ logLevel: "ERROR", message, eventTag }));
   }
-  static critical(message: any, eventTag?: string) {
+  static critical(message: unknown, eventTag?: string) {
     if (Log.LogLevelValue > 20) return;
     console.log(Log.FormatLog({ logLevel: "CRITICAL", message, eventTag }));
   }

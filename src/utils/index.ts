@@ -1,5 +1,5 @@
 import { ApiError, FetchError, JsonDeserializeError, UnknowError } from "$lib/error";
-import { Err, isErr, Ok, Result } from "$lib/superposition";
+import { Err, isErr, Ok, type Result } from "$lib/superposition";
 import { NO_CONTENT } from "$utils/http-codes";
 
 export async function catchError<T>(
@@ -15,6 +15,7 @@ export async function catchError<T>(
 
 // Disabled because of any type
 // eslint-disable-next-line
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function catchErrorSync<TArgs extends any[], TReturn>(
   fn: (...args: TArgs) => TReturn,
   ...args: TArgs
