@@ -59,7 +59,11 @@ export class Toaster {
       clearTimeout(timeout);
       this._toastToTimeout.delete(id);
     }
-    this._toasts = this._toasts.filter((v) => v.id !== id);
+    const toastIndexToRemove = this._toasts.findIndex(v => v.id === id);
+    if (toastIndexToRemove < 0) return;
+
+    this._toasted.push(this._toasts[toastIndexToRemove]);
+    this._toasts.splice(toastIndexToRemove, 1);
   }
 
   getPercentage(id: string) {
